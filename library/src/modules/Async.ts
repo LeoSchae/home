@@ -47,8 +47,7 @@ export class AsyncOptions {
   done() {
     this.aborted = true;
     let T = performance.now() - (this.t0 || performance.now());
-    if (false && T > 2000)
-      console.log("Long Task Took: " + Math.round(T) + "ms");
+    if (T > 1500) console.debug("Long Task Took: " + Math.round(T) + "ms");
   }
 
   get shouldYield(): boolean {
@@ -60,20 +59,15 @@ export class AsyncOptions {
 
   async yield(): Promise<void>;
   async yield(): Promise<void | number> {
-    if (this.aborted) {
-      if (false) console.log("Task was aborted!");
-      throw "aborted";
-    }
-
     if (this.t) {
       let delta = performance.now() - this.t;
 
-      // Geom running average for iterations
+      // Geom. running average for iterations
       this.I = Math.max(1, this.i * Math.min(this.d / (delta + 1), 4));
     }
     await wait(0);
     if (this.aborted) {
-      if (false) console.log("Task was aborted!");
+      console.debug("A task was aborted!");
       throw "aborted";
     }
 
@@ -124,7 +118,7 @@ export namespace wrap {
     if (!ao) ao = DefaultAsyncOptions();
     ao.begin();
 
-    // The types should be sage
+    // The types should be safe
     let gen = f.apply(th, args);
     let n = gen.next();
     while (!n.done) {
@@ -144,5 +138,5 @@ export function DefaultAsyncOptions() {
 }
 
 export function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 0));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

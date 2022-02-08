@@ -1,4 +1,17 @@
+/**
+ * A class that allows easy interaction with an canvas or other HTML element.
+ * When registered on an element, the listeners passed to the constructor are
+ * called when the respective event takes place.
+ */
 export class DragZoomHover {
+  /**
+   * Create a new instance with listeners.
+   * All values are mesured in CSS pixels measured
+   * as offset from the target element.
+   * @param onDrag drag listener
+   * @param onZoom zoom listener
+   * @param onHover hover listener
+   */
   constructor(
     public onDrag: (delta: [number, number]) => any,
     public onZoom: (factor: number, center: [number, number]) => any,
@@ -94,6 +107,9 @@ export class DragZoomHover {
     ]);
   };
 
+  /**
+   * Add the listeners to an HTMLElement.
+   */
   registerListeners(e: HTMLElement) {
     e.addEventListener("pointerup", this.up);
     e.addEventListener("pointerdown", this.down);
@@ -103,6 +119,9 @@ export class DragZoomHover {
     e.addEventListener("wheel", this.wheel);
   }
 
+  /**
+   * Remove the listeners from an HTMLElement.
+   */
   removeListeres(e: HTMLElement) {
     e.removeEventListener("pointerup", this.up);
     e.removeEventListener("pointerdown", this.down);
