@@ -1,0 +1,76 @@
+:host {
+  position: relative;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+.canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.options-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: #eeeeeeaa;
+  margin: 0;
+  padding: 20px;
+  /*border: 5px solid black;*/
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.canvas-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.option-button {
+  position: absolute;
+  bottom: 1em;
+  right: 1em;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #001122;
+  background-color: #001122;
+  color: #ddeeff;
+}
+
+.option-button:hover {
+  background-color: #bbddee;
+  color: #001122;
+}
+.option-button:active {
+  transform: translateY(1px);
+  background-color: #bbddee;
+  color: #001122;
+}
+
+.option-icon {
+  display: block;
+  margin: 20%;
+  width: 60%;
+  height: 60%;
+}

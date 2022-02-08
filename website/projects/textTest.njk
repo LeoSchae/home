@@ -1,0 +1,30 @@
+---
+title: test
+description: "Just a test"
+nav:
+  key: "Tiny Projects::SVG Test"
+layout: "main.njk"
+layout_type: "text"
+---
+
+<style>
+  @keyframes rotating {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .spinner {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0.2em;
+    width: 0.8em;
+    height: 0.8em;
+    border-style: solid;
+    border-radius: 100%;
+    border-width: 0.2em;
+    border-color: currentColor #0005 #0005 #0005;
+    animation: rotating 1.2s linear infinite;
+  }
+</style>
+
+A<span class="spinner"></span>

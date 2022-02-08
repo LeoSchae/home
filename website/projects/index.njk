@@ -1,0 +1,76 @@
+---
+title: Small Projects
+description: "List of all projects"
+layout: main.njk
+nav:
+  key: All Projects
+---
+<style>
+.project-card {
+  display: grid;
+  align-items: center;
+  position: relative;
+
+  background: black;
+  color: white;
+
+  min-height: 150px;
+
+  box-sizing: content-box;
+  margin-top: 20px;
+  border-radius: 10px;
+  border: 2px solid black;
+}
+.project-card a {
+  color: currentColor;
+  text-decoration: underline dotted;
+}
+
+.project-card a:hover {
+  color: currentColor;
+  text-decoration: underline;
+}
+
+.project-icon {
+  display: block;
+  position: absolute;
+  opacity: 0.4;
+  width: 150px;
+  height: 100%;
+}
+.project-text {
+  display: block;
+  position: relative;
+  padding: 0.5em 2em;
+}
+.project-text h2 {
+  margin-top: 0;
+}
+
+@media(min-width: 600px) {
+  .project-card {
+    grid-template-columns: 150px auto;
+  }
+  .project-icon {
+    display: block;
+    position: static;
+    opacity: 1;
+  }
+  .project-text {
+    padding: 0.5em 1em;
+  }
+</style>
+
+{% for test in collections.projects %}
+<section class="project-card">
+<div class="project-icon">{{test.data.icon | safe}}</div>
+<div class="project-text">
+<h2><a href="{{test.url}}">{{test.data.title}}</a></h2>
+<p>{{test.data.description}}</p>
+</div>
+<div style="clear: both;"></div>
+</section>
+{% endfor %}
+
+</div>
+

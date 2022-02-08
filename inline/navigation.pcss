@@ -1,0 +1,258 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Times New Roman", serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+nav {
+  font-family: "Times New Roman", serif;
+}
+
+.root {
+  display: flex;
+  flex-flow: column;
+  width: 100%;
+
+  margin: 0;
+  padding: 0;
+}
+
+.root-fullscreen {
+  overflow: hidden;
+  height: 100%;
+}
+
+.main {
+  flex-grow: 1;
+}
+.main-text {
+  padding: 0 10%;
+}
+
+/*
+ * Navigation css files for header
+ * Mobile first. Default css has the hamburger menu.
+ * Overrides for desktop are at the bottom.
+ */
+
+$height: 40px;
+
+$font: "Calibri", serif;
+$font-size: 20px;
+$nav-padding: 0 10%;
+$drop-pad: 10px;
+
+$desktop-view-threshold: 770px;
+
+$nav-bg: white;
+$nav-fg: black;
+$drop-bg: var(--colorAccent);
+$drop-fg: white;
+$hover-bg: var(--colorSecondary);
+$hover-fg: black;
+
+/* Navigation Container (<nav>) */
+.n-c {
+  width: 100%;
+
+  font-family: $font;
+
+  color: $nav-fg;
+  background: $nav-bg;
+
+  padding: $nav-padding;
+  outline: 1px solid black;
+
+  z-index: 10;
+
+  a {
+    text-decoration: underline dotted 1px;
+    color: currentColor;
+    white-space: nowrap;
+  }
+
+  & a:hover,
+  & a:focus {
+    text-decoration: underline 2px;
+    color: $hover-fg;
+    background: $hover-bg;
+  }
+
+  > a {
+    display: block;
+    float: left;
+    height: $height;
+    vertical-align: middle;
+    line-height: $height;
+
+    font-size: 1.3em;
+    font-weight: bold;
+  }
+}
+
+/* Outer list (<ul>) */
+.n-ul1 {
+  display: inline-block;
+  //display: flex;
+  flex-wrap: wrap;
+
+  gap: 0 30px;
+  padding: 0;
+  list-style-type: none;
+
+  width: 100%;
+  background: transparent;
+  color: black;
+
+  a,
+  span {
+    font-weight: bold;
+  }
+}
+
+/* Outer list items (<li>) */
+.n-li1 {
+  flex-grow: 1;
+  flex-basis: auto;
+
+  display: block;
+  padding: 0 10px 0;
+  margin-bottom: 10px;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+}
+
+/* Checkbox is only checked via its label (burger icon) */
+#nav-cbox {
+  display: none;
+}
+
+/* If checkbox is checked hide the items */
+#nav-cbox:checked ~ .n-ul1 {
+  display: none;
+}
+
+/* The inner list within the first */
+.n-ul2 {
+  display: block;
+  list-style-type: none;
+  padding: 0;
+
+  color: black;
+
+  a,
+  span {
+    font-weight: normal;
+  }
+}
+
+/*
+ * Burger icon and checkbox overlay
+ */
+
+.n-b {
+  float: right;
+  display: block;
+
+  width: $height;
+  height: $height;
+
+  padding: 10px;
+
+  color: $nav-fg;
+
+  &:hover {
+    color: $hover-fg;
+    background: $hover-bg;
+  }
+}
+
+@media (min-width: $desktop-view-threshold) {
+  .n-b {
+    display: none;
+  }
+
+  #nav-cbox:checked ~ .n-ul1 {
+    display: block;
+  }
+
+  .n-ul1 {
+    all: unset;
+    display: block;
+    float: left;
+    height: $height;
+    padding: 0;
+    margin: 0;
+  }
+
+  .n-li1 {
+    all: unset;
+    display: block;
+    position: relative;
+    float: left;
+
+    & > a,
+    & > span {
+      margin-left: 15px;
+      font-size: 1.3em;
+      vertical-align: middle;
+      line-height: $height;
+    }
+
+    & > span::after {
+      content: "◂";
+      display: inline-block;
+      margin-left: 3pt;
+      transform: scale(0.75);
+      transition: transform 100ms;
+    }
+
+    &:hover > span::after,
+    &:focus-within > span::after {
+      transform: scale(0.75) rotate(-90deg);
+    }
+
+    &:hover > .n-ul2,
+    &:focus-within > .n-ul2 {
+      display: block;
+    }
+  }
+
+  .n-ul2 {
+    display: none;
+    position: absolute;
+    background: white;
+    min-width: 100%;
+    border: 1px solid black;
+    border-top: none;
+    padding: 0;
+  }
+
+  .n-li2 {
+    display: block;
+    width: 100%;
+    height: 30px;
+    & > a {
+      display: block;
+      min-width: 100%;
+      height: 100%;
+      line-height: 30px;
+      padding: 0 20px;
+      box-sizing: border-box;
+      whitespace: nowrap;
+      text-align: middle;
+    }
+  }
+}

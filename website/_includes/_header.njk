@@ -1,0 +1,17 @@
+<nav class="n-c">
+  <input id="nav-cbox" type="checkbox" checked="checked" style="display: none;" />
+
+  <a href="{% urlCheck '/', collections.all %}"> Leo's Homepage </a>
+
+  <label for="nav-cbox" tabindex="0" class="n-b">
+    <svg style="display:block;width:100%;height:100%;max-width:100px;" viewBox="0 0 10 10">
+      <path
+        d="M0,2 10,2M0,5 10,5M0,8 10,8"
+        stroke="currentColor"
+        stroke-width="1"
+      />
+    </svg>
+  </label>
+
+  {% navigation_html collections.all%}
+</nav>
