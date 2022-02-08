@@ -16,6 +16,8 @@ import Inline from "./plugins/inline";
 
       eleventyConfig.addPlugin(Inline, { inherit: ["pcss", "ts"] });
       eleventyConfig.addPlugin(Navigation);
+
+      eleventyConfig.addWatchTarget("./library/", "./inline/");
       eleventyConfig.addPlugin(TSPlugin, {
         plugins: [ESBuildPostCSS([require("postcss-minify")])],
       });
@@ -48,7 +50,7 @@ import Inline from "./plugins/inline";
       });
 
       eleventyConfig.on("eleventy.before", () => {
-        console.log(eleventyConfig.extensionMap);
+        //console.log(eleventyConfig.extensionMap);
       });
     },
   });

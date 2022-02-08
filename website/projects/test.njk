@@ -4,6 +4,6 @@ layout: main.njk
 layout_type: "fullscreen"
 ---
 <script>
-{% renderFile "./website/scripts/SubgroupsWC.ts" %}
+{% bundleJSImport "@lib/components/SubgroupsWC" %}
 </script>
 <subgroups-wc></subgroups-wc>

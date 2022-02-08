@@ -2,16 +2,16 @@ import {
   annotateCarthesian2DAxis,
   ComplexScTr,
   drawCarthesian2DAxis,
-} from "./canvas/axis";
+} from "../canvas/axis";
 import {
   Renderer2D,
   Renderer2DBuffer,
   Renderer2DCanvas,
   Renderer2DSVG,
-} from "./canvas/context";
-import { FracSprite, TextSprite } from "./canvas/sprites";
-import { AsyncManager, AsyncOptions, wrap } from "./modules/Async";
-import { DragZoomHover } from "./modules/Interact";
+} from "../canvas/context";
+import { FracSprite, TextSprite } from "../canvas/sprites";
+import { AsyncManager, AsyncOptions, wrap } from "../modules/Async";
+import { DragZoomHover } from "../modules/Interact";
 import {
   ButtonOption,
   ColorOption,
@@ -19,9 +19,9 @@ import {
   LayeredCanvasOptions,
   NumberOption,
   RadioOption,
-} from "./modules/layeredCanvas";
-import { Complex, congruenceSubgroups, Moebius } from "./modules/math";
-import { hyperbolicLine } from "./modules/math/draw";
+} from "../modules/layeredCanvas";
+import { Complex, congruenceSubgroups, Moebius } from "../modules/math";
+import { hyperbolicLine } from "../modules/math/draw";
 
 function downloadSvg(el: string) {
   let data =

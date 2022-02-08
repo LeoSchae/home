@@ -1,9 +1,9 @@
-import { ComplexScTr } from "@lib/canvas/axis";
-import { PredictiveRenderer2D, Renderer2DCanvas } from "@lib/canvas/context";
+import { ComplexScTr } from "../canvas/axis";
+import { PredictiveRenderer2D, Renderer2DCanvas } from "../canvas/context";
 import {
   LayeredCanvasApp,
   LayeredCanvasOptions,
-} from "@lib/modules/layeredCanvas";
+} from "../modules/layeredCanvas";
 
 class Hyperbolamethod extends LayeredCanvasApp {
   initializeApp(options: LayeredCanvasOptions): void {

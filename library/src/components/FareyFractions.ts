@@ -2,20 +2,20 @@ import {
   ComplexScTr,
   drawCarthesian2DAxis,
   annotateCarthesian2DAxis,
-} from "@lib/canvas/axis";
+} from "../canvas/axis";
 import {
   PredictiveRenderer2D,
   Renderer2D,
   Renderer2DCanvas,
-} from "@lib/canvas/context";
-import { BBSprite, FracSprite, TextSprite } from "@lib/canvas/sprites";
-import TeX from "@lib/canvas/TeX";
-import { DragZoomHover } from "@lib/modules/Interact";
+} from "../canvas/context";
+import { BBSprite, FracSprite, TextSprite } from "../canvas/sprites";
+import TeX from "../canvas/TeX";
+import { DragZoomHover } from "../modules/Interact";
 import {
   LayeredCanvasApp,
   LayeredCanvasOptions,
-} from "@lib/modules/layeredCanvas";
-import { Complex } from "@lib/modules/math";
+} from "../modules/layeredCanvas";
+import { Complex } from "../modules/math";
 
 class TestApp extends LayeredCanvasApp {
   initializeApp(options: LayeredCanvasOptions): void {
