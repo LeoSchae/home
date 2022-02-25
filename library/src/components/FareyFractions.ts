@@ -3,137 +3,129 @@ import {
   drawCarthesian2DAxis,
   annotateCarthesian2DAxis,
 } from "../canvas/axis";
-import {
-  PredictiveRenderer2D,
-  Renderer2D,
-  Renderer2DCanvas,
-} from "../canvas/context";
+import { PredictiveRenderer2D, Renderer2DCanvas } from "../canvas/context";
 import { BBSprite, FracSprite, TextSprite } from "../canvas/sprites";
-import TeX from "../canvas/TeX";
 import { DragZoomHover } from "../modules/Interact";
-import {
-  LayeredCanvasApp,
-  LayeredCanvasOptions,
-} from "../modules/layeredCanvas";
 import { Complex } from "../modules/math";
+import { CanvasLayer, LayeredComponent } from "./LayeredComponent";
 
-class TestApp extends LayeredCanvasApp {
-  initializeApp(options: LayeredCanvasOptions): void {
-    const app = this;
-    const map = options.map;
+window.customElements.define(
+  "farey-fractions",
+  LayeredComponent({
+    connected(config) {
+      const app = this;
 
-    const pr = new ComplexScTr([100, 100], 100);
+      const pr = new ComplexScTr([100, 100], 100);
 
-    function fixTrZoom() {
-      let p0 = pr.project(new Complex(0));
-      let p1 = pr.project(new Complex(1));
-      let d = Math.abs(p0[0] - p1[0]);
-
-      let mod = false;
-
-      if (p0[1] < map.height / 6) {
-        pr.addTranslation([0, -p0[1] + map.height / 6]);
-        mod = true;
-      } else if (p0[1] > (5 * map.height) / 6) {
-        pr.addTranslation([0, -p0[1] + (5 * map.height) / 6]);
-        mod = true;
-      }
-      if (p1[0] < 0.5 * map.width) {
-        pr.addTranslation([-p1[0] + 0.5 * map.width, 0]);
-        mod = true;
-      }
-      if (p0[0] > map.width * 0.5) {
-        pr.addTranslation([-p0[0] + 0.5 * map.width, 0]);
-        mod = true;
-      }
-
-      if (d < 0.25 * map.width) {
-        pr.addZoom((0.25 * map.width) / d, [map.width / 2, map.height / 2]);
-        mod = true;
-      }
-
-      if (mod) app.requestRepaintAll();
-    }
-
-    const dzh = new DragZoomHover(
-      ([x, y]) => {
-        pr.addTranslation(map.toCanvas(x, y));
-
-        this.requestRepaintAll();
-      },
-      (f, [x, y]) => {
+      function fixTrZoom() {
         let p0 = pr.project(new Complex(0));
         let p1 = pr.project(new Complex(1));
         let d = Math.abs(p0[0] - p1[0]);
-        if (f <= (0.25 * map.width) / d) f = (0.25 * map.width) / d;
-        pr.addZoom(f, map.toCanvas(x, y));
 
-        this.requestRepaintAll();
-      },
-      () => {}
-    );
-    dzh.registerListeners(options.canvasContainer);
+        let mod = false;
 
-    options.addLayer("drawLayer", {
-      fracs: undefined as
-        | { sprite: BBSprite; at: number; p: number; q: number }[]
-        | undefined,
-      draw(canvas: HTMLCanvasElement) {
-        fixTrZoom();
-        const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-        let r = new Renderer2DCanvas(ctx);
+        let { width, height } = config;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.lineWidth = map.pixelFactor * 1.25;
-        drawCarthesian2DAxis(r, pr, {
-          scale: map.pixelFactor,
-        });
-
-        let fs = 9 * map.pixelFactor;
-        r.fontSize = fs;
-        let Q = bestQ(pr.scale, fs);
-
-        // Find smallest and largest value on screen
-        let min = Math.max(-pr.origin[0] / pr.scale, 0.00000000001);
-        let max = Math.min((r.width - pr.origin[0]) / pr.scale, 0.99999999999);
-
-        // Find biggest fraction not yet on screen
-        let [a, b, c, d] = bestFracsFor(Q, min);
-
-        // Find all fracions on screen
-        let spr = fareyIter(r, [a, b, c, d], Q, max);
-        spr.push({ sprite: TextSprite(r, "1", { center: true }), at: 1 });
-        for (let o of spr) {
+        if (p0[1] < height / 6) {
+          pr.addTranslation([0, -p0[1] + height / 6]);
+          mod = true;
+        } else if (p0[1] > (5 * height) / 6) {
+          pr.addTranslation([0, -p0[1] + (5 * height) / 6]);
+          mod = true;
+        }
+        if (p1[0] < 0.5 * width) {
+          pr.addTranslation([-p1[0] + 0.5 * width, 0]);
+          mod = true;
+        }
+        if (p0[0] > width * 0.5) {
+          pr.addTranslation([-p0[0] + 0.5 * width, 0]);
+          mod = true;
         }
 
-        // annotate Fractions
-        annotateCarthesian2DAxis(r, "x", pr, spr);
+        if (d < 0.25 * width) {
+          pr.addZoom((0.25 * width) / d, [width / 2, height / 2]);
+          mod = true;
+        }
 
-        // Draw textbox
-        let ts = TextSprite(r, "Fractions with denominator up to " + Q);
-        r.beginPath();
-        r.rect(
-          0,
-          r.height,
-          ts.left + ts.right + 20 * map.pixelFactor,
-          -Math.round(ts.bot + ts.top + 10 * map.pixelFactor)
-        );
-        r.fillStyle = "#FFFFFF";
-        r.fill();
-        r.stroke();
-        r.fillStyle = "#000000";
-        ts.draw(
-          r,
-          ts.left + 10 * map.pixelFactor,
-          r.height - ts.bot - 5 * map.pixelFactor
-        );
-      },
-    });
-  }
+        if (mod) config.update();
+      }
 
-  uninitializeApp() {}
-}
+      const dzh = new DragZoomHover(
+        (dragDir) => {
+          pr.addTranslation(dragDir);
+          config.update();
+        },
+        (zoomFactor, center) => {
+          let p0 = pr.project(new Complex(0));
+          let p1 = pr.project(new Complex(1));
+          let d = Math.abs(p0[0] - p1[0]);
+          if (zoomFactor <= (0.25 * config.width) / d)
+            zoomFactor = (0.25 * config.width) / d;
+          pr.addZoom(zoomFactor, center);
+
+          config.update();
+        },
+        () => {}
+      );
+      dzh.registerListeners(config.containerElement);
+
+      config.addLayer(
+        "draw",
+        CanvasLayer({
+          update(config, ctx) {
+            fixTrZoom();
+            let r = new Renderer2DCanvas(ctx);
+
+            ctx.clearRect(0, 0, config.width, config.height);
+
+            ctx.lineWidth = 1.25;
+            drawCarthesian2DAxis(r, pr, {
+              scale: 1,
+            });
+
+            let fs = 9;
+            r.fontSize = fs;
+            let Q = bestQ(pr.scale, fs);
+
+            // Find smallest and largest value on screen
+            let min = Math.max(-pr.origin[0] / pr.scale, 0.00000000001);
+            let max = Math.min(
+              (r.width - pr.origin[0]) / pr.scale,
+              0.99999999999
+            );
+
+            // Find biggest fraction not yet on screen
+            let [a, b, c, d] = bestFracsFor(Q, min);
+
+            // Find all fracions on screen
+            let spr = fareyIter(r, [a, b, c, d], Q, max);
+            spr.push({ sprite: TextSprite(r, "1", { center: true }), at: 1 });
+            for (let o of spr) {
+            }
+
+            // annotate Fractions
+            annotateCarthesian2DAxis(r, "x", pr, spr);
+
+            // Draw textbox
+            let ts = TextSprite(r, "Fractions with denominator up to " + Q);
+            r.beginPath();
+            r.rect(
+              0,
+              r.height,
+              ts.left + ts.right + 20,
+              -Math.round(ts.bot + ts.top + 10)
+            );
+            r.fillStyle = "#FFFFFF";
+            r.fill();
+            r.stroke();
+            r.fillStyle = "#000000";
+            ts.draw(r, ts.left + 10, r.height - ts.bot - 5);
+          },
+        })
+      );
+    },
+  })
+);
 
 function bestQ(scale: number, fs: number) {
   let Q = 0;
@@ -352,5 +344,3 @@ function findFareyFractions(
   }
   return sprites;
 }
-
-window.customElements.define("test-app", TestApp);

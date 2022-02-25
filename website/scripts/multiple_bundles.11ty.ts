@@ -1,5 +1,5 @@
 export function render(this: any, data: any) {
-  return this.bundleJSImport(data.scripts[data.pagination.items[0]]);
+  return this.bundleJSImport(data.scripts[data.pagination.items[0]], data);
 }
 
 export const data = {

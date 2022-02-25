@@ -1,29 +1,24 @@
 import { ComplexScTr } from "../canvas/axis";
-import { PredictiveRenderer2D, Renderer2DCanvas } from "../canvas/context";
-import {
-  LayeredCanvasApp,
-  LayeredCanvasOptions,
-} from "../modules/layeredCanvas";
+import { CanvasLayer, LayeredComponent } from "./LayeredComponent";
 
-class Hyperbolamethod extends LayeredCanvasApp {
-  initializeApp(options: LayeredCanvasOptions): void {
-    options.addLayer("drawLayer", {
-      draw: (canvas) => {
-        let ctx: PredictiveRenderer2D = new Renderer2DCanvas(
-          canvas.getContext("2d") as any
-        );
-        let width = ctx.width;
-        let height = ctx.height;
+window.customElements.define(
+  "hyperbola-app",
+  LayeredComponent({
+    connected(config) {
+      config.addLayer(
+        "draw",
+        CanvasLayer({
+          update(config, ctx) {
+            let width = config.width;
+            let height = config.height;
 
-        let proj = new ComplexScTr([width / 2, height / 2], 100);
+            let proj = new ComplexScTr([width / 2, height / 2], 100);
 
-        ctx.rect(...proj.project([-1, 1]), 200, 200);
-        ctx.stroke();
-      },
-    });
-  }
-
-  uninitializeApp() {}
-}
-
-window.customElements.define("hyperbola-app", Hyperbolamethod);
+            ctx.rect(...proj.project([-1, 1]), 200, 200);
+            ctx.stroke();
+          },
+        })
+      );
+    },
+  })
+);

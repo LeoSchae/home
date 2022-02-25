@@ -10,6 +10,9 @@ import Inline from "./plugins/inline";
 (async function () {
   let eleventy = new Eleventy("./website/", "./_build", {
     config: function (eleventyConfig: any) {
+      (global as any).eleveventy = eleventyConfig;
+
+      eleventyConfig.addPassthroughCopy("website/fonts/");
       //eleventyConfig.setQuietMode(true);
       eleventyConfig.setWatchJavaScriptDependencies(false);
       eleventyConfig.setTemplateFormats(["njk", "md", "pcss", "ts"]);
