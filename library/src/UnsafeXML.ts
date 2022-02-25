@@ -5,18 +5,20 @@ export class Element {
     public children: (Element | string)[] = []
   ) {}
 
-  attrString() {
+  private attrString() {
     return Object.entries(this.attributes)
       .map(([k, v]) => `${k}="${v}"`)
       .join(" ");
   }
-  chString(): string {
+
+  private chString(): string {
     return this.children.map((v) => v.toString()).join("");
   }
 
   append(child: Element | string) {
     this.children.push(child);
   }
+
   toString(): string {
     return `<${this.name} ${this.attrString()}>${this.chString()}</${
       this.name
