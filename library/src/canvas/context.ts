@@ -82,10 +82,10 @@ export class Renderer2DCanvas implements PredictiveRenderer2D {
   width: number;
   height: number;
 
-  constructor(ctx: CanvasRenderingContext2D) {
+  constructor(ctx: CanvasRenderingContext2D, width?: number, height?: number) {
     this._ctx = ctx;
-    this.width = ctx.canvas.width;
-    this.height = ctx.canvas.height;
+    this.width = width === undefined ? ctx.canvas.width : width;
+    this.height = height === undefined ? ctx.canvas.height : height;
   }
 
   get lineWidth() {
