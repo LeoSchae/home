@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node eleventy/app"
+    "dev": "ts-node --files eleventy/app"
   },
   "keywords": [],
   "author": "",

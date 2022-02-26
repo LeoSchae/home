@@ -1,5 +1,10 @@
 import katex from "katex";
 
+/**
+ * Only called when bundling js.
+ * @param this Javascript functions from 11ty
+ * @param data Data from cascade
+ */
 export default function (this: any, data: any) {
   this.urlCheck(KatexStylesheet, data.collections.all);
 }

@@ -1,6 +1,6 @@
 // @ts-ignore
 import Eleventy, { EleventyRenderPlugin } from "@11ty/eleventy/src/Eleventy";
-import TSPlugin from "./plugins/tsext";
+import * as ESBuild from "./plugins/esbuild";
 import PCSSPlugin, { ESBuildPostCSS } from "./plugins/postcss";
 import Navigation from "./plugins/navigation";
 import Inline from "./plugins/inline";
@@ -21,8 +21,9 @@ import Inline from "./plugins/inline";
       eleventyConfig.addPlugin(Navigation);
 
       eleventyConfig.addWatchTarget("./library/", "./inline/");
-      eleventyConfig.addPlugin(TSPlugin, {
-        plugins: [ESBuildPostCSS([require("postcss-minify")])],
+      eleventyConfig.addPlugin(ESBuild.EleventyPlugin, {
+        build: { plugins: [ESBuildPostCSS([require("postcss-minify")])] },
+        plugins: [ESBuild.ESBuildConstImport],
       });
       eleventyConfig.addPlugin(PCSSPlugin, {
         plugins: [
