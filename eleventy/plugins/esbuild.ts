@@ -1,4 +1,6 @@
 import pathlib from "path";
+import PostCSS from "postcss";
+import { readFile } from "fs/promises";
 import * as ESBuild from "esbuild";
 
 const defaultBuildOptions: ESBuild.BuildOptions = {
@@ -57,6 +59,7 @@ export function EleventyPlugin(
   async function eleventyBundledImport(this: EleventyThis, script: string) {
     if (!this.ctx)
       throw new Error("This value is missing eleventy data in 'ctx' field");
+    if (this.verbose) (this as any).verbose(`Bundling ${script}`);
     let fullOptions: ESBuild.BuildOptions = {
       ...options.build,
       entryPoints: [script],
@@ -149,24 +152,43 @@ export function EleventyPlugin(
  * as JSON values.
  * This allows preprocessing before a bundle is created.
  */
-export function ESBuildConstImport(
-  eleventyConfig: any,
-  templateData: any
-): ESBuild.Plugin {
-  return {
-    name: "ConstTSImports",
-    setup: function (build) {
-      build.onLoad({ filter: /.const.ts/ }, async function (data) {
-        let module = require(data.path);
+export function ConstImports() {
+  return function (eleventyConfig: any, templateData: any): ESBuild.Plugin {
+    return {
+      name: "ConstTSImports",
+      setup: function (build) {
+        build.onLoad({ filter: /.const.ts/ }, async function (data) {
+          let module = require(data.path);
 
-        if (typeof module.default === "function")
-          await module.default.call(
-            eleventyConfig.javascriptFunctions,
-            templateData
-          );
-        let consts = JSON.stringify(module);
-        return { contents: consts, loader: "json" };
-      });
-    },
+          if (typeof module.default === "function")
+            await module.default.call(
+              thisBindings(eleventyConfig.javascriptFunctions, templateData),
+              templateData
+            );
+          let consts = JSON.stringify(module);
+          return { contents: consts, loader: "json" };
+        });
+      },
+    };
+  };
+}
+
+export function CSSImports(plugins: any[] = []): () => ESBuild.Plugin {
+  const postcss = PostCSS(plugins);
+  return function () {
+    return {
+      name: "ImportCSS",
+      setup: function (build: any) {
+        build.onLoad({ filter: /.css/ }, async function (data: any) {
+          let content = await readFile(data.path, {
+            encoding: "utf-8",
+          });
+          let res = await postcss.process(content, {
+            from: data.path,
+          });
+          return { contents: res.css, loader: "text" };
+        });
+      },
+    };
   };
 }

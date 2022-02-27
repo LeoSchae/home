@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <style>
+      .log {
+        margin: 5px 0;
+        padding: 5px 15px;
+        color: white;
+        background: black;
+        font-family: monospace;
+      }
+      .hide-verbose .verbose {
+        display: none;
+      }
+      .hide-info .info {
+        display: none;
+      }
+      .log-line.verbose {
+        color: #33cccc;
+      }
+      .log-line.info {
+        color: #3399ff;
+      }
+      .log-line.warn {
+        color: #ff3300;
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="logs"></ul>
+    <script>
+      function Element(name, attrs = {}, children =[]) {
+        let el = document.createElement(name);
+        for (var [k, v] of Object.entries(attrs)) 
+          el.setAttribute(
+            k, typeof v === "number"
+            ? "" + v
+            : v);
+        
+        if (Array.isArray(children)) 
+          for (var c of children) {
+            if (typeof c === "string") 
+              c = document.createTextNode(c);
+            
+            el.append(c);
+          }
+         else 
+          el.innerHTML = children.__html;
+        
+        return el;
+      }
+      function renderLog(json) {
+        let levels = json.levels;
+        let group = {};
+        for (var log of json.messages) {
+          let el = group[log.source];
+          if (! el) {
+            el = group[log.source] = Element("div", {class: "log"})
+            document.getElementById("logs").append(Element("li", {
+              class: levels[log.level]
+            }, [
+              Element("span", {}, [log.source]),
+              el
+            ]))
+          }
+          el.append(Element("span", {
+            class: "log-line "+levels[log.level]
+          }, [log.message, Element("br")]))
+        }
+      }(function () {
+        const logURL = "{{ logURL }}";
+        fetch(logURL).then((res) => res.json()).then((json) => renderLog(json));
+      })();
+    </script>
+  </body>
+</html>

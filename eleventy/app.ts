@@ -1,7 +1,8 @@
 // @ts-ignore
 import Eleventy, { EleventyRenderPlugin } from "@11ty/eleventy/src/Eleventy";
 import * as ESBuild from "./plugins/esbuild";
-import PCSSPlugin, { ESBuildPostCSS } from "./plugins/postcss";
+import * as PostCSS from "./plugins/postcss";
+import * as Logging from "./plugins/logging";
 import Navigation from "./plugins/navigation";
 import Inline from "./plugins/inline";
 
@@ -12,20 +13,29 @@ import Inline from "./plugins/inline";
     config: function (eleventyConfig: any) {
       (global as any).eleveventy = eleventyConfig;
 
-      eleventyConfig.addPassthroughCopy("website/fonts/");
-      //eleventyConfig.setQuietMode(true);
       eleventyConfig.setWatchJavaScriptDependencies(false);
+
+      eleventyConfig.addPassthroughCopy("website/fonts/");
       eleventyConfig.setTemplateFormats(["njk", "md", "pcss", "ts"]);
 
+      eleventyConfig.addPlugin(Logging.EleventyPlugin, {});
+
       eleventyConfig.addPlugin(Inline, { inherit: ["pcss", "ts"] });
-      eleventyConfig.addPlugin(Navigation);
+      eleventyConfig.addPlugin(Navigation, {});
 
       eleventyConfig.addWatchTarget("./library/", "./inline/");
+
       eleventyConfig.addPlugin(ESBuild.EleventyPlugin, {
-        build: { plugins: [ESBuildPostCSS([require("postcss-minify")])] },
-        plugins: [ESBuild.ESBuildConstImport],
+        build: {
+          sourcemap: "inline",
+        },
+        plugins: [
+          ESBuild.ConstImports(),
+          ESBuild.CSSImports([require("postcss-minify")]),
+        ],
       });
-      eleventyConfig.addPlugin(PCSSPlugin, {
+
+      eleventyConfig.addPlugin(PostCSS.EleventyPlugin, {
         plugins: [
           require("postcss-minify"),
           require("postcss-nested"),
@@ -34,28 +44,43 @@ import Inline from "./plugins/inline";
           require("postcss-import"),
         ],
       });
-      eleventyConfig.addPlugin(EleventyRenderPlugin);
 
       /**
        * Shortcode to check if a url is present within a collection on pages
        */
-      eleventyConfig.addShortcode(
+      eleventyConfig.addNunjucksShortcode(
         "urlCheck",
-        function (site: string, possibleTarget: any[]) {
-          for (let page of possibleTarget) {
+        function (this: EleventyThis, site: string) {
+          for (let page of this.ctx.collections.all) {
             if (page.url == site) return site;
           }
           throw Error("Linked site '" + site + "' not found!");
         }
       );
-
-      eleventyConfig.addFilter("warn", function (this: any, data: any) {
-        console.log(`[warning] ${data} (${this.ctx.page.inputPath})`);
-      });
-
-      eleventyConfig.on("eleventy.before", () => {
-        //console.log(eleventyConfig.extensionMap);
-      });
+      /**
+       * Shortcode to check if a url is present within a collection on pages
+       */
+      eleventyConfig.addJavaScriptFunction(
+        "urlCheck",
+        function (this: EleventyThis, site: string) {
+          for (let page of this.ctx.collections.all) {
+            if (page.url == site) return site;
+          }
+          throw Error("Linked site '" + site + "' not found!");
+        }
+      );
+      /**
+       * Shortcode to check if a url is present within a collection on pages
+       */
+      eleventyConfig.addLiquidShortcode(
+        "urlCheck",
+        function (site: string, all: EleventyPage[]) {
+          for (let page of all) {
+            if (page.url == site) return site;
+          }
+          throw Error("Linked site '" + site + "' not found!");
+        }
+      );
     },
   });
 
