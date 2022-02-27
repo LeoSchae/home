@@ -36,7 +36,7 @@ export default function (
 
   eleventyConfig.addNunjucksAsyncShortcode(
     "inline",
-    async function (path: string) {
+    async function (this: EleventyThis, path: string) {
       path = resolve("./inline/", path);
 
       let ext = getExtension(path);

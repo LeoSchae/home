@@ -1,6 +1,0 @@
-{"level":"verbose","message":"\"Bundling @lib/components/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
-{"level":"verbose","message":"\"Bundling @lib/components/FareyFractions\"","source":"/scripts/FareyFractions.js"}
-{"level":"verbose","message":"\"Bundling @lib/components/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
-{"level":"verbose","message":"\"Bundling @lib/components/FareyFractions\"","source":"/projects/FareyFractions/"}
-{"level":"verbose","message":"\"Bundling @lib/components/SubgroupsWC\"","source":"/projects/Subgroups/"}
-{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
