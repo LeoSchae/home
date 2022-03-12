@@ -1,5 +1,12 @@
-
-function renderParent({ display, url, children }: {display: string, url?: string, children: {[key: string]: {display: string, url?: string}}}) {
+function renderParent({
+  display,
+  url,
+  children,
+}: {
+  display: string;
+  url?: string;
+  children: { [key: string]: { display: string; url?: string } };
+}) {
   let html;
   if (url) html = `<a href="${url}">${display}</a>`;
   else html = `<span tabindex="0">${display}</span>`;
@@ -12,13 +19,16 @@ function renderParent({ display, url, children }: {display: string, url?: string
   return `<li class="n-li1">${html}</li>`;
 }
 
-function renderChild({ display, url }: {display: string, url?: string}) {
+function renderChild({ display, url }: { display: string; url?: string }) {
   if (url) return `<li class="n-li2"><a href="${url}">${display}</a></li>`;
   return `<li class="n-li2"><span>${display}</span></li>`;
 }
 
-// @ts-ignore
-export default function (eleventyConfig: typeof import("@11ty/eleventy/src/UserConfig"), options: any) {
+export default function (
+  // @ts-ignore
+  eleventyConfig: typeof import("@11ty/eleventy/src/UserConfig"),
+  options: any
+) {
   let { keyDelimiter = "::" } = options || {};
 
   eleventyConfig.addShortcode("navigation_html", function (collection: any[]) {

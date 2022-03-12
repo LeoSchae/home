@@ -77,10 +77,12 @@ export function EleventyPlugin(
   );
   eleventyConfig.addJavaScriptFunction("bundledScript", eleventyBundledImport);
 
+  let instanceCache: any = {};
   eleventyConfig.addExtension("ts", {
     read: false,
     getData: true,
     init() {
+      instanceCache = {};
       // clear cache before build
       for (var key of Object.keys(require.cache)) delete require.cache[key];
     },
@@ -88,7 +90,9 @@ export function EleventyPlugin(
       switch (instanceTypeOf(path)) {
         case "11ty":
           // Return the module instance for .11ty.ts content.
-          return require(pathlib.resolve(path));
+          if (instanceCache[path]) return instanceCache[path];
+          let inst = (instanceCache[path] = require(pathlib.resolve(path)));
+          return inst;
         case "ts":
           return {};
       }

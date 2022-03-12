@@ -4,6 +4,36 @@ import winston from "winston";
 
 let nunjucks = require("nunjucks");
 
+type FilterPage = {
+  date: Date;
+  inputPath: string;
+  fileSlug: string;
+  filePathStem: string;
+  outputFileExtension: string;
+  url: string;
+  outputPath: string;
+};
+type FilterCtx = {
+  collections: {
+    all: FilterPage[];
+    [key: string]: FilterPage[] | undefined;
+  };
+};
+type FilterFunction = (
+  this: { ctx: FilterCtx; page: FilterPage },
+  ...args: any[]
+) => any;
+
+function wrapFilter(filter: FilterFunction): (...args: any[]) => any {
+  return function (this: any) {
+    let newThis = { ...this };
+    if (newThis.context) newThis.ctx = this.context.environments;
+    if (!this.ctx) newThis.ctx = this;
+    if (!this.page) newThis.page = this.ctx.page;
+    return filter.call(newThis, ...arguments);
+  };
+}
+
 export function EleventyPlugin(eleventyConfig: any, options: {}) {
   const defaultLevel = "info";
   const levelList = ["verbose", "info", "warn"];
@@ -59,6 +89,7 @@ export function EleventyPlugin(eleventyConfig: any, options: {}) {
     message: string,
     page: { url: string }
   ) {
+    if (!page.url) page = { url: "( Data Proxy-Pass )" };
     let log = {
       level: levelMap[level] as number,
       message,
@@ -83,25 +114,34 @@ export function EleventyPlugin(eleventyConfig: any, options: {}) {
       this.ctx.page
     );
   });
-  eleventyConfig.addFilter("warn", function (this: any, data: any) {
-    templateLog(
-      "warn",
-      [...arguments].map((o) => JSON.stringify(o)).join(),
-      this.ctx.page
-    );
-  });
-  eleventyConfig.addFilter("info", function (this: any, data: any) {
-    templateLog(
-      "info",
-      [...arguments].map((o) => JSON.stringify(o)).join(),
-      this.ctx.page
-    );
-  });
-  eleventyConfig.addFilter("log", function (this: EleventyThis) {
-    templateLog(
-      "info",
-      [...arguments].map((o) => JSON.stringify(o)).join(),
-      this.ctx.page
-    );
-  });
+  eleventyConfig.addFilter(
+    "warn",
+    wrapFilter(function () {
+      templateLog(
+        "warn",
+        [...arguments].map((o) => JSON.stringify(o)).join(),
+        this.page
+      );
+    })
+  );
+  eleventyConfig.addFilter(
+    "info",
+    wrapFilter(function () {
+      templateLog(
+        "info",
+        [...arguments].map((o) => JSON.stringify(o)).join(),
+        this.page
+      );
+    })
+  );
+  eleventyConfig.addFilter(
+    "log",
+    wrapFilter(function () {
+      templateLog(
+        "info",
+        [...arguments].map((o) => JSON.stringify(o)).join(),
+        this.page
+      );
+    })
+  );
 }

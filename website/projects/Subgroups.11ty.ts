@@ -14,7 +14,7 @@ export async function render(this: any, data: any) {
   );
 }
 
-export function data() {
+export function data(this: any) {
   return {
     title: "Congruence Subgroups",
     description:
@@ -23,12 +23,24 @@ export function data() {
     layout_type: "fullscreen",
     tags: ["projects"],
     nav: { key: "Web Apps::Subgroups" },
-    icon: perviewIcon(),
+    eleventyComputed: {
+      icon: perviewIcon,
+    },
   };
 }
 
-function perviewIcon() {
-  let grp = congruenceSubgroups.Gamma_1.cosetRepresentatives(5);
+function perviewIcon(this: any, data: any) {
+  this.ctx = data;
+  this.page = data.page;
+  this.ctx = data;
+  this.page = data.page;
+  let group = congruenceSubgroups.Gamma_1;
+  let level = 7;
+
+  // Only log in non proxy pass
+  this.verbose(`Generating icon with ${group.toTeX()}(${level})`);
+
+  let grp = group.cosetRepresentatives(level);
   let dom = congruenceSubgroups.Domain1.corners;
 
   let ctx = new Renderer2DSVG(200, 200);
