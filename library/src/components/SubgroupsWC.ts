@@ -13,7 +13,7 @@ import {
   NumberOption,
   RadioOption,
 } from "../modules/layeredCanvas";
-import { Complex, congruenceSubgroups, Moebius } from "../modules/math";
+import * as math from "../modules/math";
 import { hyperbolicLine } from "../modules/math/draw";
 import {
   CanvasLayer,
@@ -52,9 +52,9 @@ window.customElements.define(
       // config.addLayer("options", new OptionsLayer({}));
 
       let state = {
-        group_type: congruenceSubgroups.Gamma_1,
+        group_type: math.congruenceSubgroups.Gamma_1,
         level: 17,
-        domain: congruenceSubgroups.Domain1,
+        domain: math.congruenceSubgroups.Domain1,
       };
 
       let visual = {
@@ -81,7 +81,7 @@ window.customElements.define(
       let asyncManager = new AsyncManager<"group" | "bgDraw">();
 
       let changeGroup = (
-        newGroup: congruenceSubgroups.CongruenceSubgroup,
+        newGroup: math.congruenceSubgroups.CongruenceSubgroup,
         newLevel: number
       ) => {
         let p = newGroup.cosetRepresentativesAsync(
@@ -151,12 +151,12 @@ window.customElements.define(
         new RadioOption(
           "Group",
           [
-            [congruenceSubgroups.Gamma_0.tex, consts.Gamma0],
-            [congruenceSubgroups.Gamma_1.tex, consts.Gamma1],
-            [congruenceSubgroups.Gamma.tex, consts.Gamma],
+            [math.congruenceSubgroups.Gamma_0.tex, consts.Gamma0],
+            [math.congruenceSubgroups.Gamma_1.tex, consts.Gamma1],
+            [math.congruenceSubgroups.Gamma.tex, consts.Gamma],
           ],
           (v) => {
-            let { Gamma_0, Gamma_1, Gamma } = congruenceSubgroups;
+            let { Gamma_0, Gamma_1, Gamma } = math.congruenceSubgroups;
             switch (v) {
               case Gamma.tex:
                 changeGroup(Gamma, visual.level);
@@ -209,8 +209,8 @@ window.customElements.define(
       }
 
       var cachedBG: null | {
-        nw: Complex;
-        se: Complex;
+        nw: math.Complex;
+        se: math.Complex;
         use: boolean;
       } = null;
       var cachedCanvas = document.createElement("canvas");
@@ -293,7 +293,7 @@ window.customElements.define(
             let { mouse, projection, domain } = visual;
 
             if (mouse != null) {
-              const m = congruenceSubgroups.Domain1.findCosetOf(
+              const m = math.congruenceSubgroups.Domain1.findCosetOf(
                 projection.invert(mouse)
               );
               if (m !== undefined) {

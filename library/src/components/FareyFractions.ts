@@ -160,74 +160,6 @@ function gcd(a: number, b: number) {
   }
 }
 
-function fracTest(
-  ctx: render.Renderer2D & render.MeasureText & { width: number },
-  proj: { origin: [number, number]; scale: number },
-  Q: number
-) {
-  let fs = ctx.fontSize;
-  let { origin: p0, scale: pS } = proj;
-
-  let min = -p0[0] / pS;
-  let max = (ctx.width - p0[0]) / pS;
-
-  let leftP = 0,
-    leftQ = 1;
-  let rightP = 1,
-    rightQ = 1;
-  let rightStack: number[] = [];
-
-  if (min >= 1 || max <= 0) return;
-
-  let sprites: { sprite: BBSprite; at: number; p: number; q: number }[] = [];
-
-  let i = 0;
-  while (rightQ <= Q) {
-    i++;
-    if (i > 4000) break;
-
-    let newP = leftP + rightP;
-    let newQ = leftQ + rightQ;
-
-    let d = gcd(newP, newQ);
-    newP = newP / d;
-    newQ = newQ / d;
-
-    if (newQ <= Q) {
-      if (newP / newQ < min) {
-        leftP = newP;
-        leftQ = newQ;
-        continue;
-      }
-      rightStack.push(rightQ);
-      rightStack.push(rightP);
-      rightP = newP;
-      rightQ = newQ;
-    } else {
-      leftP = rightP;
-      leftQ = rightQ;
-
-      if (leftP / leftQ > max || rightStack.length < 2) {
-        break;
-      }
-      rightP = rightStack.pop() as number;
-      rightQ = rightStack.pop() as number;
-
-      sprites.push({
-        p: leftP,
-        q: leftQ,
-        sprite: FracSprite(
-          TextSprite(ctx, "" + leftP),
-          TextSprite(ctx, "" + leftQ)
-        ),
-        at: leftP / leftQ,
-      });
-    }
-  }
-
-  annotateCarthesian2DAxis(ctx, "x", proj, sprites);
-}
-
 /**
  * The value $v$ has to be between 0 and 1;
  *
@@ -272,19 +204,6 @@ function bestFracsFor(Q: number, v: number) {
   return [a, b, c, d];
 }
 
-function* continueFareyIteration(
-  Q: number,
-  a: number,
-  b: number,
-  c: number,
-  d: number
-) {
-  while (b !== d) {
-    let k = Math.floor((Q + b) / d);
-    [a, b, c, d] = [c, d, k * c - a, k * d - b];
-    yield [c, d] as [number, number];
-  }
-}
 /**
  *
  * @param start Two consecutive elements in the sequence.
@@ -306,41 +225,6 @@ function fareyIter(
       sprite: FracSprite(TextSprite(ctx, "" + a), TextSprite(ctx, "" + b)),
       at: a / b,
     });
-  }
-  return sprites;
-}
-
-function findFareyFractions(
-  ctx: render.Renderer2D & render.MeasureText,
-  Q: number
-): { sprite: BBSprite; at: number; p: number; q: number }[] {
-  let sprites: { sprite: BBSprite; at: number; p: number; q: number }[] = [];
-  for (let q = 1; q < Q; q++) {
-    for (let p = 1; p < q; p++) {
-      if (gcd(p, q) != 1) continue;
-      function gcd(a: number, b: number) {
-        a = Math.abs(a);
-        b = Math.abs(b);
-        if (b > a) {
-          let temp = a;
-          a = b;
-          b = temp;
-        }
-        while (true) {
-          if (b == 0) return a;
-          a %= b;
-          if (a == 0) return b;
-          b %= a;
-        }
-      }
-
-      sprites.push({
-        p,
-        q,
-        sprite: FracSprite(TextSprite(ctx, "" + p), TextSprite(ctx, "" + q)),
-        at: p / q,
-      });
-    }
   }
   return sprites;
 }
