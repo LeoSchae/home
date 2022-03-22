@@ -3,8 +3,8 @@ import {
   ComplexScTr,
   drawCarthesian2DAxis,
 } from "../canvas/axis";
-import { Renderer2D, Renderer2DCanvas, Renderer2DSVG } from "../canvas/context";
-import { FracSprite, TextSprite } from "../canvas/sprites";
+import * as render from "../renderer";
+import * as sprites from "../canvas/sprites";
 import { AsyncManager, wrap } from "../modules/Async";
 import { DragZoomHover } from "../modules/Interact";
 import {
@@ -15,9 +15,14 @@ import {
 } from "../modules/layeredCanvas";
 import { Complex, congruenceSubgroups, Moebius } from "../modules/math";
 import { hyperbolicLine } from "../modules/math/draw";
-import { CanvasLayer, LayeredComponent } from "./LayeredComponent";
+import {
+  CanvasLayer,
+  LayeredComponent,
+  OptionsLayer,
+} from "./LayeredComponent";
 import * as consts from "./SubgroupsWC.const";
 import * as dom from "../DomElement";
+import katex from "katex";
 
 function downloadSvg(el: string) {
   let data =
@@ -43,6 +48,9 @@ window.customElements.define(
         })
       );
 
+      // TEST
+      // config.addLayer("options", new OptionsLayer({}));
+
       let state = {
         group_type: congruenceSubgroups.Gamma_1,
         level: 17,
@@ -57,6 +65,18 @@ window.customElements.define(
         projection: new ComplexScTr([200, 300], 200),
         mouse: null as [number, number] | null,
       };
+      let info = dom.Element(
+        "div",
+        {
+          style: "position: absolute;bottom:0;left:0;z-index: 2;padding: 10px;",
+        },
+        {
+          __html: katex.renderToString(
+            visual.group_type.tex + `(${visual.level})`
+          ),
+        }
+      );
+      config.attachToShaddow(info);
 
       let asyncManager = new AsyncManager<"group" | "bgDraw">();
 
@@ -73,6 +93,8 @@ window.customElements.define(
           visual.group_type = newGroup;
           visual.level = newLevel;
           visual.group = g;
+
+          katex.render(newGroup.tex + `(${newLevel})`, info);
 
           config.update();
         }).catch((e) => {
@@ -156,7 +178,7 @@ window.customElements.define(
 
       config.addOption(
         new ButtonOption("Export", "SVG", () => {
-          const r2dsvg = new Renderer2DSVG(config.width, config.height);
+          const r2dsvg = new render.SVG(config.width, config.height);
 
           let d = bgDraw(r2dsvg);
           while (!d.next().done) continue;
@@ -164,7 +186,7 @@ window.customElements.define(
         })
       );
 
-      function* bgDraw(ctx: Renderer2D) {
+      function* bgDraw(ctx: render.Renderer2D) {
         ctx.fillStyle = appOptions.fill + "55";
         ctx.strokeStyle = appOptions.fill;
         ctx.lineWidth = 1;
@@ -206,7 +228,7 @@ window.customElements.define(
               .callWrapped(
                 null,
                 bgDraw,
-                [new Renderer2DCanvas(ctx)],
+                [new render.Canvas(ctx)],
                 asyncManager.getNew("bgDraw")
               )
               /*.then(() => {
@@ -235,7 +257,7 @@ window.customElements.define(
         "fg",
         CanvasLayer({
           update: (config, ctx) => {
-            let r = new Renderer2DCanvas(ctx, config.width, config.height);
+            let r = new render.Canvas(ctx, config.width, config.height);
             ctx.clearRect(0, 0, config.width, config.height);
 
             /*if (cachedBG && cachedBG.use && false) {
@@ -253,11 +275,17 @@ window.customElements.define(
             r.fontSize = annotationFS;
             let annotations = [
               {
-                sprite: FracSprite(TextSprite(r, "-1"), TextSprite(r, "2")),
+                sprite: sprites.FracSprite(
+                  sprites.TextSprite(r, "-1"),
+                  sprites.TextSprite(r, "2")
+                ),
                 at: -0.5,
               },
               {
-                sprite: FracSprite(TextSprite(r, "1"), TextSprite(r, "2")),
+                sprite: sprites.FracSprite(
+                  sprites.TextSprite(r, "1"),
+                  sprites.TextSprite(r, "2")
+                ),
                 at: 0.5,
               },
             ];
@@ -269,20 +297,20 @@ window.customElements.define(
                 projection.invert(mouse)
               );
               if (m !== undefined) {
-                ctx.fillStyle = "#CCCCEEAA";
-                ctx.beginPath();
+                r.fillStyle = "#CCCCEEAA";
+                r.beginPath();
                 for (let i = 0; i < domain.length; i++) {
                   hyperbolicLine(
-                    ctx,
+                    r,
                     projection,
                     m.transform(domain[i]),
                     m.transform(domain[(i + 1) % domain.length])
                   );
                 }
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillStyle = "#000000";
+                r.closePath();
+                r.fill();
+                r.stroke();
+                r.fillStyle = "#000000";
 
                 let p = m.m[0],
                   q = m.m[2];
@@ -292,9 +320,9 @@ window.customElements.define(
                 }
                 if (p !== 0)
                   annotations.push({
-                    sprite: FracSprite(
-                      TextSprite(r, "" + p),
-                      TextSprite(r, "" + q)
+                    sprite: sprites.FracSprite(
+                      sprites.TextSprite(r, "" + p),
+                      sprites.TextSprite(r, "" + q)
                     ),
                     at: p / q,
                   });

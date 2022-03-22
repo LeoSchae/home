@@ -1,9 +1,13 @@
 export class Element {
+  children: (Element | string)[];
+
   constructor(
     public name: string,
     public attributes: { [key: string]: string | number } = {},
-    public children: (Element | string)[] = []
-  ) {}
+    ...children: (Element | string)[]
+  ) {
+    this.children = children;
+  }
 
   private attrString() {
     return Object.entries(this.attributes)

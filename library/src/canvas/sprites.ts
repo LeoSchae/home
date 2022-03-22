@@ -1,7 +1,7 @@
-import { PredictiveRenderer2D, Renderer2D } from "./context";
+import type * as render from "../renderer";
 
 export type Sprite = {
-  draw(ctx: Renderer2D, x: number, y: number): unknown;
+  draw(ctx: render.Renderer2D, x: number, y: number): unknown;
 };
 
 export type BBSprite = Sprite & {
@@ -12,17 +12,20 @@ export type BBSprite = Sprite & {
 };
 
 export function strokeBounds(
-  ctx: CanvasRenderingContext2D,
+  ctx: render.Renderer2D,
   sprite: BBSprite,
   x: number,
   y: number
 ) {
-  ctx.strokeRect(
+  ctx.beginPath();
+  ctx.rect(
     x - sprite.left,
     y - sprite.top,
     sprite.left + sprite.right,
     sprite.top + sprite.bot
   );
+  ctx.closePath();
+  ctx.stroke();
 }
 
 /**
@@ -33,12 +36,12 @@ export function strokeBounds(
  * @returns Sprite of thext
  */
 export function TextSprite(
-  ctx: PredictiveRenderer2D,
+  measure: render.MeasureText,
   text: string,
   options?: { center?: boolean }
 ): BBSprite {
   const { center = false } = options || {};
-  let { top, bot, left, right } = ctx.measureText(text);
+  let { top, bot, left, right } = measure.measureText(text);
   let dx = 0;
   if (center) {
     dx = (right - left) / 2;
@@ -53,7 +56,7 @@ export function TextSprite(
     bot,
     left,
     right,
-    draw: function (ctx: Renderer2D, x: number, y: number) {
+    draw: function (ctx: render.Renderer2D, x: number, y: number) {
       ctx.fillText(this.text, x - this.dx, y);
     },
   };
@@ -96,7 +99,7 @@ export function FracSprite(top: BBSprite, bot: BBSprite): BBSprite {
     left: halfLineLength,
     right: halfLineLength,
 
-    draw: function (ctx: Renderer2D, x: number, y: number) {
+    draw: function (ctx: render.Renderer2D, x: number, y: number) {
       let [topOffsetX, topOffsetY, botOffsetX, botOffsetY, halfLineLength] =
         this.data;
 

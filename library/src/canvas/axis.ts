@@ -1,6 +1,6 @@
 import { Complex } from "../modules/math";
-import { PredictiveRenderer2D, Renderer2D, Renderer2DBuffer } from "./context";
-import { BBSprite, TextSprite } from "./sprites";
+import * as render from "../renderer";
+import * as sprites from "./sprites";
 import TeX from "./TeX";
 
 export class ComplexScTr {
@@ -43,7 +43,7 @@ export class ComplexScTr {
  * @returns [sx, sy, ex, ey] The start and end points of the drawn arrow.
  */
 function infArrow(
-  ctx: Renderer2D,
+  ctx: render.Renderer2D,
   width: number,
   height: number,
   p: [number, number],
@@ -96,7 +96,10 @@ function infArrow(
  * @param options options for drawing
  */
 export function drawCarthesian2DAxis(
-  ctx: PredictiveRenderer2D,
+  ctx: render.Renderer2D & {
+    width: number;
+    height: number;
+  } & render.MeasureText,
   { origin: p0, scale: ps }: { origin: [number, number]; scale: number },
   {
     arrowSize: as = 7,
@@ -126,19 +129,15 @@ export function drawCarthesian2DAxis(
   const dx = [p1[0] - p0[0], p1[1] - p0[1]] as [number, number];
   const dy = [pi[0] - p0[0], pi[1] - p0[1]] as [number, number];
 
-  const buff = new Renderer2DBuffer();
-
-  const [, , rx, ry] = infArrow(buff, width, height, p0, dx, {
+  const [, , rx, ry] = infArrow(ctx, width, height, p0, dx, {
     arrowSize: as,
   });
-  const [, , ix, iy] = infArrow(buff, width, height, p0, dy, {
+  const [, , ix, iy] = infArrow(ctx, width, height, p0, dy, {
     arrowSize: as,
   });
-
-  buff.applyOn(ctx);
 
   // TODO drawing is not good for rotations!
-  const reSprite = TextSprite(ctx, reLab);
+  const reSprite = sprites.TextSprite(ctx, reLab);
 
   reSprite.draw(
     ctx,
@@ -146,7 +145,7 @@ export function drawCarthesian2DAxis(
     ry + reSprite.top + 0.2 * fs + 0.5 * as
   );
 
-  const imSprite = TextSprite(ctx, imLab);
+  const imSprite = sprites.TextSprite(ctx, imLab);
 
   imSprite.draw(
     ctx,
@@ -156,10 +155,10 @@ export function drawCarthesian2DAxis(
 }
 
 export function annotateCarthesian2DAxis(
-  ctx: Renderer2D,
+  ctx: render.Renderer2D,
   axis: "x",
   { origin: p0, scale: ps }: { origin: [number, number]; scale: number },
-  annotations: { sprite: BBSprite; at: number }[],
+  annotations: { sprite: sprites.BBSprite; at: number }[],
   { gap = 5 } = {}
 ) {
   var width: number = (ctx as any).width || 0;

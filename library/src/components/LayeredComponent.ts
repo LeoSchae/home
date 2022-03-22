@@ -1,31 +1,85 @@
-import { connect } from "http2";
 import * as dom from "../DomElement";
 import layerStyles from "./LayeredComponent.css";
 
 export type LayerHandler = {
+  /**
+   * Setup for the LayeredElement
+   */
   connected?: (config: LayeredConfig) => any;
   disconnected?: (config: LayeredConfig) => any;
   resized?: (config: LayeredConfig) => any;
 };
 
+/**
+ * Config Object for a LayeredElement.
+ */
 export type LayeredConfig = {
-  width: number;
-  height: number;
-  containerElement: HTMLDivElement;
+  /** The current width in CSSPixels */
+  readonly width: number;
+  /** The current height in CSSPixels */
+  readonly height: number;
+  /** The element that contains all layers */
+  readonly containerElement: HTMLDivElement;
+  /** Redraw a single layer. Improved performance when using string. */
   update(layer?: string | Layer<any>): unknown;
+  /** Add CSS to the stylesheet in the shaddow dom */
   addStyles(css: string): unknown;
-  addLayer<T extends Node>(name: string, layer: T | Layer<T>): unknown;
+  /** Add a layer to the element. */
+  addLayer<T extends Node>(name: string, layer: T): unknown;
+  addLayer<T extends Node | void>(name: string, layer: Layer<T>): unknown;
+  /** Add an option to the options overlay */
   addOption(option: { label: Node; input: Node }): unknown;
+  /** Attach a node directly to the shaddow dom */
   attachToShaddow(node: Node): unknown;
 };
 
-export type Layer<N extends Node> = {
-  connected: (component: LayeredConfig) => N;
-  disconnected?: (component: LayeredConfig) => void;
+export type Layer<N extends Node | void> = {
+  connected: (config: LayeredConfig) => N;
+  disconnected?: (config: LayeredConfig) => void;
 
   update?: (config: LayeredConfig, node: N) => unknown;
   resized?: (config: LayeredConfig, node: N) => any;
 };
+
+export class OptionsLayer implements Layer<void> {
+  options: { zIndex: number };
+  constructor(options: { zIndex?: number }) {
+    this.options = Object.assign({}, { zIndex: 5 }, options);
+  }
+  connected(config: LayeredConfig) {
+    let optionsFrame = dom.Element(
+      "div",
+      {
+        style: `display:none;position:absolute;top:0;left:0;width:100%;height:100%;z-index:99;background-color: #fffb;padding:1em;`,
+      },
+      { __html: "<h1>Options</h1>" }
+    );
+    let optionsButton = dom.Element(
+      "button",
+      {
+        "aria-label": "Options Toggle",
+        class: "option-button",
+        title: "Show all options",
+      },
+      {
+        __html: `<svg xmlns="http://www.w3.org/2000/svg" class="option-icon" x="0px" y="0px"width="24" height="24"viewBox="0 0 24 24"style=" fill:currentColor;"><path d="M19.9,13.3C20,12.8,20,12.4,20,12s0-0.8-0.1-1.3L21.8,9l-2.3-4l-2.4,0.8c-0.7-0.5-1.4-1-2.2-1.3L14.3,2H9.7L9.2,4.5	C8.3,4.8,7.6,5.3,6.9,5.8L4.5,5L2.2,9l1.9,1.7C4,11.2,4,11.6,4,12c0,0.4,0,0.8,0.1,1.3L2.2,15l2.3,4l2.4-0.8l0,0	c0.7,0.5,1.4,1,2.2,1.3L9.7,22h4.7l0.5-2.5c0.8-0.3,1.6-0.7,2.2-1.3l0,0l2.4,0.8l2.3-4L19.9,13.3L19.9,13.3z M12,16	c-2.2,0-4-1.8-4-4c0-2.2,1.8-4,4-4c2.2,0,4,1.8,4,4C16,14.2,14.2,16,12,16z"></path></svg>`,
+      }
+    );
+    let list = dom.Element("ul");
+
+    optionsButton.onclick = () => {
+      optionsFrame.style.display =
+        optionsFrame.style.display == "none" ? "block" : "none";
+    };
+    optionsFrame.append(list);
+
+    config.attachToShaddow(optionsFrame);
+    config.attachToShaddow(optionsButton);
+  }
+  disconnected?: ((config: LayeredConfig) => void) | undefined;
+  update?: ((config: LayeredConfig, node: void) => unknown) | undefined;
+  resized?: ((config: LayeredConfig, node: void) => any) | undefined;
+}
 
 export function CanvasLayer(options: {
   update: (config: LayeredConfig, ctx: CanvasRenderingContext2D) => unknown;
@@ -165,9 +219,9 @@ abstract class LayeredElement extends HTMLElement {
       addStyles: function (css: string): void {
         styles.append(css);
       },
-      addLayer: function <T extends Node>(
+      addLayer: function (
         name: string,
-        layer: T | Layer<T>
+        layer: Node | Layer<Node | undefined>
       ): void {
         if (layer instanceof Node) {
           container.appendChild(layer);

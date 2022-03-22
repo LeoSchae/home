@@ -1,8 +1,8 @@
 import { Complex, oo } from ".";
-import { PredictiveRenderer2D, Renderer2D } from "../../canvas/context";
+import * as render from "@lib/renderer";
 
 export function hyperbolicLine(
-  ctx: CanvasRenderingContext2D | Renderer2D,
+  ctx: render.Renderer2D,
   { origin, scale }: { origin: [number, number]; scale: number },
   from: Complex | oo,
   to: Complex | oo

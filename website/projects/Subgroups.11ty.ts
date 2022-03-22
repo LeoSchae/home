@@ -1,5 +1,5 @@
 import { ComplexScTr } from "../../library/src/canvas/axis";
-import { Renderer2DSVG } from "@lib/canvas/context";
+import { default as SVG } from "@lib/renderer/SVG";
 import { congruenceSubgroups } from "@lib/modules/math";
 import { hyperbolicLine } from "@lib/modules/math/draw";
 
@@ -43,7 +43,7 @@ function perviewIcon(this: any, data: any) {
   let grp = group.cosetRepresentatives(level);
   let dom = congruenceSubgroups.Domain1.corners;
 
-  let ctx = new Renderer2DSVG(200, 200);
+  let ctx = new SVG(200, 200);
   let projection = new ComplexScTr([100, 200], 100);
 
   ctx.fillStyle = "#AA000055";

@@ -3,7 +3,7 @@ import {
   drawCarthesian2DAxis,
   annotateCarthesian2DAxis,
 } from "../canvas/axis";
-import { PredictiveRenderer2D, Renderer2DCanvas } from "../canvas/context";
+import * as render from "../renderer";
 import { BBSprite, FracSprite, TextSprite } from "../canvas/sprites";
 import { DragZoomHover } from "../modules/Interact";
 import { Complex } from "../modules/math";
@@ -74,7 +74,7 @@ window.customElements.define(
         CanvasLayer({
           update(config, ctx) {
             fixTrZoom();
-            let r = new Renderer2DCanvas(ctx);
+            let r = new render.Canvas(ctx);
 
             ctx.clearRect(0, 0, config.width, config.height);
 
@@ -161,7 +161,7 @@ function gcd(a: number, b: number) {
 }
 
 function fracTest(
-  ctx: PredictiveRenderer2D,
+  ctx: render.Renderer2D & render.MeasureText & { width: number },
   proj: { origin: [number, number]; scale: number },
   Q: number
 ) {
@@ -292,7 +292,7 @@ function* continueFareyIteration(
  * @param max The maximum fraction value.
  */
 function fareyIter(
-  ctx: PredictiveRenderer2D,
+  ctx: render.MeasureText,
   start: [number, number, number, number],
   Q: number,
   max: number
@@ -311,7 +311,7 @@ function fareyIter(
 }
 
 function findFareyFractions(
-  ctx: PredictiveRenderer2D,
+  ctx: render.Renderer2D & render.MeasureText,
   Q: number
 ): { sprite: BBSprite; at: number; p: number; q: number }[] {
   let sprites: { sprite: BBSprite; at: number; p: number; q: number }[] = [];
