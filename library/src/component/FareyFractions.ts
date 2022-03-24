@@ -71,7 +71,7 @@ window.customElements.define(
 
       config.addLayer(
         "draw",
-        layers.CanvasLayer({
+        layers.Canvas({
           update(config, ctx) {
             fixTrZoom();
             let r = new render.Canvas(ctx);

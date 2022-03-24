@@ -7,7 +7,7 @@ window.customElements.define(
     connected(config) {
       config.addLayer(
         "draw",
-        layers.CanvasLayer({
+        layers.Canvas({
           update(config, ctx) {
             let width = config.width;
             let height = config.height;

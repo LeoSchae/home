@@ -120,7 +120,9 @@ window.customElements.define(
         fill: "#a40000",
       };
 
-      config.addOption(
+      let options = config.addLayer("options", layers.Options());
+
+      options.addOption(
         new ColorOption(
           "Color",
           (s) => {
@@ -131,7 +133,7 @@ window.customElements.define(
         )
       );
 
-      config.addOption(
+      options.addOption(
         new NumberOption(
           "Level",
           (s) => {
@@ -143,7 +145,7 @@ window.customElements.define(
         )
       );
 
-      config.addOption(
+      options.addOption(
         new RadioOption(
           "Group",
           [
@@ -172,7 +174,7 @@ window.customElements.define(
         )
       );
 
-      config.addOption(
+      options.addOption(
         new ButtonOption("Export", "SVG", () => {
           const r2dsvg = new render.SVG(config.width, config.height);
 
@@ -214,7 +216,7 @@ window.customElements.define(
       // background canvas
       config.addLayer(
         "bg",
-        layers.CanvasLayer({
+        layers.Canvas({
           update: (config, ctx) => {
             ctx?.clearRect(0, 0, config.width, config.height);
             asyncManager.abortAll("bgDraw");
@@ -251,7 +253,7 @@ window.customElements.define(
       // foreground canvas
       config.addLayer(
         "fg",
-        layers.CanvasLayer({
+        layers.Canvas({
           update: (config, ctx) => {
             let r = new render.Canvas(ctx, config.width, config.height);
             ctx.clearRect(0, 0, config.width, config.height);
