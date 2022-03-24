@@ -1,13 +1,13 @@
 import { ComplexScTr } from "../canvas/axis";
-import { CanvasLayer, LayeredComponent } from "./LayeredComponent";
+import * as layers from "./layers";
 
 window.customElements.define(
   "hyperbola-app",
-  LayeredComponent({
+  layers.LayeredComponent({
     connected(config) {
       config.addLayer(
         "draw",
-        CanvasLayer({
+        layers.CanvasLayer({
           update(config, ctx) {
             let width = config.width;
             let height = config.height;

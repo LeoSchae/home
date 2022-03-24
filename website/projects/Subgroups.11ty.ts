@@ -8,7 +8,7 @@ let nojs = `<div style="display:grid;justify-items:center;align-items:center;wid
 export async function render(this: any, data: any) {
   return (
     `<script>${await this.bundledScript(
-      "@lib/components/SubgroupsWC",
+      "@lib/component/SubgroupsWC",
       data
     )}</script>` + `<subgroups-wc>${nojs}</subgroups-wc>`
   );

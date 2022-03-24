@@ -15,11 +15,7 @@ import {
 } from "../modules/layeredCanvas";
 import * as math from "../modules/math";
 import { hyperbolicLine } from "../modules/math/draw";
-import {
-  CanvasLayer,
-  LayeredComponent,
-  OptionsLayer,
-} from "./LayeredComponent";
+import * as layers from "./layers";
 import * as consts from "./SubgroupsWC.const";
 import * as dom from "../DomElement";
 import katex from "katex";
@@ -38,7 +34,7 @@ function downloadSvg(el: string) {
 
 window.customElements.define(
   "subgroups-wc",
-  LayeredComponent({
+  layers.LayeredComponent({
     connected(config) {
       config.attachToShaddow(
         dom.Element("link", {
@@ -218,7 +214,7 @@ window.customElements.define(
       // background canvas
       config.addLayer(
         "bg",
-        CanvasLayer({
+        layers.CanvasLayer({
           update: (config, ctx) => {
             ctx?.clearRect(0, 0, config.width, config.height);
             asyncManager.abortAll("bgDraw");
@@ -255,7 +251,7 @@ window.customElements.define(
       // foreground canvas
       config.addLayer(
         "fg",
-        CanvasLayer({
+        layers.CanvasLayer({
           update: (config, ctx) => {
             let r = new render.Canvas(ctx, config.width, config.height);
             ctx.clearRect(0, 0, config.width, config.height);

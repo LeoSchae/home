@@ -1,5 +1,5 @@
-import * as dom from "../DomElement";
-import layerStyles from "./LayeredComponent.css";
+import * as dom from "@lib/DomElement";
+import layerStyles from "./index.css";
 
 export type LayerHandler = {
   /**
@@ -21,27 +21,93 @@ export type LayeredConfig = {
   /** The element that contains all layers */
   readonly containerElement: HTMLDivElement;
   /** Redraw a single layer. Improved performance when using string. */
-  update(layer?: string | Layer<any>): unknown;
+  update(layer?: string | LayerObject<any>): unknown;
   /** Add CSS to the stylesheet in the shaddow dom */
   addStyles(css: string): unknown;
   /** Add a layer to the element. */
-  addLayer<T extends Node>(name: string, layer: T): unknown;
-  addLayer<T extends Node | void>(name: string, layer: Layer<T>): unknown;
+  addLayer(name: string, layer: Node): unknown;
+  addLayer<O>(name: string, layer: Layer<any, O>): LayerHandle<O>;
   /** Add an option to the options overlay */
   addOption(option: { label: Node; input: Node }): unknown;
   /** Attach a node directly to the shaddow dom */
   attachToShaddow(node: Node): unknown;
 };
 
-export type Layer<N extends Node | void> = {
-  connected: (config: LayeredConfig) => N;
-  disconnected?: (config: LayeredConfig) => void;
+/**
+ * O: The fields that will be attached to the LayerHandle
+ * N: Type of nodes to attach
+ */
+export type LayerObject<
+  N extends Node | Node[] | undefined = undefined,
+  O = {}
+> = {
+  connected: (
+    config: LayeredConfig
+  ) => O & (N extends undefined ? {} : { nodes: N });
+  disconnected?: (config: LayeredConfig) => unknown;
 
-  update?: (config: LayeredConfig, node: N) => unknown;
-  resized?: (config: LayeredConfig, node: N) => any;
+  update?: (config: LayeredConfig, nodes: N) => unknown;
+  resized?: (config: LayeredConfig, nodes: N) => unknown;
 };
+export type Layer<N extends Node | Node[] | undefined = undefined, O = {}> =
+  | ((config: LayeredConfig) => O & (N extends undefined ? {} : { nodes: N }))
+  | LayerObject<N, O>;
 
-export class OptionsLayer implements Layer<void> {
+/** The handle returned by addLayer */
+export type LayerHandle<O> = {
+  [Name in Exclude<keyof O, "nodes" | "update">]: O[Name];
+} & { update(): unknown };
+
+export function Options2(): Layer<
+  undefined,
+  { addOption(option: { label: Node; input: Node }): unknown }
+> {
+  return (config: LayeredConfig) => {
+    let optionsFrame = dom.Element(
+      "div",
+      {
+        style: `display:none;position:absolute;top:0;left:0;width:100%;height:100%;z-index:99;background-color: #fffb;padding:1em;`,
+      },
+      { __html: "<h1>Options</h1>" }
+    );
+    let optionsButton = dom.Element(
+      "button",
+      {
+        "aria-label": "Options Toggle",
+        class: "option-button",
+        title: "Show all options",
+      },
+      {
+        __html: `<svg xmlns="http://www.w3.org/2000/svg" class="option-icon" x="0px" y="0px"width="24" height="24"viewBox="0 0 24 24"style=" fill:currentColor;"><path d="M19.9,13.3C20,12.8,20,12.4,20,12s0-0.8-0.1-1.3L21.8,9l-2.3-4l-2.4,0.8c-0.7-0.5-1.4-1-2.2-1.3L14.3,2H9.7L9.2,4.5	C8.3,4.8,7.6,5.3,6.9,5.8L4.5,5L2.2,9l1.9,1.7C4,11.2,4,11.6,4,12c0,0.4,0,0.8,0.1,1.3L2.2,15l2.3,4l2.4-0.8l0,0	c0.7,0.5,1.4,1,2.2,1.3L9.7,22h4.7l0.5-2.5c0.8-0.3,1.6-0.7,2.2-1.3l0,0l2.4,0.8l2.3-4L19.9,13.3L19.9,13.3z M12,16	c-2.2,0-4-1.8-4-4c0-2.2,1.8-4,4-4c2.2,0,4,1.8,4,4C16,14.2,14.2,16,12,16z"></path></svg>`,
+      }
+    );
+    let list = dom.Element("ul");
+
+    optionsButton.onclick = () => {
+      optionsFrame.style.display =
+        optionsFrame.style.display == "none" ? "block" : "none";
+    };
+    optionsFrame.append(list);
+
+    config.attachToShaddow(optionsFrame);
+    config.attachToShaddow(optionsButton);
+    return {
+      addOption(option: { label: Node; input: Node }) {
+        const li = document.createElement("li");
+        li.append(option.label, ": ", option.input);
+        list.appendChild(li);
+      },
+    };
+  };
+}
+
+export class OptionsLayer
+  implements
+    LayerObject<
+      undefined,
+      { addOption(option: { label: Node; input: Node }): unknown }
+    >
+{
   options: { zIndex: number };
   constructor(options: { zIndex?: number }) {
     this.options = Object.assign({}, { zIndex: 5 }, options);
@@ -75,16 +141,20 @@ export class OptionsLayer implements Layer<void> {
 
     config.attachToShaddow(optionsFrame);
     config.attachToShaddow(optionsButton);
+    return {
+      addOption(option: { label: Node; input: Node }) {
+        const li = document.createElement("li");
+        li.append(option.label, ": ", option.input);
+        list.appendChild(li);
+      },
+    };
   }
-  disconnected?: ((config: LayeredConfig) => void) | undefined;
-  update?: ((config: LayeredConfig, node: void) => unknown) | undefined;
-  resized?: ((config: LayeredConfig, node: void) => any) | undefined;
 }
 
 export function CanvasLayer(options: {
   update: (config: LayeredConfig, ctx: CanvasRenderingContext2D) => unknown;
-}): Layer<HTMLCanvasElement> {
-  let layer = {
+}): LayerObject<HTMLCanvasElement> {
+  let layer: LayerObject<HTMLCanvasElement> = {
     update(config: LayeredConfig, canvas: HTMLCanvasElement) {
       let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
       const dpr = window.devicePixelRatio;
@@ -101,9 +171,9 @@ export function CanvasLayer(options: {
     resized(config: LayeredConfig) {
       config.update(this);
     },
-    connected(config: LayeredConfig): HTMLCanvasElement {
+    connected(config: LayeredConfig) {
       let canvas = dom.Element("canvas", { class: "canvas-layer" });
-      return canvas;
+      return { nodes: canvas };
     },
   };
   return layer;
@@ -163,14 +233,14 @@ abstract class LayeredElement extends HTMLElement {
     const resizeObs = new ResizeObserver(() => {
       this.layerHandler.resized?.(config);
       for (var layer of layers.values())
-        layer.layer?.resized?.(config, layer.node);
+        layer.layer?.resized?.(config, layer.nodes);
     });
     resizeObs.observe(container);
     shadow.append(styles, container);
 
     const layers: Map<
       string,
-      { node?: Node; layer?: Layer<any>; update: boolean }
+      { nodes?: Node | Node[]; layer?: LayerObject<any, any>; update: boolean }
     > = new Map();
 
     /** When changing from 0 an animation frame
@@ -183,7 +253,7 @@ abstract class LayeredElement extends HTMLElement {
       updateState = 0;
       for (var layer of layers.values()) {
         if (all || layer.update)
-          layer.layer?.update?.(config, layer.node as any);
+          layer.layer?.update?.(config, layer.nodes as any);
         layer.update = false;
       }
     };
@@ -219,18 +289,41 @@ abstract class LayeredElement extends HTMLElement {
       addStyles: function (css: string): void {
         styles.append(css);
       },
-      addLayer: function (
-        name: string,
-        layer: Node | Layer<Node | undefined>
-      ): void {
+      addLayer: function <O>(name: string, layer: Node | Layer<any, O>): any {
+        // Manually check that return type is correct
         if (layer instanceof Node) {
           container.appendChild(layer);
           return;
         }
-        let node = layer.connected(config);
-        if (node) container.append(node);
-        layers.set(name, { node, layer, update: false });
+
+        let layerObject: undefined | LayerObject<any, any>,
+          instance: O & { nodes?: Node | Node[] };
+        if (typeof layer === "function") {
+          instance = layer(config);
+          layerObject = undefined;
+        } else {
+          instance = layer.connected(config);
+          layerObject = layer;
+        }
+
+        let nodes = instance.nodes;
+        if (nodes) {
+          if (Array.isArray(nodes)) container.append(...nodes);
+          else container.append(nodes);
+        }
+
+        layers.set(name, { nodes, layer: layerObject, update: false });
         config.update(name);
+
+        let handle: LayerHandle<O> = {
+          ...instance,
+          nodes: undefined,
+          update: () => {
+            this.update(name);
+          },
+        };
+
+        return handle;
       },
       addOption(option: { label: Node; input: Node }) {
         options.addOption(option);

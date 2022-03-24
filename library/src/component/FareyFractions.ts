@@ -7,11 +7,11 @@ import * as render from "../renderer";
 import { BBSprite, FracSprite, TextSprite } from "../canvas/sprites";
 import { DragZoomHover } from "../modules/Interact";
 import { Complex } from "../modules/math";
-import { CanvasLayer, LayeredComponent } from "./LayeredComponent";
+import * as layers from "./layers";
 
 window.customElements.define(
   "farey-fractions",
-  LayeredComponent({
+  layers.LayeredComponent({
     connected(config) {
       const app = this;
 
@@ -71,7 +71,7 @@ window.customElements.define(
 
       config.addLayer(
         "draw",
-        CanvasLayer({
+        layers.CanvasLayer({
           update(config, ctx) {
             fixTrZoom();
             let r = new render.Canvas(ctx);

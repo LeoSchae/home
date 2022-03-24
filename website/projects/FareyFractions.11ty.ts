@@ -3,7 +3,7 @@ let nojs = `<div style="display:grid;justify-items:center;align-items:center;wid
 export async function render(this: any, data: any) {
   return (
     `<script>${await this.bundledScript(
-      "@lib/components/FareyFractions",
+      "@lib/component/FareyFractions",
       data
     )}</script>` + `<farey-fractions>${nojs}</farey-fractions>`
   );
