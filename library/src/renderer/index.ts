@@ -1,3 +1,8 @@
+/**
+ * A type for different rendering backends.
+ * By default all coordinates should be provided
+ * with the origin in the top left corner.
+ */
 export interface Renderer2D {
   get lineWidth(): number;
   set lineWidth(lineWidth: number);
@@ -11,18 +16,30 @@ export interface Renderer2D {
   get strokeStyle(): string;
   set strokeStyle(strokeStyle: string);
 
-  fillText(text: string, x: number, y: number): void;
+  fillText(text: string, x: number, y: number): this;
 
-  beginPath(): void;
+  /** Begin a new Path. This clears all points from the current path. */
+  beginPath(): this;
 
-  moveTo(x: number, y: number): void;
+  /** Move the path to a location without drawing a line */
+  moveTo(x: number, y: number): this;
 
-  lineTo(x: number, y: number): void;
+  /** Draw a line from the current to the target location */
+  lineTo(x: number, y: number): this;
 
   closePath(): void;
 
-  rect(x: number, y: number, w: number, h: number): void;
+  rect(x: number, y: number, w: number, h: number): this;
 
+  /**
+   * Draw a arc of a circle centered at (x,y)
+   * @param x center x
+   * @param y center y
+   * @param radius radius
+   * @param startAngle The start angle in radians
+   * @param endAngle The end angle in radians
+   * @param ccw Whether the arc should run counter clockwise
+   */
   arc(
     x: number,
     y: number,
@@ -30,13 +47,13 @@ export interface Renderer2D {
     startAngle: number,
     endAngle: number,
     ccw?: boolean
-  ): void;
+  ): this;
 
-  stroke(): void;
+  stroke(): this;
 
-  fill(): void;
+  fill(): this;
 
-  fillAndStroke(): void;
+  fillAndStroke(): this;
 }
 
 export interface MeasureText {

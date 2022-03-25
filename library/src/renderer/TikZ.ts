@@ -110,29 +110,34 @@ export default class TikZ implements Renderer2D {
     this.style.fontSize = fontSize;
   }
 
-  fillText(text: string, x: number, y: number): void {
+  fillText(text: string, x: number, y: number) {
     throw new Error("Not implemented");
+    return this;
   }
 
-  beginPath(): void {
+  beginPath() {
     this.path = undefined;
+    return this;
   }
-  moveTo(x: number, y: number): void {
+  moveTo(x: number, y: number) {
     this.path = (this.path || "") + ` (${x},${y})`;
+    return this;
   }
-  lineTo(x: number, y: number): void {
+  lineTo(x: number, y: number) {
     let path = this.path;
     this.path = (path ? path + " -- " : " ") + `(${x}, ${y})`;
+    return this;
   }
   closePath() {
     this.path += " -- cycle";
   }
-  rect(x: number, y: number, w: number, h: number): void {
+  rect(x: number, y: number, w: number, h: number) {
     this.moveTo(x, y);
     this.lineTo(x + w, y);
     this.lineTo(x + w, y + h);
     this.lineTo(x, y + h);
     this.lineTo(x, y);
+    return this;
   }
   arc(
     x: number,
@@ -141,7 +146,7 @@ export default class TikZ implements Renderer2D {
     startAngle: number,
     endAngle: number,
     ccw?: boolean
-  ): void {
+  ) {
     ccw = !ccw;
     let sx = x + radius * Math.cos(startAngle),
       sy = y + radius * Math.sin(startAngle);
@@ -156,18 +161,22 @@ export default class TikZ implements Renderer2D {
 
     this.lineTo(sx, sy);
     this.path += ` arc(${startAngle * 360}:${endAngle * 360}:${radius})`;
+    return this;
   }
-  stroke(): void {
+  stroke() {
     let draw = `\\path [${this._pathAttr(false, true)}]${this.path};%\n`;
     this.TeX += draw;
+    return this;
   }
-  fill(): void {
+  fill() {
     let draw = `\\path [${this._pathAttr(true, false)}]${this.path};%\n`;
     this.TeX += draw;
+    return this;
   }
   fillAndStroke() {
     let draw = `\\path [${this._pathAttr(true, true)}]${this.path};%\n`;
     this.TeX += draw;
+    return this;
   }
 
   toTeX() {

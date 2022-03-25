@@ -50,27 +50,32 @@ export class Renderer2DBuffer implements Renderer2D {
   } {
     throw new Error("Method not implemented.");
   }
-  fillText(text: string, x: number, y: number): void {
+  fillText(text: string, x: number, y: number) {
     this.data.push(DrawOp.TEXTFILL, text, x, y);
+    return this;
   }
-  beginPath(): void {
+  beginPath() {
     this.data.push(DrawOp.BEGIN);
+    return this;
   }
-  moveTo(x: number, y: number): void {
+  moveTo(x: number, y: number) {
     this.data.push(DrawOp.MOVE, x, y);
+    return this;
   }
-  lineTo(x: number, y: number): void {
+  lineTo(x: number, y: number) {
     this.data.push(DrawOp.LINE, x, y);
+    return this;
   }
   closePath() {
     this.data.push(DrawOp.CLOSE);
   }
-  rect(x: number, y: number, w: number, h: number): void {
+  rect(x: number, y: number, w: number, h: number) {
     this.moveTo(x, y);
     this.lineTo(x + w, y);
     this.lineTo(x + w, y + h);
     this.lineTo(x, y + h);
     this.lineTo(x, y);
+    return this;
   }
   arc(
     x: number,
@@ -79,21 +84,25 @@ export class Renderer2DBuffer implements Renderer2D {
     startAngle: number,
     endAngle: number,
     ccw?: boolean
-  ): void {
+  ) {
     this.data.push(DrawOp.ARC, x, y, radius, startAngle, endAngle, ccw);
+    return this;
   }
-  stroke(): void {
+  stroke() {
     this.data.push(DrawOp.STROKE);
+    return this;
   }
-  fill(): void {
+  fill() {
     this.data.push(DrawOp.FILL);
+    return this;
   }
   fillAndStroke() {
     /* TODO */
     this.fill();
     this.stroke();
+    return this;
   }
-  applyOn(r: Renderer2D): void {
+  applyOn(r: Renderer2D) {
     const data = this.data;
     let d;
     let i;

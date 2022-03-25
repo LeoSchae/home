@@ -72,18 +72,22 @@ export default class Canvas implements Renderer2D, MeasureText {
 
   fillText(text: string, x: number, y: number) {
     this._ctx.fillText(text, x, y);
+    return this;
   }
 
   beginPath() {
     this._ctx.beginPath();
+    return this;
   }
 
   moveTo(x: number, y: number) {
     this._ctx.moveTo(x, y);
+    return this;
   }
 
   lineTo(x: number, y: number) {
     this._ctx.lineTo(x, y);
+    return this;
   }
 
   closePath() {
@@ -92,6 +96,7 @@ export default class Canvas implements Renderer2D, MeasureText {
 
   rect(x: number, y: number, w: number, h: number) {
     this._ctx.rect(x, y, w, h);
+    return this;
   }
 
   arc(
@@ -101,20 +106,24 @@ export default class Canvas implements Renderer2D, MeasureText {
     startAngle: number,
     endAngle: number,
     ccw?: boolean
-  ): void {
+  ) {
     this._ctx.arc(x, y, radius, startAngle, endAngle, ccw);
+    return this;
   }
 
   stroke() {
     this._ctx.stroke();
+    return this;
   }
 
   fill() {
     this._ctx.fill();
+    return this;
   }
 
   fillAndStroke() {
     this.fill();
     this.stroke();
+    return this;
   }
 }

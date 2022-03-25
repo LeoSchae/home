@@ -84,7 +84,7 @@ export default class SVG implements Renderer2D {
     this.style.fontSize = fontSize;
   }
 
-  fillText(text: string, x: number, y: number): void {
+  fillText(text: string, x: number, y: number) {
     this.svg.append(
       new xml.Element(
         "text",
@@ -92,26 +92,32 @@ export default class SVG implements Renderer2D {
         text
       )
     );
+    return this;
   }
 
-  beginPath(): void {
+  beginPath() {
     this._path = undefined;
+    return this;
   }
-  moveTo(x: number, y: number): void {
+  moveTo(x: number, y: number) {
     this._path = (this._path || "") + `M${x} ${y}`;
+    return this;
   }
-  lineTo(x: number, y: number): void {
+  lineTo(x: number, y: number) {
     this._path = (this._path || `M ${x} ${y}`) + `L${x} ${y}`;
+    return this;
   }
   closePath() {
     this._path = (this._path || "") + "Z";
+    return this;
   }
-  rect(x: number, y: number, w: number, h: number): void {
+  rect(x: number, y: number, w: number, h: number) {
     this.moveTo(x, y);
     this.lineTo(x + w, y);
     this.lineTo(x + w, y + h);
     this.lineTo(x, y + h);
     this.lineTo(x, y);
+    return this;
   }
   arc(
     x: number,
@@ -120,7 +126,7 @@ export default class SVG implements Renderer2D {
     startAngle: number,
     endAngle: number,
     ccw?: boolean
-  ): void {
+  ) {
     startAngle -= Math.PI / 2;
     endAngle -= Math.PI / 2;
     let sx = x + radius * Math.sin(-startAngle),
@@ -138,8 +144,9 @@ export default class SVG implements Renderer2D {
       `L ${sx} ${sy}A ${radius} ${radius} 0 ${short ? 0 : 1} ${
         ccw ? 0 : 1
       } ${ex} ${ey}`;
+    return this;
   }
-  stroke(): void {
+  stroke() {
     if (this._path)
       this.svg.append(
         new xml.Element("path", {
@@ -148,8 +155,9 @@ export default class SVG implements Renderer2D {
           ...this.style.stroke,
         })
       );
+    return this;
   }
-  fill(): void {
+  fill() {
     if (this._path)
       this.svg.append(
         new xml.Element("path", {
@@ -157,6 +165,7 @@ export default class SVG implements Renderer2D {
           ...this.style.fill,
         })
       );
+    return this;
   }
   fillAndStroke() {
     if (this._path)
@@ -167,6 +176,7 @@ export default class SVG implements Renderer2D {
           ...this.style.stroke,
         })
       );
+    return this;
   }
   toXML() {
     return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n${this.svg.toString()}`;
