@@ -1,5 +1,5 @@
 import * as dom from "@lib/DomElement";
-import layerStyles from "./index.css";
+import styles from "./index.css";
 
 export type LayerHandler = {
   /**
@@ -71,9 +71,9 @@ abstract class LayeredElement extends HTMLElement {
     const shadow = this.shadow;
     shadow.innerHTML = "";
 
-    const styles = dom.Element("style", {}, [layerStyles]);
+    const style = dom.Element("style", {}, [styles.css]);
     const container = dom.Element("div", {
-      class: "container",
+      class: styles.class.container,
     });
     const resizeObs = new ResizeObserver(() => {
       this.layerHandler.resized?.(config);
@@ -81,7 +81,7 @@ abstract class LayeredElement extends HTMLElement {
         layer.layer?.resized?.(config, layer.nodes);
     });
     resizeObs.observe(container);
-    shadow.append(styles, container);
+    shadow.append(style, container);
 
     const layers: Map<
       string,
@@ -129,7 +129,7 @@ abstract class LayeredElement extends HTMLElement {
         }
       },
       addStyles: function (css: string): void {
-        styles.append(css);
+        style.append(css);
       },
       addLayer: function <O>(name: string, layer: Node | Layer<any, O>): any {
         // Manually check that return type is correct

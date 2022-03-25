@@ -1,6 +1,11 @@
 declare module "*.css" {
-  const content: string;
-  export default content;
+  const exp_type: {
+    css: string;
+    class: {
+      [key: string]: string;
+    };
+  };
+  export default exp_type;
 }
 
 declare type EleventyPage = {

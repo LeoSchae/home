@@ -178,11 +178,23 @@ export function ConstImports() {
 }
 
 export function CSSImports(plugins: any[] = []): () => ESBuild.Plugin {
-  const postcss = PostCSS(plugins);
+  const modules = require("postcss-modules")({
+    getJSON: function (
+      cssFileName: string,
+      json: string,
+      outputFileName: string
+    ) {
+      var path = require("path");
+      var cssName = path.basename(cssFileName, ".css");
+      var jsonFileName = path.resolve("./build/" + cssName + ".json");
+      //console.log(this);
+    },
+  });
+  const postcss = PostCSS([modules, ...plugins]);
   return function () {
     return {
       name: "ImportCSS",
-      setup: function (build: any) {
+      setup: function (build) {
         build.onLoad({ filter: /.css/ }, async function (data: any) {
           let content = await readFile(data.path, {
             encoding: "utf-8",
@@ -190,7 +202,13 @@ export function CSSImports(plugins: any[] = []): () => ESBuild.Plugin {
           let res = await postcss.process(content, {
             from: data.path,
           });
-          return { contents: res.css, loader: "text" };
+          let classes = res.messages.find(
+            (t) => t.plugin == "postcss-modules"
+          )?.exportTokens;
+          return {
+            contents: JSON.stringify({ css: res.css, class: classes }),
+            loader: "json",
+          };
         });
       },
     };

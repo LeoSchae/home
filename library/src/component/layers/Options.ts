@@ -2,6 +2,8 @@ import type { LayeredConfig, Layer } from "./";
 import * as dom from "@lib/DomElement";
 import styles from "./Options.css";
 
+console.log(styles);
+
 export default function (): Layer<
   undefined,
   { addOption(option: { label: Node; input: Node }): unknown }
@@ -10,7 +12,8 @@ export default function (): Layer<
     let optionsFrame = dom.Element(
       "div",
       {
-        style: `display:none;position:absolute;top:0;left:0;width:100%;height:100%;z-index:99;background-color: #fffb;padding:1em;`,
+        class: styles.class.container,
+        style: "display: none;",
       },
       { __html: "<h1>Options</h1>" }
     );
@@ -18,11 +21,11 @@ export default function (): Layer<
       "button",
       {
         "aria-label": "Options Toggle",
-        class: "option-button",
+        class: styles.class.button,
         title: "Show all options",
       },
       {
-        __html: `<svg xmlns="http://www.w3.org/2000/svg" class="option-icon" x="0px" y="0px"width="24" height="24"viewBox="0 0 24 24"style=" fill:currentColor;"><path d="M19.9,13.3C20,12.8,20,12.4,20,12s0-0.8-0.1-1.3L21.8,9l-2.3-4l-2.4,0.8c-0.7-0.5-1.4-1-2.2-1.3L14.3,2H9.7L9.2,4.5	C8.3,4.8,7.6,5.3,6.9,5.8L4.5,5L2.2,9l1.9,1.7C4,11.2,4,11.6,4,12c0,0.4,0,0.8,0.1,1.3L2.2,15l2.3,4l2.4-0.8l0,0	c0.7,0.5,1.4,1,2.2,1.3L9.7,22h4.7l0.5-2.5c0.8-0.3,1.6-0.7,2.2-1.3l0,0l2.4,0.8l2.3-4L19.9,13.3L19.9,13.3z M12,16	c-2.2,0-4-1.8-4-4c0-2.2,1.8-4,4-4c2.2,0,4,1.8,4,4C16,14.2,14.2,16,12,16z"></path></svg>`,
+        __html: `<svg xmlns="http://www.w3.org/2000/svg" class="${styles.class.icon}" viewBox="0 0 24 24" style="fill:currentColor;"><path d="M19.9,13.3C20,12.8,20,12.4,20,12s0-0.8-0.1-1.3L21.8,9l-2.3-4l-2.4,0.8c-0.7-0.5-1.4-1-2.2-1.3L14.3,2H9.7L9.2,4.5	C8.3,4.8,7.6,5.3,6.9,5.8L4.5,5L2.2,9l1.9,1.7C4,11.2,4,11.6,4,12c0,0.4,0,0.8,0.1,1.3L2.2,15l2.3,4l2.4-0.8l0,0	c0.7,0.5,1.4,1,2.2,1.3L9.7,22h4.7l0.5-2.5c0.8-0.3,1.6-0.7,2.2-1.3l0,0l2.4,0.8l2.3-4L19.9,13.3L19.9,13.3z M12,16	c-2.2,0-4-1.8-4-4c0-2.2,1.8-4,4-4c2.2,0,4,1.8,4,4C16,14.2,14.2,16,12,16z"></path></svg>`,
       }
     );
     let list = dom.Element("ul");
@@ -33,7 +36,7 @@ export default function (): Layer<
     };
     optionsFrame.append(list);
 
-    config.attachToShaddow(dom.Element("style", {}, { __html: styles }));
+    config.attachToShaddow(dom.Element("style", {}, { __html: styles.css }));
     config.attachToShaddow(optionsFrame);
     config.attachToShaddow(optionsButton);
     return {
