@@ -1,3 +1,7 @@
+/**
+ * Types for CSSModules. Imports only work for bundled javascript.
+ * Loader is defined in /eleventy/plugins/esbuild.ts
+ */
 declare module "*.css" {
   const exp_type: {
     css: string;

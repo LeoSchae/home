@@ -168,4 +168,7 @@ export default class SVG implements Renderer2D {
         })
       );
   }
+  toXML() {
+    return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n${this.svg.toString()}`;
+  }
 }

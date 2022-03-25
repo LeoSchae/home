@@ -1,3 +1,5 @@
+import TikZ from "@lib/renderer/TikZ";
+
 let nojs = `<div style="display:grid;justify-items:center;align-items:center;width:100%;height:100%;"><h2>Javascript required!</h2></div>`;
 
 export async function render(this: any, data: any) {

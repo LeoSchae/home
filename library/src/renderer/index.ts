@@ -50,3 +50,4 @@ export interface MeasureText {
 
 export { default as Canvas } from "./Canvas";
 export { default as SVG } from "./SVG";
+export { default as TikZ } from "./TikZ";

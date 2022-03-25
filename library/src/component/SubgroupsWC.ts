@@ -19,15 +19,16 @@ import * as layers from "./layers";
 import * as consts from "./SubgroupsWC.const";
 import * as dom from "../DomElement";
 import katex from "katex";
+import TikZ from "@lib/renderer/TikZ";
 
-function downloadSvg(el: string) {
-  let data =
-    `data:image/svg+xml;base64,` +
-    window.btoa(
-      `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n` + el
-    );
+function download(
+  content: string,
+  name: string,
+  dataType: string = "text/plain"
+) {
+  let data = `data:${dataType};base64,${window.btoa(content)}`;
   let link = document.createElement("a");
-  link.setAttribute("download", "Subgroups.svg");
+  link.setAttribute("download", name);
   link.href = data;
   link.click();
 }
@@ -174,15 +175,34 @@ window.customElements.define(
         )
       );
 
-      options.addOption(
-        new ButtonOption("Export", "SVG", () => {
-          const r2dsvg = new render.SVG(config.width, config.height);
+      let exportSVG = dom.Element("input", {
+        type: "button",
+        value: "SVG",
+        title: "Export as SVG image",
+      });
+      exportSVG.onclick = () => {
+        let r = new render.SVG(config.width, config.height);
+        let d = bgDraw(r);
+        while (!d.next().done) continue;
+        download(r.toXML(), "Subgroups.svg", "image/svg+xml");
+      };
 
-          let d = bgDraw(r2dsvg);
-          while (!d.next().done) continue;
-          downloadSvg(r2dsvg.svg.toString());
-        })
-      );
+      let exportTikZ = dom.Element("input", {
+        type: "button",
+        value: "TikZ",
+        title: "Export as TikZ image for use in LaTeX",
+      });
+      exportTikZ.onclick = () => {
+        let r = new render.TikZ(config.width, config.height);
+        let d = bgDraw(r);
+        while (!d.next().done) continue;
+        download(r.toTeX(), "Subgroups.tikz", "text/plain");
+      };
+
+      options.addOption({
+        label: document.createTextNode("Export"),
+        input: dom.Element("span", {}, [exportSVG, exportTikZ]),
+      });
 
       function* bgDraw(ctx: render.Renderer2D) {
         ctx.fillStyle = appOptions.fill + "55";

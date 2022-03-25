@@ -2,8 +2,6 @@ import type { LayeredConfig, Layer } from "./";
 import * as dom from "@lib/DomElement";
 import styles from "./Options.css";
 
-console.log(styles);
-
 export default function (): Layer<
   undefined,
   { addOption(option: { label: Node; input: Node }): unknown }
