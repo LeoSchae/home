@@ -32,12 +32,38 @@ function download(
   link.click();
 }
 
+function setSize(
+  dim: { width: number; height: number } | "auto",
+  config: layers.LayeredConfig
+) {
+  if (dim == "auto") {
+  } else {
+    config.containerElement.style.width = dim.width + "px";
+    config.containerElement.style.height = dim.height + "px";
+  }
+}
+
 window.customElements.define(
   "subgroups-wc",
   layers.LayeredComponent({
     connected(config) {
+      setSize({ width: 600, height: 400 }, config);
+
+      new ResizeObserver(() => {
+        if (config.containerElement.style.width === "") {
+          return;
+        }
+        let parent = config.hostElement;
+        if (!parent) return;
+        let { clientWidth: cw, clientHeight: ch } = config.containerElement;
+        let { clientWidth: ww, clientHeight: wh } = parent;
+        let scale = Math.min(ww / cw, wh / ch);
+        config.containerElement.style.transformOrigin = "top left";
+        config.containerElement.style.transform = `scale(${scale}, ${scale})`;
+      }).observe(config.hostElement);
+
       config.attachToShaddow(
-        dom.Element("link", {
+        dom.Element("link", [], {
           rel: "stylesheet",
           type: "text/css",
           href: consts.KatexStylesheet,
@@ -64,12 +90,12 @@ window.customElements.define(
       let info = dom.Element(
         "div",
         {
-          style: "position: absolute;bottom:0;left:0;z-index: 2;padding: 10px;",
-        },
-        {
           __html: katex.renderToString(
             visual.group_type.tex + `(${visual.level})`
           ),
+        },
+        {
+          style: "position: absolute;bottom:0;left:0;z-index: 2;padding: 10px;",
         }
       );
       config.attachToShaddow(info);
@@ -174,7 +200,7 @@ window.customElements.define(
         )
       );
 
-      let exportSVG = dom.Element("input", {
+      let exportSVG = dom.Element("input", [], {
         type: "button",
         value: "SVG",
         title: "Export as SVG image",
@@ -186,7 +212,7 @@ window.customElements.define(
         download(r.toXML(), "Subgroups.svg", "image/svg+xml");
       };
 
-      let exportTikZ = dom.Element("input", {
+      let exportTikZ = dom.Element("input", [], {
         type: "button",
         value: "TikZ",
         title: "Export as TikZ image for use in LaTeX",
@@ -200,7 +226,7 @@ window.customElements.define(
 
       options.addOption({
         label: document.createTextNode("Export"),
-        input: dom.Element("span", {}, [exportSVG, exportTikZ]),
+        input: dom.Element("span", [exportSVG, exportTikZ]),
       });
 
       function* bgDraw(ctx: render.Renderer2D) {

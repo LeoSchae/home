@@ -20,6 +20,8 @@ export type LayeredConfig = {
   readonly height: number;
   /** The element that contains all layers */
   readonly containerElement: HTMLDivElement;
+  /** The webcomponent host element */
+  readonly hostElement: HTMLElement;
   /** Redraw a single layer. Improved performance when using string. */
   update(layer?: string | LayerObject<any>): unknown;
   /** Add CSS to the stylesheet in the shaddow dom */
@@ -71,8 +73,8 @@ abstract class LayeredElement extends HTMLElement {
     const shadow = this.shadow;
     shadow.innerHTML = "";
 
-    const style = dom.Element("style", {}, [styles.css]);
-    const container = dom.Element("div", {
+    const style = dom.Element("style", [styles.css]);
+    const container = dom.Element("div", [], {
       class: styles.class.container,
     });
     const resizeObs = new ResizeObserver(() => {
@@ -111,6 +113,7 @@ abstract class LayeredElement extends HTMLElement {
         return container.clientHeight;
       },
       containerElement: container,
+      hostElement: this,
       update: function (layer?: string | Layer<any>): unknown {
         if (updateState === 2) return;
         if (updateState === 0) requestAnimationFrame(updateLayers);

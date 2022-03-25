@@ -53,7 +53,7 @@ window.customElements.define(
 
       let options = config.addLayer("options", layers.Options());
       // Options
-      let exportSVG = dom.Element("input", {
+      let exportSVG = dom.Element("input", [], {
         type: "button",
         value: "SVG",
         title: "Export as SVG image",
@@ -64,7 +64,7 @@ window.customElements.define(
         download(r.toXML(), "Subgroups.svg", "image/svg+xml");
       };
 
-      let exportTikZ = dom.Element("input", {
+      let exportTikZ = dom.Element("input", [], {
         type: "button",
         value: "TikZ",
         title: "Export as TikZ image for use in LaTeX",
@@ -77,7 +77,7 @@ window.customElements.define(
 
       options.addOption({
         label: document.createTextNode("Export"),
-        input: dom.Element("span", {}, [exportSVG, exportTikZ]),
+        input: dom.Element("span", [exportSVG, exportTikZ]),
       });
     },
   })

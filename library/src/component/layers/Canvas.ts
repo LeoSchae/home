@@ -22,7 +22,7 @@ export default function (options: {
       config.update(this);
     },
     connected(config: LayeredConfig) {
-      let canvas = dom.Element("canvas", { class: "canvas-layer" });
+      let canvas = dom.Element("canvas", [], { class: "canvas-layer" });
       return { nodes: canvas };
     },
   };
