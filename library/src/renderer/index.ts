@@ -21,24 +21,26 @@ export interface Renderer2D {
   /** Begin a new Path. This clears all points from the current path. */
   beginPath(): this;
 
-  /** Move the path to a location without drawing a line */
+  /** Move the path to a location without drawing a line. */
   moveTo(x: number, y: number): this;
 
-  /** Draw a line from the current to the target location */
+  /** Draw a line from the current to the target location. */
   lineTo(x: number, y: number): this;
 
+  /** Close the current path. */
   closePath(): void;
 
   rect(x: number, y: number, w: number, h: number): this;
 
   /**
-   * Draw a arc of a circle centered at (x,y)
+   * Draw a arc of a circle centered at (x,y).
+   * Drawing a full circle is not possible.
    * @param x center x
    * @param y center y
    * @param radius radius
    * @param startAngle The start angle in radians
    * @param endAngle The end angle in radians
-   * @param ccw Whether the arc should run counter clockwise
+   * @param cw Whether the arc should run clockwise. Defaults to false.
    */
   arc(
     x: number,
@@ -46,7 +48,7 @@ export interface Renderer2D {
     radius: number,
     startAngle: number,
     endAngle: number,
-    ccw?: boolean
+    cw?: boolean
   ): this;
 
   stroke(): this;

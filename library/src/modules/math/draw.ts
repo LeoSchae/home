@@ -43,5 +43,5 @@ export function hyperbolicLine(
   let a1 = c1.arg();
   let a2 = c2.arg();
 
-  ctx.arc(CP[0], CP[1], c1.abs() * scale, -a1, -a2, a1 < a2);
+  ctx.arc(CP[0], CP[1], c1.abs() * scale, -a1, -a2, a1 > a2);
 }

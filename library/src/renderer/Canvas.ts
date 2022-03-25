@@ -1,5 +1,8 @@
 import type { Renderer2D, MeasureText } from "./";
 
+const PI_2 = 2 * Math.PI;
+const _PI_2 = 0.5 / Math.PI;
+
 export default class Canvas implements Renderer2D, MeasureText {
   private _ctx: CanvasRenderingContext2D;
 
@@ -105,9 +108,16 @@ export default class Canvas implements Renderer2D, MeasureText {
     radius: number,
     startAngle: number,
     endAngle: number,
-    ccw?: boolean
+    cw?: boolean
   ) {
-    this._ctx.arc(x, y, radius, startAngle, endAngle, ccw);
+    this._ctx.arc(
+      x,
+      y,
+      radius,
+      startAngle - PI_2 * Math.floor(_PI_2 * startAngle),
+      endAngle - PI_2 * Math.floor(_PI_2 * endAngle),
+      !cw
+    );
     return this;
   }
 

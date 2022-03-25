@@ -19,7 +19,6 @@ import * as layers from "./layers";
 import * as consts from "./SubgroupsWC.const";
 import * as dom from "../DomElement";
 import katex from "katex";
-import TikZ from "@lib/renderer/TikZ";
 
 function download(
   content: string,

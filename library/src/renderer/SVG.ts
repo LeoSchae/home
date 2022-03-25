@@ -1,6 +1,10 @@
 import type { Renderer2D } from "./";
 import * as xml from "../UnsafeXML";
 
+const R2D = 180.0 / Math.PI;
+const PI2 = 2 * Math.PI;
+const _PI2 = 0.5 / Math.PI;
+
 type SVGStyle = {
   stroke: {
     stroke: string;
@@ -125,25 +129,31 @@ export default class SVG implements Renderer2D {
     radius: number,
     startAngle: number,
     endAngle: number,
-    ccw?: boolean
+    cw?: boolean
   ) {
-    startAngle -= Math.PI / 2;
-    endAngle -= Math.PI / 2;
-    let sx = x + radius * Math.sin(-startAngle),
-      sy = y + radius * Math.cos(-startAngle);
-    let ex = x + radius * Math.sin(-endAngle),
-      ey = y + radius * Math.cos(-endAngle);
-
-    let delta = (endAngle - startAngle) / Math.PI / 2;
+    let delta = (endAngle - startAngle) * _PI2;
     delta = delta - Math.floor(delta);
+    if (delta >= 0.499 && delta <= 0.511) {
+      // Half arcs are ambigous in svg files.
+      // Split the arc into two half circles.
+      let midAngle = startAngle + (cw ? +0.5 * delta : -0.5 * delta);
+      this.arc(x, y, radius, startAngle, midAngle, cw);
+      this.arc(x, y, radius, midAngle, endAngle, cw);
+      return this;
+    }
 
-    let short = delta <= 0.5 != ccw;
+    let sx = x + radius * Math.cos(startAngle),
+      sy = y + radius * Math.sin(startAngle);
+    let ex = x + radius * Math.cos(endAngle),
+      ey = y + radius * Math.sin(endAngle);
 
-    this._path =
-      (this._path || "M ${sx} ${sy}") +
-      `L ${sx} ${sy}A ${radius} ${radius} 0 ${short ? 0 : 1} ${
-        ccw ? 0 : 1
-      } ${ex} ${ey}`;
+    this._path = (this._path || `M ${sx} ${sy}`) + `L ${sx} ${sy}`;
+
+    let short = delta <= 0.5 == cw;
+
+    this._path += `A ${radius} ${radius} 0 ${short ? 0 : 1} ${
+      cw ? 1 : 0
+    } ${ex} ${ey}`;
     return this;
   }
   stroke() {

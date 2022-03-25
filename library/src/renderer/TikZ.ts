@@ -145,19 +145,18 @@ export default class TikZ implements Renderer2D {
     radius: number,
     startAngle: number,
     endAngle: number,
-    ccw?: boolean
+    cw?: boolean
   ) {
-    ccw = !ccw;
     let sx = x + radius * Math.cos(startAngle),
       sy = y + radius * Math.sin(startAngle);
     startAngle /= 2 * Math.PI;
     endAngle /= 2 * Math.PI;
     startAngle -= Math.floor(startAngle);
     endAngle -= Math.floor(endAngle);
-    if (ccw && endAngle < startAngle) endAngle += 1;
-    if (!ccw && startAngle < endAngle) endAngle -= 1;
 
-    console.log(endAngle - startAngle);
+    // Clockwise and counterclockwise are inverted since units are too.
+    if (cw && endAngle < startAngle) endAngle += 1;
+    if (!cw && startAngle < endAngle) endAngle -= 1;
 
     this.lineTo(sx, sy);
     this.path += ` arc(${startAngle * 360}:${endAngle * 360}:${radius})`;
