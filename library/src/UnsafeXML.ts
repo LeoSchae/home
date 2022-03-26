@@ -1,10 +1,10 @@
-export class Element {
-  children: (Element | string)[];
+export class XML {
+  children: (XML | string)[];
 
   constructor(
     public name: string,
     public attributes: { [key: string]: string | number } = {},
-    ...children: (Element | string)[]
+    ...children: (XML | string)[]
   ) {
     this.children = children;
   }
@@ -19,7 +19,7 @@ export class Element {
     return this.children.map((v) => v.toString()).join("");
   }
 
-  append(child: Element | string) {
+  append(child: XML | string) {
     this.children.push(child);
   }
 
@@ -28,4 +28,21 @@ export class Element {
       this.name
     }>`;
   }
+}
+
+export function jsx(
+  name: string,
+  attributes: { [key: string]: string | number },
+  ...children: any[]
+): XML {
+  return new XML(name, attributes, ...children);
+}
+
+export declare namespace jsx.JSX {
+  type Element = XML;
+  type IntrinsicElements = {
+    [key: string]: {
+      [key: string]: string | number;
+    };
+  };
 }

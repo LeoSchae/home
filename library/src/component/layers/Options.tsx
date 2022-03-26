@@ -32,18 +32,22 @@ export default function (): Layer<
     optionsFrame.append(list);
 
     config.hostElement.append(
-      <style __html={styles.css}></style>,
+      <style __html={styles.css} />,
       optionsFrame,
       optionsButton
     );
     config.attachToShaddow(
-      <style __html={styles.css}></style>,
+      <style __html={styles.css} />,
       optionsFrame,
       optionsButton
     );
     return {
       addOption(option: { label: Node; input: Node }) {
-        list.appendChild(<li>{[option.label, ": ", option.input]}</li>);
+        list.appendChild(
+          <li>
+            {option.label}: {option.input}
+          </li>
+        );
       },
     };
   };
@@ -87,12 +91,9 @@ export function manualSizing(config: LayeredConfig) {
           type="button"
           value="Default"
           onclick={() => {
-            let w = parseInt(x.value);
-            let h = parseInt(y.value);
-
-            config.containerElement.style.width = w + "px";
-            config.containerElement.style.height = h + "px";
-            config.containerElement.style.outline = "1px dashed black";
+            inputs.replaceChildren(auto);
+            observer.unobserve(config.containerElement);
+            observer.unobserve(config.hostElement);
           }}
         />,
       ]}
@@ -101,8 +102,7 @@ export function manualSizing(config: LayeredConfig) {
 
   auto = (
     <span>
-      {" "}
-      [Automatic]{" "}
+      [Automatic]
       <input
         type="button"
         value="Change"
@@ -111,7 +111,7 @@ export function manualSizing(config: LayeredConfig) {
           observer.observe(config.containerElement);
           observer.observe(config.hostElement);
         }}
-      />{" "}
+      />
     </span>
   );
 

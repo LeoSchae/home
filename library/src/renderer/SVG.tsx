@@ -1,5 +1,6 @@
-import type { Renderer2D } from "./";
-import * as xml from "../UnsafeXML";
+/** @jsx jsx */
+import { jsx, XML } from "../UnsafeXML";
+import type { Renderer2D } from ".";
 
 const R2D = 180.0 / Math.PI;
 const PI2 = 2 * Math.PI;
@@ -19,7 +20,7 @@ type SVGStyle = {
 };
 
 export default class SVG implements Renderer2D {
-  svg: xml.Element;
+  svg: XML;
 
   private _path: string | undefined;
   private style: SVGStyle = {
@@ -34,12 +35,14 @@ export default class SVG implements Renderer2D {
   };
 
   constructor(width: number, height: number) {
-    this.svg = new xml.Element("svg", {
-      xmlns: "http://www.w3.org/2000/svg",
-      "xmlns:xlink": "http://www.w3.org/1999/xlink",
-      version: "1.1",
-      viewBox: `0 0 ${width} ${height}`,
-    });
+    this.svg = (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        version="1.1"
+        viewBox={`0 0 ${width} ${height}`}
+      ></svg>
+    );
   }
 
   get fillStyle(): string {
@@ -90,11 +93,9 @@ export default class SVG implements Renderer2D {
 
   fillText(text: string, x: number, y: number) {
     this.svg.append(
-      new xml.Element(
-        "text",
-        { x: x, y: y, "font-size": this.style.fontSize },
-        text
-      )
+      <text x={x} y={y} font-size={this.style.fontSize}>
+        {text}
+      </text>
     );
     return this;
   }
@@ -159,32 +160,19 @@ export default class SVG implements Renderer2D {
   stroke() {
     if (this._path)
       this.svg.append(
-        new xml.Element("path", {
-          d: this._path,
-          fill: "none",
-          ...this.style.stroke,
-        })
+        <path d={this._path} fill="none" {...this.style.stroke} />
       );
     return this;
   }
   fill() {
     if (this._path)
-      this.svg.append(
-        new xml.Element("path", {
-          d: this._path,
-          ...this.style.fill,
-        })
-      );
+      this.svg.append(<path d={this._path} {...this.style.fill} />);
     return this;
   }
   fillAndStroke() {
     if (this._path)
       this.svg.append(
-        new xml.Element("path", {
-          d: this._path,
-          ...this.style.fill,
-          ...this.style.stroke,
-        })
+        <path d={this._path} {...this.style.fill} {...this.style.stroke} />
       );
     return this;
   }

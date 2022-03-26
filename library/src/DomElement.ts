@@ -32,12 +32,12 @@ function deepChildren(el: HTMLElement, children: any[]) {
 
 export function jsx(
   name: string,
-  attrs: jsx.JSX.IntrinsicElements[""],
-  ...children: any[]
+  attrs: jsx.JSX.IntrinsicElements[""]
 ): HTMLElement;
 export function jsx(
   name: string,
-  attrs: jsx.JSX.IntrinsicElements[""]
+  attrs: jsx.JSX.IntrinsicElements[""],
+  ...children: any[]
 ): HTMLElement | HTMLElement[] {
   let el = document.createElement(name);
   attrs = attrs || {};
@@ -55,7 +55,7 @@ export function jsx(
     }
   }
 
-  deepChildren(el, Array.prototype.slice.call(arguments, 2));
+  deepChildren(el, children);
   return el;
 }
 
