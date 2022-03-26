@@ -1,3 +1,13 @@
+## Folder Structure
+
+- `/eleventy/`: The folder that contains the eleventy code config and plugins.
+  The main config is contained here in the `app.ts` file.
+- `/library/src`: Code containing java / typescript code that can be imported
+  from typescript using the `@lib/...` shorthand.
+- `/inline/`: Contains any templates that can be processed by eleventy.
+  Files can be inlined using the `inline` shortcode of the respective template language.
+- `/website/`: The actual web content. Any file from here will be processed by eleventy.
+
 ## ESBuild Plugin
 
 The Eleventy app makes use of an ESBuild plugin for typescript.
