@@ -7,7 +7,13 @@ The following extensions are handled:
 - ".11ty.ts": Is handled similar to the ".11ty.js" files in the default 11ty setup.
 - ".ts": This file will be bundled to a ".js" file.
 
-### .const.ts imports
+### tsx
+
+One can use tsx in templates.
+To define the tsx factory one can use the comments
+`js /** @jsx jsxFactory */` and `js /** @jsxFarag fragmentClassOrType */`.
+
+### .const.ts(x) imports
 
 A plugin is used to allow special ".const.ts" processing.
 Files with the extension imported as preprocessed constants.
@@ -35,5 +41,17 @@ as a JSON file.
 
 ### .css imports
 
-A plugin is used to allow ".css" to be imported to normal ".ts" files.
-The results are minified using postcss.
+A plugin is used to allow ".css" to be imported as css modules to any ".ts(x)" files.
+The results are minified using postcss. The resulting import has the format:
+
+```js
+{
+  css: string, // The full stylesheet as string
+  classes: {
+    [key: string]: string,
+  }
+}
+```
+
+Here the classes field contains the different css classnames and the corresponding transformed name.
+(See css modules.)
