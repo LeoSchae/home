@@ -30,7 +30,7 @@ export type LayeredConfig = {
   addLayer(name: string, layer: Node): unknown;
   addLayer<O>(name: string, layer: Layer<any, O>): LayerHandle<O>;
   /** Attach a node directly to the shaddow dom */
-  attachToShaddow(node: Node): unknown;
+  attachToShaddow(...node: Node[]): unknown;
 };
 
 /**
@@ -170,8 +170,8 @@ abstract class LayeredElement extends HTMLElement {
 
         return handle;
       },
-      attachToShaddow(node: Node) {
-        shadow.append(node);
+      attachToShaddow(...nodes: Node[]) {
+        shadow.append(...nodes);
       },
     };
 

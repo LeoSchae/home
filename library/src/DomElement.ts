@@ -10,18 +10,9 @@ export function Element<K extends keyof HTMLElementTagNameMap>(
 ): HTMLElementTagNameMap[K] {
   let el = document.createElement(name);
 
-  for (let [k, v] of Object.entries(attrs)) {
-    switch (typeof v) {
-      case "number":
-        v = ("" + v) as any;
-      case "string":
-        el.setAttribute(k, v as any);
-        break;
-      default:
-        // Global event handlers
-        (el as any)[k] = v;
-    }
-  }
+  for (let [k, v] of Object.entries(attrs))
+    el.setAttribute(k, typeof v === "string" ? v : v + "");
+  for (let [k, v] of Object.entries(events)) (el as any)[k] = v;
 
   if (Array.isArray(children))
     for (var c of children) {
@@ -30,4 +21,54 @@ export function Element<K extends keyof HTMLElementTagNameMap>(
     }
   else el.innerHTML = children.__html;
   return el;
+}
+
+function deepChildren(el: HTMLElement, children: any[]) {
+  for (var c of children) {
+    if (Array.isArray(c)) deepChildren(el, c);
+    else el.append(c instanceof Node ? c : "" + c);
+  }
+}
+
+export function jsx(
+  name: string,
+  attrs: jsx.JSX.IntrinsicElements[""],
+  ...children: any[]
+): HTMLElement;
+export function jsx(
+  name: string,
+  attrs: jsx.JSX.IntrinsicElements[""]
+): HTMLElement | HTMLElement[] {
+  let el = document.createElement(name);
+  attrs = attrs || {};
+
+  if ("__html" in attrs) {
+    el.innerHTML = "" + attrs.__html;
+    delete attrs.__html;
+  }
+
+  for (var [k, v] of Object.entries(attrs)) {
+    if (typeof v === "function") {
+      (el as any)[k] = v;
+    } else {
+      el.setAttribute(k, "" + v);
+    }
+  }
+
+  deepChildren(el, Array.prototype.slice.call(arguments, 2));
+  return el;
+}
+
+export declare namespace jsx.JSX {
+  type Element = HTMLElement;
+  type IntrinsicElements = {
+    [key: string]: {
+      [key: string]: string | number | (() => any) | undefined;
+    } & {
+      [key in keyof GlobalEventHandlers]?:
+        | GlobalEventHandlers[key]
+        | string
+        | number;
+    } & { __html?: string };
+  };
 }

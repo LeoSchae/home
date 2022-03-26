@@ -19,6 +19,10 @@ import * as layers from "./layers";
 import * as consts from "./SubgroupsWC.const";
 import * as dom from "../DomElement";
 import katex from "katex";
+import { manualSizing } from "./layers/Options";
+import test from "../test";
+
+test();
 
 function download(
   content: string,
@@ -47,21 +51,6 @@ window.customElements.define(
   "subgroups-wc",
   layers.LayeredComponent({
     connected(config) {
-      setSize({ width: 600, height: 400 }, config);
-
-      new ResizeObserver(() => {
-        if (config.containerElement.style.width === "") {
-          return;
-        }
-        let parent = config.hostElement;
-        if (!parent) return;
-        let { clientWidth: cw, clientHeight: ch } = config.containerElement;
-        let { clientWidth: ww, clientHeight: wh } = parent;
-        let scale = Math.min(ww / cw, wh / ch);
-        config.containerElement.style.transformOrigin = "top left";
-        config.containerElement.style.transform = `scale(${scale}, ${scale})`;
-      }).observe(config.hostElement);
-
       config.attachToShaddow(
         dom.Element("link", [], {
           rel: "stylesheet",
@@ -199,6 +188,8 @@ window.customElements.define(
           visual.group_type.tex
         )
       );
+
+      options.addOption(manualSizing(config));
 
       let exportSVG = dom.Element("input", [], {
         type: "button",
