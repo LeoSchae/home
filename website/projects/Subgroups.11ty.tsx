@@ -1,16 +1,25 @@
+/** @jsx jsx */
+/** @jsxFrag jsx.Fragment */
+import { jsx } from "@lib/UnsafeXML";
 import { ComplexScTr } from "../../library/src/canvas/axis";
-import { default as SVG } from "@lib/renderer/SVG";
+import SVG from "@lib/renderer/SVG";
 import { congruenceSubgroups } from "@lib/modules/math";
 import { hyperbolicLine } from "@lib/modules/math/draw";
 
-let nojs = `<div style="display:grid;justify-items:center;align-items:center;width:100%;height:100%;"><h2>Javascript required!</h2></div>`;
+let nojs = (
+  <div style="display:grid;justify-items:center;align-items:center;width:100%;height:100%;">
+    <h2>Javascript required!</h2>
+  </div>
+);
 
 export async function render(this: any, data: any) {
   return (
-    `<script>${await this.bundledScript(
-      "@lib/component/SubgroupsWC",
-      data
-    )}</script>` + `<subgroups-wc>${nojs}</subgroups-wc>`
+    <>
+      <script>
+        {await this.bundledScript("@lib/component/SubgroupsWC", data)}
+      </script>
+      <subgroups-wc>{nojs}</subgroups-wc>
+    </>
   );
 }
 

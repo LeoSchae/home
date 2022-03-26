@@ -39,6 +39,7 @@ export function jsx(
   attrs: jsx.JSX.IntrinsicElements[""],
   ...children: any[]
 ): HTMLElement | HTMLElement[] {
+  if (name === "") return children;
   let el = document.createElement(name);
   attrs = attrs || {};
 
@@ -58,6 +59,7 @@ export function jsx(
   deepChildren(el, children);
   return el;
 }
+jsx.Fragment = "";
 
 export declare namespace jsx.JSX {
   type Element = HTMLElement;

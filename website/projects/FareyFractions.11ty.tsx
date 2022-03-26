@@ -1,13 +1,21 @@
-import TikZ from "@lib/renderer/TikZ";
+/** @jsx jsx */
+/** @jsxFrag jsx.Fragment */
+import { jsx } from "@lib/UnsafeXML";
 
-let nojs = `<div style="display:grid;justify-items:center;align-items:center;width:100%;height:100%;"><h2>Javascript required!</h2></div>`;
+let nojs = (
+  <div style="display:grid;justify-items:center;align-items:center;width:100%;height:100%;">
+    <h2>Javascript required!</h2>
+  </div>
+);
 
 export async function render(this: any, data: any) {
   return (
-    `<script>${await this.bundledScript(
-      "@lib/component/FareyFractions",
-      data
-    )}</script>` + `<farey-fractions>${nojs}</farey-fractions>`
+    <>
+      <script>
+        {await this.bundledScript("@lib/component/FareyFractions", data)}
+      </script>
+      <farey-fractions>{nojs}</farey-fractions>
+    </>
   );
 }
 

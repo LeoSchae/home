@@ -1,12 +1,14 @@
 export class XML {
   children: (XML | string)[];
+  attributes: { [key: string]: string | number };
 
   constructor(
     public name: string,
-    public attributes: { [key: string]: string | number } = {},
+    attributes?: { [key: string]: string | number },
     ...children: (XML | string)[]
   ) {
     this.children = children;
+    this.attributes = attributes || {};
   }
 
   private attrString() {
@@ -24,9 +26,9 @@ export class XML {
   }
 
   toString(): string {
-    return `<${this.name} ${this.attrString()}>${this.chString()}</${
-      this.name
-    }>`;
+    let name = this.name;
+    if (name === "") return this.chString();
+    return `<${name} ${this.attrString()}>${this.chString()}</${name}>`;
   }
 }
 
@@ -37,6 +39,7 @@ export function jsx(
 ): XML {
   return new XML(name, attributes, ...children);
 }
+jsx.Fragment = "";
 
 export declare namespace jsx.JSX {
   type Element = XML;

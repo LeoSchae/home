@@ -26,7 +26,9 @@ function thisBindings(javascriptFunctions: any, ctx: any): EleventyThis {
 }
 
 function instanceTypeOf(path: string): "11ty" | "ts" {
-  return path.endsWith(".11ty.ts") ? "11ty" : "ts";
+  return path.endsWith(".11ty.ts") || path.endsWith(".11ty.tsx")
+    ? "11ty"
+    : "ts";
 }
 
 async function bundleImport(options: ESBuild.BuildOptions) {
@@ -78,7 +80,8 @@ export function EleventyPlugin(
   eleventyConfig.addJavaScriptFunction("bundledScript", eleventyBundledImport);
 
   let instanceCache: any = {};
-  eleventyConfig.addExtension("ts", {
+
+  let extensionHandler = {
     read: false,
     getData: true,
     init() {
@@ -87,6 +90,8 @@ export function EleventyPlugin(
       for (var key of Object.keys(require.cache)) delete require.cache[key];
     },
     getInstanceFromInputPath: async function (path: string) {
+      console.log(path);
+
       switch (instanceTypeOf(path)) {
         case "11ty":
           // Return the module instance for .11ty.ts content.
@@ -147,7 +152,10 @@ export function EleventyPlugin(
         };
       },
     },
-  });
+  };
+
+  eleventyConfig.addExtension("ts", extensionHandler);
+  eleventyConfig.addExtension("tsx", extensionHandler);
 }
 
 /**
