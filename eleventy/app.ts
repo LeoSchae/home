@@ -16,6 +16,7 @@ import Inline from "./plugins/inline";
       eleventyConfig.setWatchJavaScriptDependencies(false);
 
       eleventyConfig.addPassthroughCopy("website/fonts/");
+      eleventyConfig.addPassthroughCopy("website/favicon.svg");
       eleventyConfig.setTemplateFormats(["njk", "md", "pcss", "ts", "tsx"]);
 
       eleventyConfig.addPlugin(Logging.EleventyPlugin, {});

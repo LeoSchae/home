@@ -51,10 +51,11 @@ export interface Renderer2D {
     cw?: boolean
   ): this;
 
+  /** Stroke the current path */
   stroke(): this;
-
+  /** Fill the current path */
   fill(): this;
-
+  /** Stroke and Fill the current path */
   fillAndStroke(): this;
 }
 
