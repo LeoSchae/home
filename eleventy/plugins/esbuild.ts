@@ -169,7 +169,7 @@ export function ConstImports() {
     return {
       name: "ConstTSImports",
       setup: function (build) {
-        build.onLoad({ filter: /.const.ts/ }, async function (data) {
+        build.onLoad({ filter: /.const.tsx?/ }, async function (data) {
           let module = require(data.path);
 
           if (typeof module.default === "function")

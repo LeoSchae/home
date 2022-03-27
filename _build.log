@@ -1,6 +1,5 @@
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
-{"level":"verbose","message":"\"Bundling ./website/icon.ts\"","source":"/icon.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
@@ -9,7 +8,6 @@
 {"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
-{"level":"verbose","message":"\"Bundling ./website/favicon.ts\"","source":"/favicon.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
@@ -18,7 +16,6 @@
 {"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
-{"level":"verbose","message":"\"Bundling ./website/favicon.ts\"","source":"/favicon.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
@@ -27,7 +24,9 @@
 {"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
-{"level":"verbose","message":"\"Bundling ./website/favicon.ts\"","source":"/favicon.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
 {"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
@@ -36,7 +35,6 @@
 {"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
-{"level":"verbose","message":"\"Bundling ./website/favicon.ts\"","source":"/favicon.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
@@ -45,7 +43,6 @@
 {"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
-{"level":"verbose","message":"\"Bundling ./website/favicon.ts\"","source":"/favicon.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
@@ -54,7 +51,221 @@
 {"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
 {"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
-{"level":"verbose","message":"\"Bundling ./website/favicon.ts\"","source":"/favicon.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
+{"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
+{"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/projects/FareyFractions/"}
+{"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/projects/Subgroups/"}
+{"level":"warn","message":"\"No description meta tag set.\"","source":"/projects/test/"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"( Data Proxy-Pass )"}
+{"level":"verbose","message":"\"Generating icon with \\\\Gamma_1(7)\"","source":"/projects/Subgroups/"}
 {"level":"verbose","message":"\"Bundling @lib/component/Hyperbolamethod\"","source":"/scripts/Hyperbolamethod.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/FareyFractions\"","source":"/scripts/FareyFractions.js"}
 {"level":"verbose","message":"\"Bundling @lib/component/SubgroupsWC\"","source":"/scripts/SubgroupsWC.js"}
