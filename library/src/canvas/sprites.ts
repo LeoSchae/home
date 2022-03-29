@@ -17,13 +17,11 @@ export function strokeBounds(
   x: number,
   y: number
 ) {
-  ctx.beginPath();
-  ctx.rect(
-    x - sprite.left,
-    y - sprite.top,
-    sprite.left + sprite.right,
-    sprite.top + sprite.bot
-  );
+  let l = x - sprite.left,
+    t = y - sprite.top,
+    r = x + sprite.right,
+    b = y + sprite.bot;
+  ctx.beginPath().lineTo(t, l).lineTo(t, r).lineTo(b, r).lineTo(b, l);
   ctx.closePath();
   ctx.stroke();
 }

@@ -173,8 +173,17 @@ export function annotateCarthesian2DAxis(
       let x = at * ps + x0;
 
       if (x + sprite.right >= 0 && x - sprite.left <= width) {
-        ctx.beginPath();
-        ctx.rect(x - 0.5, y0, 1, 3);
+        let t = y0,
+          l = x - 0.5,
+          r = x + 0.5,
+          b = y0 + 3;
+        ctx
+          .beginPath()
+          .moveTo(t, l)
+          .lineTo(t, r)
+          .lineTo(b, r)
+          .lineTo(b, l)
+          .closePath();
         ctx.fill();
         sprite.draw(ctx, x, y0 + sprite.top + gap);
       }

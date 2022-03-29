@@ -30,8 +30,6 @@ export interface Renderer2D {
   /** Close the current path. */
   closePath(): void;
 
-  rect(x: number, y: number, w: number, h: number): this;
-
   /**
    * Draw a arc of a circle centered at (x,y).
    * Drawing a full circle is not possible.

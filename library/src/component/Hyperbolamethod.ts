@@ -4,6 +4,7 @@ import * as layers from "./layers";
 import * as render from "@lib/renderer";
 import * as dom from "@lib/DomElement";
 import * as math from "@lib/modules/math";
+import ScaledRender from "@lib/renderer/AutoScale";
 
 function download(
   content: string,
@@ -57,7 +58,7 @@ function renderHyperbolamethod(
       cuts[i],
       N - cuts[J - i + 1]
     );
-  for (var i = J + 1; i > 0; i--)
+  for (var i = J; i > 0; i--)
     r.lineTo(cuts[i], N - cuts[J - i]).lineTo(cuts[i - 1], N - cuts[J - i]);
   r.lineTo(cuts[0], N - cuts[J]);
   r.fill();
@@ -105,11 +106,20 @@ window.customElements.define(
         "draw",
         layers.Canvas({
           update(config, ctx) {
-            renderHyperbolamethod(new render.Canvas(ctx), {
+            ctx.clearRect(0, 0, config.width, config.height);
+            let scale = new ScaledRender();
+            renderHyperbolamethod(scale, {
               N: 500,
               W: 10,
               J: 8,
             });
+
+            scale.applyScaled(
+              new render.Canvas(ctx),
+              config.width,
+              config.height,
+              { buffer: 10 }
+            );
           },
         })
       );

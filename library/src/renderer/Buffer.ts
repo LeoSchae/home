@@ -15,7 +15,7 @@ enum DrawOp {
   CH_FILLSTYLE,
 }
 
-export class Renderer2DBuffer implements Renderer2D {
+export default class Renderer2DBuffer implements Renderer2D {
   private data: any[] = [];
 
   get strokeStyle(): string {
@@ -102,7 +102,13 @@ export class Renderer2DBuffer implements Renderer2D {
     this.stroke();
     return this;
   }
-  applyOn(r: Renderer2D) {
+  applyWith(
+    r: Renderer2D,
+    opts?: { scale?: number; origin?: [number, number] }
+  ) {
+    let s = opts?.scale || 1,
+      [x0, y0] = opts?.origin || [0, 0];
+
     const data = this.data;
     let d;
     let i;
@@ -129,26 +135,26 @@ export class Renderer2DBuffer implements Renderer2D {
           r.fill();
           break;
         case DrawOp.LINE:
-          r.lineTo(data[++i], data[++i]);
+          r.lineTo(s * data[++i] + x0, s * data[++i] + y0);
           break;
         case DrawOp.ARC:
           r.arc(
-            data[++i],
-            data[++i],
-            data[++i],
+            s * data[++i] + x0,
+            s * data[++i] + y0,
+            s * data[++i],
             data[++i],
             data[++i],
             data[++i]
           );
           break;
         case DrawOp.MOVE:
-          r.moveTo(data[++i], data[++i]);
+          r.moveTo(s * data[++i] + x0, s * data[++i] + y0);
           break;
         case DrawOp.STROKE:
           r.stroke();
           break;
         case DrawOp.TEXTFILL:
-          r.fillText(data[++i], data[++i], data[++i]);
+          r.fillText(data[++i], s * data[++i] + x0, s * data[++i] + y0);
           break;
         case DrawOp.CLOSE:
           r.closePath();
