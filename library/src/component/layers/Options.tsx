@@ -35,11 +35,6 @@ export default function (): Layer<
     let list = <ul></ul>;
     optionsFrame.append(list);
 
-    config.hostElement.append(
-      <style __html={styles.css} />,
-      optionsFrame,
-      optionsButton
-    );
     config.attachToShaddow(
       <style __html={styles.css} />,
       optionsFrame,

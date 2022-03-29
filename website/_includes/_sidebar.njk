@@ -1,5 +1,5 @@
 <nav class="n-c">
-  <style>{% inline "navigation.pcss" %}</style>
+  <style>{% inline "sidebar.pcss" %}</style>
   <input id="nav-cbox" type="checkbox" checked="checked" style="display: none;" />
 
   <a href="{% urlCheck '/', collections.all %}"> Leo's Homepage </a>
@@ -14,7 +14,7 @@
     </svg>
   </label>
   {% navigation_html collections.all, {
-    list_classes: ["n-ul1", "n-ul2"],
-    item_classes: ["n-li1", "n-li2"]
+    list_classes: ["sb-ul1", "sb-ul2"],
+    item_classes: ["sb-li1", "sb-li2"]
   } %}
 </nav>

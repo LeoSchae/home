@@ -38,8 +38,12 @@ export function jsx(
   name: string,
   attrs: jsx.JSX.IntrinsicElements[""],
   ...children: any[]
-): HTMLElement | HTMLElement[] {
-  if (name === "") return children;
+): HTMLElement | DocumentFragment {
+  if (name === jsx.Fragment) {
+    let el = document.createDocumentFragment();
+    el.replaceChildren(...children);
+    return el;
+  }
   let el = document.createElement(name);
   attrs = attrs || {};
 

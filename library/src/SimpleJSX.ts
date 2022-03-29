@@ -33,12 +33,11 @@ export class XML {
 }
 
 export function jsx(
-  name: string | ((props: any, ...children: any) => XML),
-  props: { [key: string]: string | number },
+  name: string,
+  attributes: { [key: string]: string | number },
   ...children: any[]
 ): XML {
-  if (typeof name === "function") return name(props, ...children);
-  return new XML(name, props, ...children);
+  return new XML(name, attributes, ...children);
 }
 jsx.Fragment = "";
 
