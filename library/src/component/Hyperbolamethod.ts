@@ -3,6 +3,7 @@ import { ComplexScTr, drawCarthesian2DAxis } from "../canvas/axis";
 import * as layers from "./layers";
 import * as render from "@lib/renderer";
 import * as dom from "@lib/DomElement";
+import * as math from "@lib/modules/math";
 
 function download(
   content: string,
@@ -14,6 +15,64 @@ function download(
   link.setAttribute("download", name);
   link.href = data;
   link.click();
+}
+
+function renderHyperbolamethod(
+  r: render.Renderer2D,
+  data: { N: number; W: number; J: number }
+) {
+  let { N, J, W } = data;
+  let lNJ = Math.log(N / W) / J;
+  let cuts = [...new math.Range(0, J + 1)].map((i) => W * Math.exp(i * lNJ));
+
+  // Fill below
+  r.fillStyle = "#0000FF33";
+  r.strokeStyle = "#444444";
+  r.lineWidth = 1.5;
+  r.beginPath();
+  r.moveTo(cuts[0], N - cuts[0]).lineTo(cuts[0], N - cuts[J]);
+  for (var i = 1; i < cuts.length; i++)
+    r.lineTo(cuts[i - 1], N - cuts[J - i]).lineTo(cuts[i], N - cuts[J - i]);
+  r.lineTo(cuts[J], N - cuts[0]).closePath();
+  r.stroke();
+  r.fill();
+
+  // Lines inside
+  r.lineWidth = 1;
+  r.beginPath();
+  for (var i = 0; i < cuts.length; i++)
+    r.moveTo(cuts[i], N - cuts[0])
+      .lineTo(cuts[i], N - cuts[J - i])
+      .moveTo(cuts[0], N - cuts[i])
+      .lineTo(cuts[J - i], N - cuts[i]);
+  r.stroke();
+
+  // Boxes above;
+  r.beginPath();
+  r.fillStyle = "#FF000033";
+  r.lineWidth = 1.5;
+  r.moveTo(cuts[0], N - cuts[J]);
+  for (var i = 1; i < cuts.length; i++)
+    r.lineTo(cuts[i - 1], N - cuts[J - i + 1]).lineTo(
+      cuts[i],
+      N - cuts[J - i + 1]
+    );
+  for (var i = J + 1; i > 0; i--)
+    r.lineTo(cuts[i], N - cuts[J - i]).lineTo(cuts[i - 1], N - cuts[J - i]);
+  r.lineTo(cuts[0], N - cuts[J]);
+  r.fill();
+  r.stroke();
+
+  // Hyperbola
+  r.beginPath();
+  let steps = 100;
+  r.lineWidth = 2;
+  r.strokeStyle = "#000000";
+  for (let i of [...new math.Range(0, steps + 1)]) {
+    let v = Math.pow(N / W, i / steps);
+    r.lineTo(W * v, N - N / v);
+  }
+  r.stroke();
 }
 
 function draw(r: render.Renderer2D) {
@@ -46,7 +105,11 @@ window.customElements.define(
         "draw",
         layers.Canvas({
           update(config, ctx) {
-            draw(new render.Canvas(ctx));
+            renderHyperbolamethod(new render.Canvas(ctx), {
+              N: 500,
+              W: 10,
+              J: 8,
+            });
           },
         })
       );
@@ -60,7 +123,11 @@ window.customElements.define(
       });
       exportSVG.onclick = () => {
         let r = new render.SVG(config.width, config.height);
-        draw(r);
+        renderHyperbolamethod(r, {
+          N: 500,
+          W: 10,
+          J: 20,
+        });
         download(r.toXML(), "Subgroups.svg", "image/svg+xml");
       };
 
@@ -71,7 +138,11 @@ window.customElements.define(
       });
       exportTikZ.onclick = () => {
         let r = new render.TikZ(config.width, config.height);
-        let d = draw(r);
+        let d = renderHyperbolamethod(r, {
+          N: 500,
+          W: 10,
+          J: 20,
+        });
         download(r.toTeX(), "Subgroups.tikz", "text/plain");
       };
 

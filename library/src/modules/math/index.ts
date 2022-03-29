@@ -18,6 +18,22 @@ export const oo = {
 } as const;
 export type oo = typeof oo;
 
+export class Range {
+  constructor(
+    public start: number,
+    public end: number,
+    public step: number = 1
+  ) {}
+
+  *[Symbol.iterator]() {
+    let { start: v, step, end } = this;
+    while (v < end) {
+      yield v;
+      v += step;
+    }
+  }
+}
+
 /**
  * Function to convert different arguments to instances of the Complex class.
  * @param real
