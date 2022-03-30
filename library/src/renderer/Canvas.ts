@@ -1,4 +1,4 @@
-import type { Renderer2D, MeasureText } from "./";
+import { Renderer2D, MeasureText, TextAlign } from "./";
 
 const PI_2 = 2 * Math.PI;
 const _PI_2 = 0.5 / Math.PI;
@@ -65,15 +65,37 @@ export default class Canvas implements Renderer2D, MeasureText {
 
   measureText(text: string) {
     const tm = this._ctx.measureText(text);
+    let c = (this.fontAscent + this.fontDescent) / 2;
     return {
-      top: this.fontAscent,
-      bot: this.fontDescent,
+      top: c,
+      bot: c,
       left: tm.actualBoundingBoxLeft,
       right: tm.actualBoundingBoxRight,
     };
   }
 
-  fillText(text: string, x: number, y: number) {
+  textNode(text: string, x: number, y: number, align: TextAlign) {
+    let bl: CanvasTextBaseline = "middle",
+      al: CanvasTextAlign = "center";
+    switch (align & 0b1100) {
+      case TextAlign.T:
+        bl = "top";
+        break;
+      case TextAlign.B:
+        bl = "bottom";
+        break;
+    }
+    switch (align & 0b0011) {
+      case TextAlign.L:
+        al = "left";
+        break;
+      case TextAlign.R:
+        al = "right";
+        break;
+    }
+    console.log(bl, al);
+    this._ctx.textBaseline = bl;
+    this._ctx.textAlign = al;
     this._ctx.fillText(text, x, y);
     return this;
   }

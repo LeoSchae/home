@@ -21,7 +21,7 @@ export function strokeBounds(
     t = y - sprite.top,
     r = x + sprite.right,
     b = y + sprite.bot;
-  ctx.beginPath().lineTo(t, l).lineTo(t, r).lineTo(b, r).lineTo(b, l);
+  ctx.beginPath().lineTo(l, t).lineTo(r, t).lineTo(r, b).lineTo(l, b);
   ctx.closePath();
   ctx.stroke();
 }
@@ -55,7 +55,7 @@ export function TextSprite(
     left,
     right,
     draw: function (ctx: render.Renderer2D, x: number, y: number) {
-      ctx.fillText(this.text, x - this.dx, y);
+      ctx.textNode(this.text, x - this.dx, y);
     },
   };
   return sprite;

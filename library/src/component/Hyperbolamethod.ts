@@ -5,6 +5,7 @@ import * as render from "@lib/renderer";
 import * as dom from "@lib/DomElement";
 import * as math from "@lib/modules/math";
 import ScaledRender from "@lib/renderer/AutoScale";
+import { NumberOption } from "@lib/modules/layeredCanvas";
 
 function download(
   content: string,
@@ -20,15 +21,32 @@ function download(
 
 function renderHyperbolamethod(
   r: render.Renderer2D,
-  data: { N: number; W: number; J: number }
+  opts: {
+    N: number;
+    W: number;
+    J: number;
+    color?: {
+      fill?: string;
+      error?: string;
+      gridLine?: string;
+      hypLine?: string;
+    };
+  }
 ) {
-  let { N, J, W } = data;
+  let { N, J, W } = opts;
+  let {
+    fill = "#0000FF33",
+    error: errorFill = "#ffcc0033",
+    gridLine: gridFill = "#444444",
+    hypLine: hypFill = "#000000",
+  } = opts.color || {};
+
   let lNJ = Math.log(N / W) / J;
   let cuts = [...new math.Range(0, J + 1)].map((i) => W * Math.exp(i * lNJ));
 
   // Fill below
-  r.fillStyle = "#0000FF33";
-  r.strokeStyle = "#444444";
+  r.fillStyle = fill;
+  r.strokeStyle = gridFill;
   r.lineWidth = 1.5;
   r.beginPath();
   r.moveTo(cuts[0], N - cuts[0]).lineTo(cuts[0], N - cuts[J]);
@@ -50,7 +68,7 @@ function renderHyperbolamethod(
 
   // Boxes above;
   r.beginPath();
-  r.fillStyle = "#FF000033";
+  r.fillStyle = errorFill;
   r.lineWidth = 1.5;
   r.moveTo(cuts[0], N - cuts[J]);
   for (var i = 1; i < cuts.length; i++)
@@ -68,12 +86,16 @@ function renderHyperbolamethod(
   r.beginPath();
   let steps = 100;
   r.lineWidth = 2;
-  r.strokeStyle = "#000000";
+  r.strokeStyle = hypFill;
   for (let i of [...new math.Range(0, steps + 1)]) {
     let v = Math.pow(N / W, i / steps);
     r.lineTo(W * v, N - N / v);
   }
   r.stroke();
+
+  r.fillStyle = "#000000";
+  r.fontSize = 20;
+  r.textNode("asdasdasd", W, N - W, render.TextAlign.BL);
 }
 
 function draw(r: render.Renderer2D) {
@@ -99,20 +121,20 @@ window.customElements.define(
   "hyperbola-app",
   layers.LayeredComponent({
     connected(config) {
-      let tikz = new TikZ(config.width, config.height);
-      draw(tikz);
-      console.log(tikz.toTeX());
+      let state: Parameters<typeof renderHyperbolamethod>[1] = {
+        N: 100,
+        W: 10,
+        J: 10,
+        color: { hypLine: "#FF0000" },
+      };
+
       config.addLayer(
         "draw",
         layers.Canvas({
           update(config, ctx) {
             ctx.clearRect(0, 0, config.width, config.height);
             let scale = new ScaledRender();
-            renderHyperbolamethod(scale, {
-              N: 500,
-              W: 10,
-              J: 8,
-            });
+            renderHyperbolamethod(scale, state);
 
             scale.applyScaled(
               new render.Canvas(ctx),
@@ -125,6 +147,16 @@ window.customElements.define(
       );
 
       let options = config.addLayer("options", layers.Options());
+      let display = options.addOption(
+        new NumberOption(
+          "Cuts",
+          (s) => {
+            state.J = parseInt(s);
+            config.update("draw");
+          },
+          "" + state.J
+        )
+      );
       // Options
       let exportSVG = dom.Element("input", [], {
         type: "button",
@@ -133,11 +165,10 @@ window.customElements.define(
       });
       exportSVG.onclick = () => {
         let r = new render.SVG(config.width, config.height);
-        renderHyperbolamethod(r, {
-          N: 500,
-          W: 10,
-          J: 20,
-        });
+        let scale = new ScaledRender();
+        renderHyperbolamethod(scale, state);
+
+        scale.applyScaled(r, config.width, config.height, { buffer: 10 });
         download(r.toXML(), "Subgroups.svg", "image/svg+xml");
       };
 
@@ -148,11 +179,10 @@ window.customElements.define(
       });
       exportTikZ.onclick = () => {
         let r = new render.TikZ(config.width, config.height);
-        let d = renderHyperbolamethod(r, {
-          N: 500,
-          W: 10,
-          J: 20,
-        });
+        let scale = new ScaledRender();
+        renderHyperbolamethod(scale, state);
+
+        scale.applyScaled(r, config.width, config.height, { buffer: 10 });
         download(r.toTeX(), "Subgroups.tikz", "text/plain");
       };
 

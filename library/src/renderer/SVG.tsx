@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx, XML } from "../UnsafeXML";
-import type { Renderer2D } from ".";
+import { Renderer2D, TextAlign } from ".";
 
 const R2D = 180.0 / Math.PI;
 const PI2 = 2 * Math.PI;
@@ -91,9 +91,33 @@ export default class SVG implements Renderer2D {
     this.style.fontSize = fontSize;
   }
 
-  fillText(text: string, x: number, y: number) {
+  textNode(text: string, x: number, y: number, align: TextAlign = 0) {
+    let bl: "text-after-edge" | "text-before-edge" | "middle" = "middle",
+      al: "left" | "right" | "center" = "center";
+    switch (align & 0b1100) {
+      case TextAlign.T:
+        bl = "text-before-edge";
+        break;
+      case TextAlign.B:
+        bl = "text-after-edge";
+        break;
+    }
+    switch (align & 0b0011) {
+      case TextAlign.L:
+        al = "left";
+        break;
+      case TextAlign.R:
+        al = "right";
+        break;
+    }
     this.svg.append(
-      <text x={x} y={y} font-size={this.style.fontSize}>
+      <text
+        x={x}
+        y={y}
+        font-size={this.style.fontSize}
+        dominant-baseline={bl}
+        text-align={al}
+      >
         {text}
       </text>
     );

@@ -1,4 +1,4 @@
-import type { Renderer2D } from ".";
+import { Renderer2D, TextAlign } from ".";
 
 type PicStyle = {
   stroke: {
@@ -110,8 +110,27 @@ export default class TikZ implements Renderer2D {
     this.style.fontSize = fontSize;
   }
 
-  fillText(text: string, x: number, y: number) {
-    throw new Error("Not implemented");
+  textNode(text: string, x: number, y: number, align: TextAlign = 0) {
+    let anchor: string | undefined;
+    switch (align & 0b1100) {
+      case TextAlign.T:
+        anchor = "north";
+        break;
+      case TextAlign.B:
+        anchor = "south";
+        break;
+    }
+    switch (align & 0b0011) {
+      case TextAlign.L:
+        anchor = (anchor ? anchor + " " : "") + "west";
+        break;
+      case TextAlign.R:
+        anchor = (anchor ? anchor + " " : "") + "east";
+        break;
+    }
+    anchor = anchor || "center";
+
+    this.TeX += `\\node at(${x},${y}) [anchor=${anchor}]{${text}};`;
     return this;
   }
 

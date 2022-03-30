@@ -179,10 +179,10 @@ export function annotateCarthesian2DAxis(
           b = y0 + 3;
         ctx
           .beginPath()
-          .moveTo(t, l)
-          .lineTo(t, r)
-          .lineTo(b, r)
-          .lineTo(b, l)
+          .moveTo(l, t)
+          .lineTo(r, t)
+          .lineTo(r, b)
+          .lineTo(l, b)
           .closePath();
         ctx.fill();
         sprite.draw(ctx, x, y0 + sprite.top + gap);

@@ -1,4 +1,4 @@
-import type { Renderer2D } from "./";
+import type { Renderer2D, TextAlign } from "./";
 
 enum DrawOp {
   BEGIN,
@@ -8,7 +8,7 @@ enum DrawOp {
   CLOSE,
   STROKE,
   FILL,
-  TEXTFILL,
+  TEXTNODE,
   CH_LINEWIDTH,
   CH_FONTSIZE,
   CH_STROKESTYLE,
@@ -50,8 +50,8 @@ export default class Renderer2DBuffer implements Renderer2D {
   } {
     throw new Error("Method not implemented.");
   }
-  fillText(text: string, x: number, y: number) {
-    this.data.push(DrawOp.TEXTFILL, text, x, y);
+  textNode(text: string, x: number, y: number, align: TextAlign = 0) {
+    this.data.push(DrawOp.TEXTNODE, text, x, y, align);
     return this;
   }
   beginPath() {
@@ -153,8 +153,13 @@ export default class Renderer2DBuffer implements Renderer2D {
         case DrawOp.STROKE:
           r.stroke();
           break;
-        case DrawOp.TEXTFILL:
-          r.fillText(data[++i], s * data[++i] + x0, s * data[++i] + y0);
+        case DrawOp.TEXTNODE:
+          r.textNode(
+            data[++i],
+            s * data[++i] + x0,
+            s * data[++i] + y0,
+            data[++i]
+          );
           break;
         case DrawOp.CLOSE:
           r.closePath();
