@@ -23,7 +23,7 @@ export function Element<K extends keyof HTMLElementTagNameMap>(
   return el;
 }
 
-function deepChildren(el: HTMLElement, children: any[]) {
+function deepChildren(el: HTMLElement | DocumentFragment, children: any[]) {
   for (var c of children) {
     if (Array.isArray(c)) deepChildren(el, c);
     else el.append(c instanceof Node ? c : "" + c);
@@ -41,7 +41,7 @@ export function jsx(
 ): HTMLElement | DocumentFragment {
   if (name === jsx.Fragment) {
     let el = document.createDocumentFragment();
-    el.replaceChildren(...children);
+    deepChildren(el, children);
     return el;
   }
   let el = document.createElement(name);
@@ -69,7 +69,7 @@ export declare namespace jsx.JSX {
   type Element = HTMLElement;
   type IntrinsicElements = {
     [key: string]: {
-      [key: string]: string | number | (() => any) | undefined;
+      [key: string]: string | number | ((...args: any) => any) | undefined;
     } & {
       [key in keyof GlobalEventHandlers]?:
         | GlobalEventHandlers[key]

@@ -7,12 +7,6 @@ import * as render from "../renderer";
 import * as sprites from "../canvas/sprites";
 import { AsyncManager, wrap } from "../modules/Async";
 import { DragZoomHover } from "../modules/Interact";
-import {
-  ButtonOption,
-  ColorOption,
-  NumberOption,
-  RadioOption,
-} from "../modules/layeredCanvas";
 import * as math from "../modules/math";
 import { hyperbolicLine } from "../modules/math/draw";
 import * as layers from "./layers";
@@ -137,87 +131,79 @@ window.customElements.define(
 
       let options = config.addLayer("options", layers.Options());
 
-      options.addOption(
-        new ColorOption(
-          "Color",
-          (s) => {
-            appOptions.fill = s;
-            config.update();
-          },
-          appOptions.fill
-        )
-      );
-
-      options.addOption(
-        new NumberOption(
-          "Level",
-          (s) => {
-            let i = parseInt(s);
-            if (isNaN(i) || i < 0) return;
-            changeGroup(visual.group_type, i);
-          },
-          "" + visual.level
-        )
-      );
-
-      options.addOption(
-        new RadioOption(
-          "Group",
-          [
-            [math.congruenceSubgroups.Gamma_0.tex, consts.Gamma0],
-            [math.congruenceSubgroups.Gamma_1.tex, consts.Gamma1],
-            [math.congruenceSubgroups.Gamma.tex, consts.Gamma],
-          ],
-          (v) => {
-            let { Gamma_0, Gamma_1, Gamma } = math.congruenceSubgroups;
-            switch (v) {
-              case Gamma.tex:
-                changeGroup(Gamma, visual.level);
-                break;
-              case Gamma_0.tex:
-                changeGroup(Gamma_0, visual.level);
-                break;
-              case Gamma_1.tex:
-                changeGroup(Gamma_1, visual.level);
-                break;
-              default:
-                console.log("UNKNOWN GROUP TYPE" + v);
-                break;
-            }
-          },
-          visual.group_type.tex
-        )
-      );
-
-      options.addOption(manualSizing(config));
-
-      let exportSVG = dom.Element("input", [], {
-        type: "button",
-        value: "SVG",
-        title: "Export as SVG image",
+      options.add({
+        type: "color",
+        label: "Color",
+        onChange(s) {
+          appOptions.fill = s;
+          config.update();
+        },
+        default: appOptions.fill,
       });
-      exportSVG.onclick = () => {
-        let r = new render.SVG(config.width, config.height);
-        let d = bgDraw(r);
-        while (!d.next().done) continue;
-        download(r.toXML(), "Subgroups.svg", "image/svg+xml");
-      };
 
-      let exportTikZ = dom.Element("input", [], {
-        type: "button",
-        value: "TikZ",
-        title: "Export as TikZ image for use in LaTeX",
+      options.add({
+        type: "number",
+        label: "Level",
+        onChange(level) {
+          changeGroup(visual.group_type, level);
+        },
+        default: visual.level,
       });
-      exportTikZ.onclick = () => {
-        let r = new render.TikZ(config.width, config.height);
-        let d = bgDraw(r);
-        while (!d.next().done) continue;
-        download(r.toTeX(), "Subgroups.tikz", "text/plain");
-      };
 
-      options.addOption({
-        label: document.createTextNode("Export"),
-        input: dom.Element("span", [exportSVG, exportTikZ]),
+      options.add({
+        type: "radio",
+        label: "Group",
+        values: [
+          {
+            name: "Gamma_0",
+            label: dom.Element("span", { __html: consts.Gamma0 }),
+          },
+          {
+            name: "Gamma_1",
+            label: dom.Element("span", { __html: consts.Gamma1 }),
+          },
+          {
+            name: "Gamma",
+            label: dom.Element("span", { __html: consts.Gamma }),
+          },
+        ],
+        onChange(groupName) {
+          if (!(groupName in math.congruenceSubgroups))
+            throw new Error("Unknown congruence subgroup: " + groupName);
+          changeGroup(
+            (math.congruenceSubgroups as any)[groupName],
+            visual.level
+          );
+        },
+      });
+
+      options.add(manualSizing(config));
+
+      options.add({
+        type: "multiButton",
+        label: "Export as",
+        values: [
+          { name: "SVG", label: "SVG" },
+          { name: "TikZ", label: "TikZ" },
+        ],
+        onClick(name) {
+          let r: render.SVG | render.TikZ;
+          let fileName: string = "Subgroups";
+          let dataType: string;
+          if (name == "SVG") {
+            r = new render.SVG(config.width, config.height);
+            fileName += ".svg";
+            dataType = "image/svg+xml";
+          } else if (name == "TikZ") {
+            r = new render.TikZ(config.width, config.height);
+            fileName += ".tikz";
+            dataType = "text/plain";
+          } else throw new Error("Unknown format");
+
+          let d = bgDraw(r);
+          while (!d.next().done) continue;
+          download(r.toFileString(), fileName, dataType);
+        },
       });
 
       function* bgDraw(ctx: render.Renderer2D) {

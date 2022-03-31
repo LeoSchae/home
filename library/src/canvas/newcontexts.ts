@@ -1,5 +1,3 @@
-import { HyperbolicContext } from "@lib/modules/painter";
-
 type Tool<O> = {
   [key: string]: (this: O, ...args: any) => unknown;
 };

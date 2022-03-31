@@ -213,4 +213,7 @@ export default class TikZ implements Renderer2D {
   toTeX() {
     return this.TeX + "\\end{tikzpicture}";
   }
+  toFileString() {
+    return this.toTeX();
+  }
 }

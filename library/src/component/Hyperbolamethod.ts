@@ -1,11 +1,7 @@
-import TikZ from "@lib/renderer/TikZ";
-import { ComplexScTr, drawCarthesian2DAxis } from "../canvas/axis";
 import * as layers from "./layers";
 import * as render from "@lib/renderer";
-import * as dom from "@lib/DomElement";
 import * as math from "@lib/modules/math";
 import ScaledRender from "@lib/renderer/AutoScale";
-import { NumberOption } from "@lib/modules/layeredCanvas";
 
 function download(
   content: string,
@@ -147,48 +143,43 @@ window.customElements.define(
       );
 
       let options = config.addLayer("options", layers.Options());
-      let display = options.addOption(
-        new NumberOption(
-          "Cuts",
-          (s) => {
-            state.J = parseInt(s);
-            config.update("draw");
-          },
-          "" + state.J
-        )
-      );
-      // Options
-      let exportSVG = dom.Element("input", [], {
-        type: "button",
-        value: "SVG",
-        title: "Export as SVG image",
+      options.add({
+        type: "number",
+        label: "Cuts",
+        onChange: (x) => {
+          state.J = x;
+          config.update();
+        },
+        default: state.J,
       });
-      exportSVG.onclick = () => {
-        let r = new render.SVG(config.width, config.height);
-        let scale = new ScaledRender();
-        renderHyperbolamethod(scale, state);
 
-        scale.applyScaled(r, config.width, config.height, { buffer: 10 });
-        download(r.toXML(), "Subgroups.svg", "image/svg+xml");
-      };
+      options.add({
+        type: "multiButton",
+        label: "Export as",
+        values: [
+          { name: "SVG", label: "SVG" },
+          { name: "TikZ", label: "TikZ" },
+        ],
+        onClick(name) {
+          let r: render.SVG | render.TikZ;
+          let fileName: string = "Subgroups";
+          let dataType: string;
+          if (name == "SVG") {
+            r = new render.SVG(config.width, config.height);
+            fileName += ".svg";
+            dataType = "image/svg+xml";
+          } else if (name == "TikZ") {
+            r = new render.TikZ(config.width, config.height);
+            fileName += ".tikz";
+            dataType = "text/plain";
+          } else throw new Error("Unknown format");
 
-      let exportTikZ = dom.Element("input", [], {
-        type: "button",
-        value: "TikZ",
-        title: "Export as TikZ image for use in LaTeX",
-      });
-      exportTikZ.onclick = () => {
-        let r = new render.TikZ(config.width, config.height);
-        let scale = new ScaledRender();
-        renderHyperbolamethod(scale, state);
+          let scale = new ScaledRender();
+          renderHyperbolamethod(scale, state);
+          scale.applyScaled(r, config.width, config.height, { buffer: 10 });
 
-        scale.applyScaled(r, config.width, config.height, { buffer: 10 });
-        download(r.toTeX(), "Subgroups.tikz", "text/plain");
-      };
-
-      options.addOption({
-        label: document.createTextNode("Export"),
-        input: dom.Element("span", [exportSVG, exportTikZ]),
+          download(r.toFileString(), fileName, dataType);
+        },
       });
     },
   })

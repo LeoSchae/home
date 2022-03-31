@@ -1,15 +1,131 @@
 /** @jsx jsx */
+/** @jsxFrag jsx.Fragment */
 import { jsx } from "@lib/DomElement";
 import type { LayeredConfig, Layer } from ".";
-import { Domain } from "domain";
 import styles from "./Options.css";
 
-console.log(styles.class);
+const OPTION_TYPES = {
+  number: function (options: {
+    label: string;
+    onChange?: (n: number) => any;
+    default?: number;
+  }): {
+    label: Node;
+    input: Node;
+  } {
+    const changed = options.onChange;
+    return {
+      label: <label>{options.label}</label>,
+      input: (
+        <input
+          type="number"
+          oninput={(ev: Event) => {
+            changed?.(parseInt((ev as any).target.value));
+          }}
+          {...(options.default ? { value: options.default } : {})}
+        ></input>
+      ),
+    };
+  },
+  color: function (options: {
+    label: string;
+    onChange?: (n: string) => any;
+    default?: string;
+  }) {
+    let changed = options.onChange;
+    return {
+      label: <label>{options.label}</label>,
+      input: (
+        <input
+          type="color"
+          oninput={(ev: Event) => {
+            changed?.((ev as any).target.value);
+          }}
+          {...(options.default ? { value: options.default } : {})}
+        ></input>
+      ),
+    };
+  },
+  radio: function (options: {
+    label: string;
+    values: { name: string; label: string | Node }[];
+    onChange?: (name: string) => any;
+    default?: string;
+  }) {
+    let changed = options.onChange;
+    return {
+      label: <label>{options.label}</label>,
 
-export default function (): Layer<
-  undefined,
-  { addOption(option: { label: Node; input: Node }): unknown }
-> {
+      input: (
+        <>
+          {...options.values.map((opt) => (
+            <>
+              <label>
+                {opt.label}
+                <input
+                  type="radio"
+                  name={options.label}
+                  value={opt.name}
+                  oninput={(ev: Event) => {
+                    changed?.((ev as any).target.value);
+                  }}
+                />
+              </label>
+              <span style="display:inline-block;width:1em;" />
+            </>
+          ))}
+        </>
+      ),
+    };
+  },
+  multiButton: function (options: {
+    label: string;
+    values: { name: string; label: string | Node }[];
+    onClick?: (name: string) => any;
+    default?: string;
+  }) {
+    let clicked = options.onClick;
+    return {
+      label: <label>{options.label}</label>,
+
+      input: (
+        <>
+          {...options.values.map((opt) => (
+            <button
+              value={opt.name}
+              onclick={(ev: Event) => {
+                clicked?.((ev as any).target.value);
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </>
+      ),
+    };
+  },
+  custom: function (options: { label: Node | string; input: Node }) {
+    return {
+      label:
+        typeof options.label === "string" ? (
+          <span>{options.label}</span>
+        ) : (
+          options.label
+        ),
+      input: options.input,
+    };
+  },
+};
+
+type Options = {
+  /** @deprecated */
+  addOption(option: { label: Node; input: Node }): unknown;
+  add<K extends keyof typeof OPTION_TYPES>(
+    option: { type: K } & Parameters<typeof OPTION_TYPES[K]>[0]
+  ): unknown;
+};
+
+export default function (): Layer<undefined, Options> {
   return (config: LayeredConfig) => {
     let optionsFrame = (
       <div class={styles.class.container}>
@@ -48,11 +164,19 @@ export default function (): Layer<
           </li>
         );
       },
+      add<K extends keyof typeof OPTION_TYPES>(
+        option: { type: K } & Parameters<typeof OPTION_TYPES[K]>[0]
+      ) {
+        let opt = OPTION_TYPES[option.type](option as any);
+        this.addOption(opt);
+      },
     };
   };
 }
 
-export function manualSizing(config: LayeredConfig) {
+export function manualSizing(
+  config: LayeredConfig
+): Parameters<Options["add"]>[0] {
   let x: HTMLInputElement, y: HTMLInputElement;
   let inputs: HTMLElement, auto: HTMLElement, manual: HTMLElement;
   let observer = new ResizeObserver(() => {
@@ -123,5 +247,9 @@ export function manualSizing(config: LayeredConfig) {
 
   inputs = <span>{auto}</span>;
 
-  return { label: document.createTextNode("Change Size"), input: inputs };
+  return {
+    type: "custom",
+    label: "Change Size",
+    input: inputs,
+  };
 }
