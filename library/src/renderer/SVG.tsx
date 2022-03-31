@@ -34,6 +34,10 @@ export default class SVG implements Renderer2D {
     fontSize: 13,
   };
 
+  private round(x: number) {
+    return Math.round(x * 1000) / 1000;
+  }
+
   constructor(width: number, height: number) {
     this.svg = (
       <svg
@@ -56,7 +60,7 @@ export default class SVG implements Renderer2D {
       fillStyle = fillStyle.slice(0, 7);
 
       if (op === 1.0) delete fill["fill-opacity"];
-      else fill["fill-opacity"] = op;
+      else fill["fill-opacity"] = Math.round(1000 * op) / 1000;
     }
     fill.fill = fillStyle;
   }
@@ -72,7 +76,7 @@ export default class SVG implements Renderer2D {
       strokeStyle = strokeStyle.slice(0, 7);
 
       if (opacity === 1.0) delete stroke["stroke-opacity"];
-      else stroke["stroke-opacity"] = opacity;
+      else stroke["stroke-opacity"] = Math.round(1000 * opacity) / 1000;
     }
     stroke.stroke = strokeStyle;
   }
@@ -110,10 +114,12 @@ export default class SVG implements Renderer2D {
         al = "right";
         break;
     }
+    let rounded = this.round;
+
     this.svg.append(
       <text
-        x={x}
-        y={y}
+        x={rounded(x)}
+        y={rounded(y)}
         font-size={this.style.fontSize}
         dominant-baseline={bl}
         text-align={al}
@@ -129,11 +135,14 @@ export default class SVG implements Renderer2D {
     return this;
   }
   moveTo(x: number, y: number) {
-    this._path = (this._path || "") + `M${x} ${y}`;
+    let rounded = this.round;
+    this._path = (this._path || "") + `M${rounded(x)} ${rounded(y)}`;
     return this;
   }
   lineTo(x: number, y: number) {
-    this._path = (this._path || `M ${x} ${y}`) + `L${x} ${y}`;
+    if (!this._path) return this.moveTo(x, y);
+    let rounded = this.round;
+    this._path += `L${rounded(x)} ${rounded(y)}`;
     return this;
   }
   closePath() {
@@ -172,13 +181,14 @@ export default class SVG implements Renderer2D {
     let ex = x + radius * Math.cos(endAngle),
       ey = y + radius * Math.sin(endAngle);
 
-    this._path = (this._path || `M ${sx} ${sy}`) + `L ${sx} ${sy}`;
-
     let short = delta <= 0.5 == cw;
 
-    this._path += `A ${radius} ${radius} 0 ${short ? 0 : 1} ${
+    let rounded = this.round;
+    this.lineTo(sx, sy);
+
+    this._path += `A ${rounded(radius)} ${rounded(radius)} 0 ${short ? 0 : 1} ${
       cw ? 1 : 0
-    } ${ex} ${ey}`;
+    } ${rounded(ex)} ${rounded(ey)}`;
     return this;
   }
   stroke() {

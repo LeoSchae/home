@@ -29,6 +29,10 @@ export default class TikZ implements Renderer2D {
     fontSize: 13,
   };
 
+  private round(x: number) {
+    return Math.round(x * 1000) / 1000;
+  }
+
   constructor(width: number, height: number) {
     this.TeX =
       `\\begin{tikzpicture}[x=1pt,y=-1pt]%\n` +
@@ -130,7 +134,11 @@ export default class TikZ implements Renderer2D {
     }
     anchor = anchor || "center";
 
-    this.TeX += `\\node at(${x},${y}) [anchor=${anchor}]{${text}};`;
+    let rounded = this.round;
+
+    this.TeX += `\\node at(${rounded(x)},${rounded(
+      y
+    )}) [anchor=${anchor}]{${text}};`;
     return this;
   }
 
@@ -139,12 +147,14 @@ export default class TikZ implements Renderer2D {
     return this;
   }
   moveTo(x: number, y: number) {
-    this.path = (this.path || "") + ` (${x},${y})`;
+    let rounded = this.round;
+    this.path = (this.path || "") + ` (${rounded(x)},${rounded(y)})`;
     return this;
   }
   lineTo(x: number, y: number) {
-    let path = this.path;
-    this.path = (path ? path + " -- " : " ") + `(${x}, ${y})`;
+    if (!this.path) return this.moveTo(x, y);
+    let rounded = this.round;
+    this.path += ` -- (${rounded(x)}, ${rounded(y)})`;
     return this;
   }
   closePath() {
@@ -178,7 +188,10 @@ export default class TikZ implements Renderer2D {
     if (!cw && startAngle < endAngle) endAngle -= 1;
 
     this.lineTo(sx, sy);
-    this.path += ` arc(${startAngle * 360}:${endAngle * 360}:${radius})`;
+    let rounded = this.round;
+    this.path += ` arc(${rounded(startAngle * 360)}:${rounded(
+      endAngle * 360
+    )}:${rounded(radius)})`;
     return this;
   }
   stroke() {
