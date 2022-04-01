@@ -7,7 +7,7 @@ export enum TextAlign {
   C = 0b0000,
   T = 0b1000,
   L = 0b0010,
-  R = 0b1101,
+  R = 0b0001,
   B = 0b0100,
   TL = 0b1010,
   TR = 0b1001,

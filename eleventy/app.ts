@@ -28,7 +28,7 @@ import Inline from "./plugins/inline";
 
       eleventyConfig.addPlugin(ESBuild.EleventyPlugin, {
         build: {
-          //minify: false,
+          minify: false,
           sourcemap: "inline",
         },
         plugins: [

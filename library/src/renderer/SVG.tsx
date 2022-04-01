@@ -96,11 +96,11 @@ export default class SVG implements Renderer2D {
   }
 
   textNode(text: string, x: number, y: number, align: TextAlign = 0) {
-    let bl: "text-after-edge" | "text-before-edge" | "middle" = "middle",
-      al: "left" | "right" | "center" = "center";
+    let bl: "text-after-edge" | "hanging" | "middle" = "middle",
+      al: "start" | "end" | "middle" = "middle";
     switch (align & 0b1100) {
       case TextAlign.T:
-        bl = "text-before-edge";
+        bl = "hanging";
         break;
       case TextAlign.B:
         bl = "text-after-edge";
@@ -108,10 +108,10 @@ export default class SVG implements Renderer2D {
     }
     switch (align & 0b0011) {
       case TextAlign.L:
-        al = "left";
+        al = "start";
         break;
       case TextAlign.R:
-        al = "right";
+        al = "end";
         break;
     }
     let rounded = this.round;
@@ -121,8 +121,9 @@ export default class SVG implements Renderer2D {
         x={rounded(x)}
         y={rounded(y)}
         font-size={this.style.fontSize}
+        font-family="Times New Roman"
         dominant-baseline={bl}
-        text-align={al}
+        text-anchor={al}
       >
         {text}
       </text>

@@ -83,7 +83,7 @@ window.customElements.define(
               scale: 1,
             });
 
-            let fs = 9;
+            let fs = 10;
             r.fontSize = fs;
             let Q = bestQ(pr.scale, fs);
 

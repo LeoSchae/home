@@ -35,7 +35,8 @@ export default class TikZ implements Renderer2D {
 
   constructor(width: number, height: number) {
     this.TeX =
-      `\\begin{tikzpicture}[x=1pt,y=-1pt]%\n` +
+      `\\begin{tikzpicture}[x=1pt,y=-1pt,every node/.style={inner sep=0,outer sep=0}]%\n` +
+      `\\fontfamily{ptm}\\selectfont%\n` +
       `\\useasboundingbox (0,0) rectangle (${width},${height});%\n` +
       `\\clip (0,0) rectangle (${width},${height});%\n`;
   }
@@ -138,7 +139,9 @@ export default class TikZ implements Renderer2D {
 
     this.TeX += `\\node at(${rounded(x)},${rounded(
       y
-    )}) [anchor=${anchor}]{${text}};`;
+    )}) [anchor=${anchor}]{\\fontsize{${this.style.fontSize}pt}{${
+      this.style.fontSize
+    }pt}\\selectfont\\vphantom{Og}${text.replace("\\", "\\textbackslash{}")}};`;
     return this;
   }
 

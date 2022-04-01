@@ -91,7 +91,47 @@ function renderHyperbolamethod(
 
   r.fillStyle = "#000000";
   r.fontSize = 20;
-  r.textNode("asdasdasd", W, N - W, render.TextAlign.BL);
+  r.textNode("Das ist ein text-node test!!!", W, N - W, render.TextAlign.BL);
+
+  function xAt(x: number, y: number) {
+    r.beginPath()
+      .moveTo(x - 1, y - 1)
+      .lineTo(x + 1, y + 1)
+      .moveTo(x + 1, y - 1)
+      .lineTo(x - 1, y + 1)
+      .stroke();
+  }
+
+  let skip = 5;
+  let x = N / 2;
+  let y = 10;
+  xAt(x, y);
+  r.textNode("center", x, y, render.TextAlign.C);
+  y += skip;
+  xAt(x, y);
+  r.textNode("left", x, y, render.TextAlign.L);
+  y += skip;
+  xAt(x, y);
+  r.textNode("right", x, y, render.TextAlign.R);
+  y += skip;
+  xAt(x, y);
+  r.textNode("top", x, y, render.TextAlign.T);
+  y += skip;
+  xAt(x, y);
+  r.textNode("bottom", x, y, render.TextAlign.B);
+  y += skip;
+  xAt(x, y);
+  r.textNode("top left", x, y, render.TextAlign.TL);
+  y += skip;
+  xAt(x, y);
+  r.textNode("top right", x, y, render.TextAlign.TR);
+  y += skip;
+  xAt(x, y);
+  r.textNode("bottom left", x, y, render.TextAlign.BL);
+  y += skip;
+  xAt(x, y);
+  r.textNode("bottom right", x, y, render.TextAlign.BR);
+  y += skip;
 }
 
 function draw(r: render.Renderer2D) {
@@ -162,7 +202,7 @@ window.customElements.define(
         ],
         onClick(name) {
           let r: render.SVG | render.TikZ;
-          let fileName: string = "Subgroups";
+          let fileName: string = "Hyperbola";
           let dataType: string;
           if (name == "SVG") {
             r = new render.SVG(config.width, config.height);

@@ -21,6 +21,7 @@ export default class Canvas implements Renderer2D, MeasureText {
     this._ctx = ctx;
     this.width = width === undefined ? ctx.canvas.width : width;
     this.height = height === undefined ? ctx.canvas.height : height;
+    this.fontSize = 13;
   }
 
   get lineWidth() {
@@ -36,14 +37,10 @@ export default class Canvas implements Renderer2D, MeasureText {
   }
   set fontSize(fontSize: number) {
     this._ctx.textBaseline = "alphabetic";
-    this._ctx.font = fontSize + "px Serif";
+    this._ctx.font = fontSize + "px Times New Roman";
     this._fontSize = fontSize;
     const tm = this._ctx.measureText("1ATOgjp");
-    this.fontAscent =
-      tm.fontBoundingBoxAscent ||
-      tm.actualBoundingBoxAscent +
-        0.15 * tm.actualBoundingBoxAscent +
-        0.15 * tm.actualBoundingBoxDescent;
+    this.fontAscent = tm.fontBoundingBoxAscent || tm.actualBoundingBoxAscent;
     this.fontDescent = tm.fontBoundingBoxDescent || tm.actualBoundingBoxDescent;
   }
 
@@ -67,8 +64,8 @@ export default class Canvas implements Renderer2D, MeasureText {
     const tm = this._ctx.measureText(text);
     let c = (this.fontAscent + this.fontDescent) / 2;
     return {
-      top: c,
-      bot: c,
+      top: c * 1.3,
+      bot: c * 1,
       left: tm.actualBoundingBoxLeft,
       right: tm.actualBoundingBoxRight,
     };
@@ -93,7 +90,6 @@ export default class Canvas implements Renderer2D, MeasureText {
         al = "right";
         break;
     }
-    console.log(bl, al);
     this._ctx.textBaseline = bl;
     this._ctx.textAlign = al;
     this._ctx.fillText(text, x, y);
