@@ -14,9 +14,8 @@ import * as consts from "./SubgroupsWC.const";
 import * as dom from "../DomElement";
 import katex from "katex";
 import { manualSizing } from "./layers/Options";
-import test from "../test";
 
-test();
+import popupLayer from "./layers/Popup";
 
 function download(
   content: string,
@@ -107,6 +106,8 @@ window.customElements.define(
         });
       };
 
+      let popup = config.addLayer("popup", popupLayer());
+
       /**
        * Events for the canvas
        */
@@ -120,6 +121,7 @@ window.customElements.define(
           config.update();
         },
         (pos: [number, number] | null) => {
+          if (pos) popup.move(pos[0], pos[1]);
           visual.mouse = pos;
           config.update("fg"); // only fg update
         }
@@ -153,6 +155,7 @@ window.customElements.define(
       options.add({
         type: "radio",
         label: "Group",
+        default: "Gamma_1",
         values: [
           {
             name: "Gamma_0",
@@ -251,22 +254,6 @@ window.customElements.define(
                 [new render.Canvas(ctx)],
                 asyncManager.getNew("bgDraw")
               )
-              /*.then(() => {
-                cachedBG = {
-                  nw: visual.projection.invert([0, 0]),
-                  se: visual.projection.invert([config.width, config.height]),
-                  use: false,
-                };
-                cachedCanvas.width = ctx.canvas.width;
-                cachedCanvas.height = ctx.canvas.height;
-                let c = cachedCanvas.getContext(
-                  "2d"
-                ) as CanvasRenderingContext2D;
-                c.fillStyle = "#FFFFFF";
-                c.fillRect(0, 0, config.width, config.height);
-                c.drawImage(ctx.canvas, 0, 0);
-                config.update("fg");
-              })*/
               .catch(() => {});
           },
         })
@@ -279,17 +266,6 @@ window.customElements.define(
           update: (config, ctx) => {
             let r = new render.Canvas(ctx, config.width, config.height);
             ctx.clearRect(0, 0, config.width, config.height);
-
-            /*if (cachedBG && cachedBG.use && false) {
-              ctx.globalAlpha = 0.5;
-
-              let nw = visual.projection.project(cachedBG.nw);
-              let se = visual.projection.project(cachedBG.se);
-              let w = se[0] - nw[0],
-                h = se[1] - nw[1];
-              ctx.drawImage(cachedCanvas, nw[0], nw[1], w, h);
-              ctx.globalAlpha = 1;
-            }*/
 
             let annotationFS = 9;
             r.fontSize = annotationFS;
@@ -312,11 +288,18 @@ window.customElements.define(
 
             let { mouse, projection, domain } = visual;
 
+            if (mouse === null) popup.set();
+
             if (mouse != null) {
               const m = math.congruenceSubgroups.Domain1.findCosetOf(
                 projection.invert(mouse)
               );
-              if (m !== undefined) {
+
+              if (m === undefined) popup.set();
+              else {
+                popup.set(katex.renderToString(m.toTeX()));
+                popup.move(mouse[0], mouse[1]);
+
                 r.fillStyle = "#CCCCEEAA";
                 r.beginPath();
                 for (let i = 0; i < domain.length; i++) {
@@ -331,6 +314,14 @@ window.customElements.define(
                 r.fill();
                 r.stroke();
                 r.fillStyle = "#000000";
+
+                let [a, b, c, d] = m.m;
+                /*console.log(
+                  (2 * (c * c + d * d) * (a * c + b * d) +
+                    c * d * (b * c + a * d)) /
+                    (c * c * c * c + d * d * d * d + c * c * d * d) /
+                    2
+                );*/
 
                 let p = m.m[0],
                   q = m.m[2];

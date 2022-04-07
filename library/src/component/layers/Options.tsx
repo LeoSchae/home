@@ -69,6 +69,7 @@ const OPTION_TYPES = {
                   oninput={(ev: Event) => {
                     changed?.((ev as any).target.value);
                   }}
+                  {...(opt.name === options.default ? { checked: "" } : {})}
                 />
               </label>
               <span style="display:inline-block;width:1em;" />

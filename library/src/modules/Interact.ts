@@ -39,6 +39,7 @@ export class DragZoomHover {
   };
   private move = (e: PointerEvent) => {
     const { pointerId, offsetX: x, offsetY: y } = e;
+
     if (this.state.length === 0) {
       this.onHover([x, y]);
       return;
@@ -66,12 +67,12 @@ export class DragZoomHover {
       this.onDrag(drag);
       this.onZoom(dNew / dOld, [0.5 * (x + s2.x), 0.5 * (y + s2.y)]);
     }
+
     state.x = x;
     state.y = y;
   };
   private up = (e: PointerEvent) => {
     if (e.pointerType == "mouse" && e.button != 0) return;
-
     const { pointerId, offsetX: x, offsetY: y } = e;
     let ind = this.state.findIndex(({ id }) => id === pointerId);
     this.state.splice(ind, 1);

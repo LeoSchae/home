@@ -239,7 +239,7 @@ export class Moebius implements TeXable {
    * @returns
    */
   toTeX() {
-    return `\\begin{pmatrix}${this.m[0]}&${this.m[1]}\\${this.m[2]}&${this.m[3]}\\end{pmatrix}`;
+    return `\\begin{pmatrix}${this.m[0]}&${this.m[1]}\\\\ ${this.m[2]}&${this.m[3]}\\end{pmatrix}`;
   }
 }
 
