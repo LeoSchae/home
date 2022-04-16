@@ -5,7 +5,7 @@ import {
 } from "../canvas/axis";
 import * as render from "../renderer";
 import * as sprites from "../canvas/sprites";
-import { AsyncManager, wrap } from "../modules/Async";
+import * as asyncLib from "../modules/Async";
 import { DragZoomHover } from "../modules/Interact";
 import * as math from "../modules/math";
 import { hyperbolicLine } from "../modules/math/draw";
@@ -82,12 +82,13 @@ window.customElements.define(
       );
       config.attachToShaddow(info);
 
-      let asyncManager = new AsyncManager<"group" | "bgDraw">();
+      let asyncManager = new asyncLib.AsyncManager<"group" | "bgDraw">();
 
       let changeGroup = (
         newGroup: math.congruenceSubgroups.CongruenceSubgroup,
         newLevel: number
       ) => {
+        asyncManager.abortAll("group");
         let p = newGroup.cosetRepresentativesAsync(
           newLevel,
           asyncManager.getNew("group")
@@ -102,6 +103,7 @@ window.customElements.define(
 
           config.update();
         }).catch((e) => {
+          console.log(e);
           if (e !== "aborted") console.log(e);
         });
       };
@@ -231,13 +233,6 @@ window.customElements.define(
         }
       }
 
-      var cachedBG: null | {
-        nw: math.Complex;
-        se: math.Complex;
-        use: boolean;
-      } = null;
-      var cachedCanvas = document.createElement("canvas");
-
       // background canvas
       config.addLayer(
         "bg",
@@ -245,10 +240,9 @@ window.customElements.define(
           update: (config, ctx) => {
             ctx?.clearRect(0, 0, config.width, config.height);
             asyncManager.abortAll("bgDraw");
-            if (cachedBG) cachedBG.use = true;
 
-            wrap
-              .callWrapped(
+            asyncLib
+              .callAsync(
                 null,
                 bgDraw,
                 [new render.Canvas(ctx)],
@@ -288,17 +282,18 @@ window.customElements.define(
 
             let { mouse, projection, domain } = visual;
 
-            if (mouse === null) popup.set();
+            if (mouse === null) popup.show(false);
 
             if (mouse != null) {
               const m = math.congruenceSubgroups.Domain1.findCosetOf(
                 projection.invert(mouse)
               );
 
-              if (m === undefined) popup.set();
+              if (m === undefined) popup.show(false);
               else {
-                popup.set(katex.renderToString(m.toTeX()));
+                popup.show();
                 popup.move(mouse[0], mouse[1]);
+                katex.render(m.toTeX(), popup.container);
 
                 r.fillStyle = "#CCCCEEAA";
                 r.beginPath();

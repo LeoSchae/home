@@ -1,5 +1,5 @@
 // @ts-ignore
-import Eleventy, { EleventyRenderPlugin } from "@11ty/eleventy/src/Eleventy";
+import Eleventy from "@11ty/eleventy/src/Eleventy";
 import * as ESBuild from "./plugins/esbuild";
 import * as PostCSS from "./plugins/postcss";
 import * as Logging from "./plugins/logging";
@@ -12,19 +12,22 @@ import Inline from "./plugins/inline";
   let eleventy = new Eleventy("./website/", "./_build", {
     config: function (eleventyConfig: any) {
       (global as any).eleveventy = eleventyConfig;
-
       eleventyConfig.setWatchJavaScriptDependencies(false);
 
+      eleventyConfig.addWatchTarget("./library/", "./inline/");
+
+      // Passthrough
       eleventyConfig.addPassthroughCopy("website/fonts/");
       eleventyConfig.addPassthroughCopy("website/favicon.svg");
+
+      // Template formats
       eleventyConfig.setTemplateFormats(["njk", "md", "pcss", "ts", "tsx"]);
 
       eleventyConfig.addPlugin(Logging.EleventyPlugin, {});
 
       eleventyConfig.addPlugin(Inline, { inherit: ["pcss", "ts"] });
-      eleventyConfig.addPlugin(Navigation, {});
 
-      eleventyConfig.addWatchTarget("./library/", "./inline/");
+      eleventyConfig.addPlugin(Navigation, {});
 
       eleventyConfig.addPlugin(ESBuild.EleventyPlugin, {
         build: {

@@ -1,4 +1,4 @@
-import { AsyncOptions, DefaultAsyncOptions, wrap } from "../Async";
+import { AsyncOptions, DefaultAsyncOptions, forward, wrap } from "../Async";
 
 export enum MathType {
   Infinity = "infinity",
@@ -291,7 +291,7 @@ export namespace congruenceSubgroups {
     }
 
     /**
-     * ! Internal function !
+     * @internal
      * Find coset representatives.
      * The function yields multiple times. The yields are either ignored or used to
      * create a non-blocking async function.
@@ -343,13 +343,9 @@ export namespace congruenceSubgroups {
      * @param level The level of the group.
      * @returns The list of cosetRepresentatives.
      */
-    cosetRepresentatives(level: number): Moebius[] {
-      let generator = this._cosetRepresentatives(level);
-      let it;
-      do it = generator.next();
-      while (!it.done);
-      return it.value;
-    }
+    cosetRepresentatives = forward.sync<
+      CongruenceSubgroup["_cosetRepresentatives"]
+    >("_cosetRepresentatives");
 
     /**
      * Get a list of cosetRepresentatives.
@@ -359,12 +355,9 @@ export namespace congruenceSubgroups {
      * @param ao The AsyncOptions to use.
      * @returns A Promise for the list of coset representatives.
      */
-    async cosetRepresentativesAsync(
-      level: number,
-      ao: AsyncOptions = DefaultAsyncOptions()
-    ): Promise<Moebius[]> {
-      return wrap.callWrapped(this, this._cosetRepresentatives, [level], ao);
-    }
+    cosetRepresentativesAsync = forward.async<
+      CongruenceSubgroup["_cosetRepresentatives"]
+    >("_cosetRepresentatives");
 
     /**
      * @returns TeX representation of this Group.

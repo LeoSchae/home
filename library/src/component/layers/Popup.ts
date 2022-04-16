@@ -4,7 +4,12 @@ import styles from "./Popup.css";
 
 export default function (): LayerObject<
   HTMLElement,
-  { set(html?: string): unknown; move(x: number, y: number): unknown }
+  {
+    set(html: string): unknown;
+    show(b?: boolean): unknown;
+    move(x: number, y: number): unknown;
+    container: HTMLDivElement;
+  }
 > {
   return {
     connected(config: LayeredConfig) {
@@ -15,16 +20,15 @@ export default function (): LayerObject<
       });
       return {
         nodes: dom.Element("div", [st, popup]),
+        container: popup,
         move(x, y) {
-          popup.style.transform = `translate(${x}px,${y}px)`;
+          this.container.style.transform = `translate(${x}px,${y}px)`;
         },
-        set(html) {
-          if (!html) {
-            popup.style.opacity = "0";
-          } else {
-            popup.style.opacity = "1";
-            popup.innerHTML = html;
-          }
+        show(b: boolean = true) {
+          this.container.style.opacity = b ? "1" : "0";
+        },
+        set(html: string) {
+          this.container.innerHTML = html;
         },
       };
     },
