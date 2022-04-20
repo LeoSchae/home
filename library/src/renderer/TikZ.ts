@@ -162,6 +162,7 @@ export default class TikZ implements Renderer2D {
   }
   closePath() {
     this.path += " -- cycle";
+    return this;
   }
   rect(x: number, y: number, w: number, h: number) {
     this.moveTo(x, y);

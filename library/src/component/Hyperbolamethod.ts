@@ -15,6 +15,83 @@ function download(
   link.click();
 }
 
+function renderHyperbolamethod3d(
+  r: render.Renderer2D,
+  opts: {
+    N: number;
+    W: number;
+    J: number;
+    color?: {
+      fill?: string;
+      error?: string;
+      gridLine?: string;
+      hypLine?: string;
+    };
+  }
+) {
+  let { N, J, W } = opts;
+  let {
+    fill = "#0000FF33",
+    error: errorFill = "#ffcc0033",
+    gridLine: gridFill = "#444444",
+    hypLine: hypFill = "#000000",
+  } = opts.color || {};
+
+  let lNJ = Math.log(N / W) / J;
+  let cuts = [...new math.Range(0, J + 1)].map((i) => W * Math.exp(i * lNJ));
+
+  let zFac = 1 / 4;
+  let proj = (x: number, y: number, z: number) =>
+    [x - z * zFac, N - (y - 0.8 * z * zFac)] as [number, number];
+
+  function drawBoxSpike(cuts: number[], [i, j, k]: [number, number, number]) {
+    // z face
+    r.fillStyle = "#00000055";
+    r.beginPath();
+    r.moveTo(...proj(cuts[i], cuts[j], cuts[k]))
+      .lineTo(...proj(cuts[i - 1], cuts[j], cuts[k]))
+      .lineTo(...proj(cuts[i - 1], cuts[j - 1], cuts[k]))
+      .lineTo(...proj(cuts[i], cuts[j - 1], cuts[k]))
+      .closePath()
+      .fill();
+    r.fillStyle = "#00000033";
+    r.beginPath();
+    r.moveTo(...proj(cuts[i], cuts[j], cuts[k]))
+      .lineTo(...proj(cuts[i - 1], cuts[j], cuts[k]))
+      .lineTo(...proj(cuts[i - 1], cuts[j], cuts[k - 1]))
+      .lineTo(...proj(cuts[i], cuts[j], cuts[k - 1]))
+      .closePath()
+      .fill();
+    r.fillStyle = "#00000088";
+    r.beginPath();
+    r.moveTo(...proj(cuts[i], cuts[j], cuts[k]))
+      .lineTo(...proj(cuts[i], cuts[j], cuts[k - 1]))
+      .lineTo(...proj(cuts[i], cuts[j - 1], cuts[k - 1]))
+      .lineTo(...proj(cuts[i], cuts[j - 1], cuts[k]))
+      .closePath()
+      .fill();
+  }
+
+  r.lineWidth = 1.5;
+  r.strokeStyle = "#00000055";
+  r.beginPath();
+  r.moveTo(...proj(W, W, W)).lineTo(...proj(N, W, W));
+  r.moveTo(...proj(W, W, W)).lineTo(...proj(W, N, W));
+  r.moveTo(...proj(W, W, W)).lineTo(...proj(W, W, N));
+  r.stroke();
+
+  r.strokeStyle = "#000000";
+  r.beginPath();
+  r.moveTo(...proj(N, W, W)).lineTo(...proj(N + (N - W) * 0.1, W, W));
+  r.moveTo(...proj(W, N, W)).lineTo(...proj(W, N + (N - W) * 0.1, W));
+  r.moveTo(...proj(W, W, N)).lineTo(...proj(W, W, N + (N - W) * 0.1));
+  r.stroke();
+
+  for (let ix = 1; ix < cuts.length; ix++)
+    for (let iy = 1; iy < cuts.length - ix + 1; iy++)
+      drawBoxSpike(cuts, [ix, iy, cuts.length + 1 - ix - iy]);
+}
+
 function renderHyperbolamethod(
   r: render.Renderer2D,
   opts: {
@@ -40,7 +117,7 @@ function renderHyperbolamethod(
   let lNJ = Math.log(N / W) / J;
   let cuts = [...new math.Range(0, J + 1)].map((i) => W * Math.exp(i * lNJ));
 
-  // Fill below
+  // fill below
   r.fillStyle = fill;
   r.strokeStyle = gridFill;
   r.lineWidth = 1.5;
@@ -49,20 +126,10 @@ function renderHyperbolamethod(
   for (var i = 1; i < cuts.length; i++)
     r.lineTo(cuts[i - 1], N - cuts[J - i]).lineTo(cuts[i], N - cuts[J - i]);
   r.lineTo(cuts[J], N - cuts[0]).closePath();
-  r.stroke();
+  //r.stroke();
   r.fill();
 
-  // Lines inside
-  r.lineWidth = 1;
-  r.beginPath();
-  for (var i = 0; i < cuts.length; i++)
-    r.moveTo(cuts[i], N - cuts[0])
-      .lineTo(cuts[i], N - cuts[J - i])
-      .moveTo(cuts[0], N - cuts[i])
-      .lineTo(cuts[J - i], N - cuts[i]);
-  r.stroke();
-
-  // Boxes above;
+  // fill error;
   r.beginPath();
   r.fillStyle = errorFill;
   r.lineWidth = 1.5;
@@ -76,6 +143,31 @@ function renderHyperbolamethod(
     r.lineTo(cuts[i], N - cuts[J - i]).lineTo(cuts[i - 1], N - cuts[J - i]);
   r.lineTo(cuts[0], N - cuts[J]);
   r.fill();
+
+  /* Lines (every line only single stroked and with corners) */
+  let p: [number, number];
+  r.lineWidth = 1;
+  // longest boxes (|_| shaped)
+  r.beginPath();
+  p = [cuts[1], N - cuts[J]];
+  r.moveTo(W, N - W)
+    .lineTo(W, p[1])
+    .lineTo(p[0], p[1])
+    .lineTo(p[0], N - W);
+  p = [cuts[J], N - cuts[1]];
+  r.moveTo(W, N - W)
+    .lineTo(p[0], N - W)
+    .lineTo(p[0], p[1])
+    .lineTo(W, p[1]);
+  // other boxes (|_ shaped)
+  let maxLine = J + 1,
+    minLine = 2;
+  for (var i = minLine; i <= maxLine - minLine; i++) {
+    p = [cuts[i], N - cuts[maxLine - i]];
+    r.moveTo(W, p[1])
+      .lineTo(p[0], p[1])
+      .lineTo(p[0], N - W);
+  }
   r.stroke();
 
   // Hyperbola
@@ -83,55 +175,13 @@ function renderHyperbolamethod(
   let steps = 100;
   r.lineWidth = 2;
   r.strokeStyle = hypFill;
+  r.moveTo(W, N - W);
   for (let i of [...new math.Range(0, steps + 1)]) {
     let v = Math.pow(N / W, i / steps);
     r.lineTo(W * v, N - N / v);
   }
+  r.closePath();
   r.stroke();
-
-  r.fillStyle = "#000000";
-  r.fontSize = 20;
-  r.textNode("Das ist ein text-node test!!!", W, N - W, render.TextAlign.BL);
-
-  function xAt(x: number, y: number) {
-    r.beginPath()
-      .moveTo(x - 1, y - 1)
-      .lineTo(x + 1, y + 1)
-      .moveTo(x + 1, y - 1)
-      .lineTo(x - 1, y + 1)
-      .stroke();
-  }
-
-  let skip = 5;
-  let x = N / 2;
-  let y = 10;
-  xAt(x, y);
-  r.textNode("center", x, y, render.TextAlign.C);
-  y += skip;
-  xAt(x, y);
-  r.textNode("left", x, y, render.TextAlign.L);
-  y += skip;
-  xAt(x, y);
-  r.textNode("right", x, y, render.TextAlign.R);
-  y += skip;
-  xAt(x, y);
-  r.textNode("top", x, y, render.TextAlign.T);
-  y += skip;
-  xAt(x, y);
-  r.textNode("bottom", x, y, render.TextAlign.B);
-  y += skip;
-  xAt(x, y);
-  r.textNode("top left", x, y, render.TextAlign.TL);
-  y += skip;
-  xAt(x, y);
-  r.textNode("top right", x, y, render.TextAlign.TR);
-  y += skip;
-  xAt(x, y);
-  r.textNode("bottom left", x, y, render.TextAlign.BL);
-  y += skip;
-  xAt(x, y);
-  r.textNode("bottom right", x, y, render.TextAlign.BR);
-  y += skip;
 }
 
 function draw(r: render.Renderer2D) {
@@ -157,11 +207,19 @@ window.customElements.define(
   "hyperbola-app",
   layers.LayeredComponent({
     connected(config) {
-      let state: Parameters<typeof renderHyperbolamethod>[1] = {
+      let state: Parameters<typeof renderHyperbolamethod>[1] & {
+        dim: "2D" | "3D";
+      } = {
         N: 100,
         W: 10,
         J: 10,
-        color: { hypLine: "#FF0000" },
+        dim: "3D",
+        color: {
+          hypLine: "#000000",
+          gridLine: "#000000",
+          fill: "#000000aa",
+          error: "#00000033",
+        },
       };
 
       config.addLayer(
@@ -170,7 +228,8 @@ window.customElements.define(
           update(config, ctx) {
             ctx.clearRect(0, 0, config.width, config.height);
             let scale = new ScaledRender();
-            renderHyperbolamethod(scale, state);
+            if (state.dim == "2D") renderHyperbolamethod(scale, state);
+            else renderHyperbolamethod3d(scale, state);
 
             scale.applyScaled(
               new render.Canvas(ctx),
@@ -191,6 +250,20 @@ window.customElements.define(
           config.update();
         },
         default: state.J,
+      });
+
+      options.add({
+        type: "radio",
+        label: "Dimension",
+        values: [
+          { name: "2D", label: "2D" },
+          { name: "3D", label: "3D" },
+        ],
+        default: state.dim,
+        onChange: (value) => {
+          state.dim = value as any;
+          config.update();
+        },
       });
 
       options.add({
@@ -215,7 +288,8 @@ window.customElements.define(
           } else throw new Error("Unknown format");
 
           let scale = new ScaledRender();
-          renderHyperbolamethod(scale, state);
+          if (state.dim == "2D") renderHyperbolamethod(scale, state);
+          else renderHyperbolamethod3d(scale, state);
           scale.applyScaled(r, config.width, config.height, { buffer: 10 });
 
           download(r.toFileString(), fileName, dataType);

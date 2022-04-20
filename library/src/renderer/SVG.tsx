@@ -61,7 +61,7 @@ export default class SVG implements Renderer2D {
 
       if (op === 1.0) delete fill["fill-opacity"];
       else fill["fill-opacity"] = Math.round(1000 * op) / 1000;
-    }
+    } else delete fill["fill-opacity"];
     fill.fill = fillStyle;
   }
 
@@ -77,7 +77,7 @@ export default class SVG implements Renderer2D {
 
       if (opacity === 1.0) delete stroke["stroke-opacity"];
       else stroke["stroke-opacity"] = Math.round(1000 * opacity) / 1000;
-    }
+    } else delete stroke["stroke-opacity"];
     stroke.stroke = strokeStyle;
   }
 

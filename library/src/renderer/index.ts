@@ -48,7 +48,7 @@ export interface Renderer2D {
   lineTo(x: number, y: number): this;
 
   /** Close the current path. */
-  closePath(): void;
+  closePath(): this;
 
   /**
    * Draw a arc of a circle centered at (x,y).

@@ -113,6 +113,7 @@ export default class Canvas implements Renderer2D, MeasureText {
 
   closePath() {
     this._ctx.closePath();
+    return this;
   }
 
   rect(x: number, y: number, w: number, h: number) {

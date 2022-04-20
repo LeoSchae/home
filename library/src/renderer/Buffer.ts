@@ -68,6 +68,7 @@ export default class Renderer2DBuffer implements Renderer2D {
   }
   closePath() {
     this.data.push(DrawOp.CLOSE);
+    return this;
   }
   rect(x: number, y: number, w: number, h: number) {
     this.moveTo(x, y);

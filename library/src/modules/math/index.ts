@@ -367,27 +367,14 @@ export namespace congruenceSubgroups {
     }
   }
 
+  /** @internal check [v1] = [v2] (mod [modulus]) */
   function _mod_eq(v1: number, v2: number, modulus: number) {
     return (v1 - v2) % modulus === 0;
   }
 
+  /** @internal */
   function _gamma_0_indicator(level: number, value: Moebius) {
     return _mod_eq(value.m[2], 0, level);
-  }
-
-  function _gamma_1_indicator(level: number, value: Moebius) {
-    return (
-      _mod_eq(value.m[2], 0, level) &&
-      (_mod_eq(value.m[0], 1, level) || _mod_eq(value.m[0], -1, level))
-    );
-  }
-
-  function _gamma_indicator(level: number, value: Moebius) {
-    return (
-      _mod_eq(value.m[2], 0, level) &&
-      _mod_eq(value.m[1], 0, level) &&
-      (_mod_eq(value.m[0], 1, level) || _mod_eq(value.m[0], -1, level))
-    );
   }
 
   /**
@@ -399,6 +386,15 @@ export namespace congruenceSubgroups {
     _gamma_0_indicator,
     "\\Gamma_0"
   );
+
+  /** @internal */
+  function _gamma_1_indicator(level: number, value: Moebius) {
+    return (
+      _mod_eq(value.m[2], 0, level) &&
+      (_mod_eq(value.m[0], 1, level) || _mod_eq(value.m[0], -1, level))
+    );
+  }
+
   /**
    * The congruence subgroup $\Gamma_0$ that satisfies following congruences.
    *
@@ -408,6 +404,16 @@ export namespace congruenceSubgroups {
     _gamma_1_indicator,
     "\\Gamma_1"
   );
+
+  /** @internal */
+  function _gamma_indicator(level: number, value: Moebius) {
+    return (
+      _mod_eq(value.m[2], 0, level) &&
+      _mod_eq(value.m[1], 0, level) &&
+      (_mod_eq(value.m[0], 1, level) || _mod_eq(value.m[0], -1, level))
+    );
+  }
+
   /**
    * The congruence subgroup $\Gamma_0$ that satisfies following congruences.
    *
@@ -427,8 +433,12 @@ export namespace congruenceSubgroups {
   };
 
   /**
-   * The cosets for the group $\Gamma$ can be computed more effectively.
-   * They are multiple different shifts of the cosets of $\Gamma_1$.
+   * @internal More performant representatives for $\Gamma(N)$.
+   *
+   * The coset representatives of $\Gamma(N)$ can be computed more efficiently
+   * by computing the representatives pf $\Gamma_1(N)$ first.
+   * The full set of representatives is composed of multiple shifts of the
+   * representatives from $\Gamma_1(N)$ (shifted by 0 \leq n < N).
    */
   Gamma._cosetRepresentatives = function* (level) {
     let gamma_1_coset = yield* Gamma_1._cosetRepresentatives(level);
