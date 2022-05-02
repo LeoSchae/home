@@ -79,9 +79,7 @@ window.customElements.define(
             ctx.clearRect(0, 0, config.width, config.height);
 
             ctx.lineWidth = 1.25;
-            drawCarthesian2DAxis(r, pr, {
-              scale: 1,
-            });
+            drawCarthesian2DAxis(r, pr);
 
             let fs = 10;
             r.fontSize = fs;

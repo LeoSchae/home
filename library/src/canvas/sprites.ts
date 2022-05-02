@@ -55,7 +55,7 @@ export function TextSprite(
     left,
     right,
     draw: function (ctx: render.Renderer2D, x: number, y: number) {
-      ctx.textNode(this.text, x - this.dx, y);
+      ctx.textNode(this.text, x - this.dx, y, 0 as render.TextAlign);
     },
   };
   return sprite;

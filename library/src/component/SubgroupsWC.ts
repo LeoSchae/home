@@ -336,9 +336,7 @@ window.customElements.define(
               }
             }
 
-            drawCarthesian2DAxis(r, projection, {
-              scale: 1,
-            });
+            drawCarthesian2DAxis(r, projection);
 
             r.fontSize = annotationFS;
             annotateCarthesian2DAxis(r, "x", projection, annotations);

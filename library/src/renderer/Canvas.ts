@@ -61,6 +61,7 @@ export default class Canvas implements Renderer2D, MeasureText {
   }
 
   measureText(text: string) {
+    this._ctx.textAlign = "center";
     const tm = this._ctx.measureText(text);
     let c = (this.fontAscent + this.fontDescent) / 2;
     return {

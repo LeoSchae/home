@@ -15,7 +15,7 @@ export async function render(this: any, data: any) {
       <script>
         {await this.bundledScript("@lib/component/FordCircles", data)}
       </script>
-      <farey-fractions>{nojs}</farey-fractions>
+      <ford-circles>{nojs}</ford-circles>
     </>
   );
 }

@@ -6,7 +6,12 @@ nav:
   key: All Projects
 ---
 <style>
+.project-card-a {
+  text-decoration: none;
+}
+
 .project-card {
+  position: relative;
   display: grid;
   align-items: center;
   position: relative;
@@ -21,12 +26,22 @@ nav:
   border-radius: 10px;
   border: 2px solid black;
 }
-.project-card a {
-  color: currentColor;
-  text-decoration: underline dotted;
+
+.project-card {
+  text-decoration: none;
 }
 
-.project-card a:hover {
+.project-card h1 {
+  color: currentColor;
+  text-decoration: underline dotted;
+  font-size: 1.5em;
+}
+
+.project-card:hover {
+  background: #111111;
+}
+
+.project-card:hover h1 {
   color: currentColor;
   text-decoration: underline;
 }
@@ -42,9 +57,6 @@ nav:
   display: block;
   position: relative;
   padding: 0.5em 2em;
-}
-.project-text h2 {
-  margin-top: 0;
 }
 
 @media(min-width: 600px) {
@@ -62,14 +74,16 @@ nav:
 </style>
 
 {% for test in collections.projects %}
-<section class="project-card">
+<a class="project-card-a" href="{{test.url}}">
+<div class="project-card">
 <div class="project-icon">{{test.data.icon | safe}}</div>
 <div class="project-text">
-<h2><a href="{{test.url}}">{{test.data.title}}</a></h2>
+<h1>{{test.data.title}}</h1>
 <p>{{test.data.description}}</p>
 </div>
 <div style="clear: both;"></div>
-</section>
+</div>
+</a>
 {% endfor %}
 
 </div>

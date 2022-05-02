@@ -100,18 +100,16 @@ export function drawCarthesian2DAxis(
     width: number;
     height: number;
   } & render.MeasureText,
-  { origin: p0, scale: ps }: { origin: [number, number]; scale: number },
+  projection: { origin: [number, number]; scale: number },
   {
     arrowSize: as = 7,
     fontSize: fs = 13,
-    scale: scale = 1,
-    reLab = TeX.mathBB("R"),
-    imLab = "i" + TeX.mathBB("R"),
+    labelX = TeX.mathBB("R"),
+    labelY = "i" + TeX.mathBB("R"),
   } = {}
 ) {
+  let { origin, scale } = projection;
   const { width, height } = ctx;
-  as *= scale;
-  fs *= scale;
 
   ctx.fontSize = fs;
 
@@ -122,36 +120,37 @@ export function drawCarthesian2DAxis(
   ): [number, number] {
     let { ps, ox, oy } = this;
     return [r * ps + ox, -i * ps + oy];
-  }.bind({ ox: p0[0], oy: p0[1], ps });
-  const p1 = project(1);
-  const pi = project(0, 1);
+  }.bind({ ox: origin[0], oy: origin[1], ps: scale });
 
-  const dx = [p1[0] - p0[0], p1[1] - p0[1]] as [number, number];
-  const dy = [pi[0] - p0[0], pi[1] - p0[1]] as [number, number];
+  const pos1 = project(1);
+  const posi = project(0, 1);
 
-  const [, , rx, ry] = infArrow(ctx, width, height, p0, dx, {
+  const dx = [pos1[0] - origin[0], pos1[1] - origin[1]] as [number, number];
+  const dy = [posi[0] - origin[0], posi[1] - origin[1]] as [number, number];
+
+  const [, , rx, ry] = infArrow(ctx, width, height, origin, dx, {
     arrowSize: as,
   });
-  const [, , ix, iy] = infArrow(ctx, width, height, p0, dy, {
+  const [, , ix, iy] = infArrow(ctx, width, height, origin, dy, {
     arrowSize: as,
   });
 
   // TODO drawing is not good for rotations!
-  const reSprite = sprites.TextSprite(ctx, reLab);
+  if (labelX)
+    ctx.textNode(
+      labelX,
+      rx - 0.2 * fs,
+      ry + 0.2 * fs + as / 2,
+      render.TextAlign.TR
+    );
 
-  reSprite.draw(
-    ctx,
-    rx - reSprite.right - 0.2 * fs,
-    ry + reSprite.top + 0.2 * fs + 0.5 * as
-  );
-
-  const imSprite = sprites.TextSprite(ctx, imLab);
-
-  imSprite.draw(
-    ctx,
-    ix - imSprite.right - 0.5 * as - 0.2 * fs,
-    iy + imSprite.top + 0.2 * fs
-  );
+  if (labelY)
+    ctx.textNode(
+      labelY,
+      ix - 0.2 * fs - as / 2,
+      iy + 0.2 * fs,
+      render.TextAlign.TR
+    );
 }
 
 export function annotateCarthesian2DAxis(
