@@ -32,7 +32,8 @@ function deepChildren(el: HTMLElement | DocumentFragment, children: any[]) {
 
 export function jsx(
   name: string,
-  attrs: jsx.JSX.IntrinsicElements[""]
+  attrs: jsx.JSX.IntrinsicElements[""],
+  ...children: any[]
 ): HTMLElement;
 export function jsx(
   name: string,

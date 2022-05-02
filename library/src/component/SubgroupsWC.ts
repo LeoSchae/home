@@ -136,22 +136,7 @@ window.customElements.define(
       let options = config.addLayer("options", layers.Options());
       console.log(options);
 
-      options.add("color", {
-        label: "Color",
-        onChange(s) {
-          appOptions.fill = s;
-          config.update();
-        },
-        default: appOptions.fill,
-      });
-
-      options.add("number", {
-        label: "Level",
-        onChange(level) {
-          changeGroup(visual.group_type, level);
-        },
-        default: visual.level,
-      });
+      options.add("section", "Group Options");
 
       options.add("radio", {
         label: "Group",
@@ -178,6 +163,25 @@ window.customElements.define(
             visual.level
           );
         },
+      });
+
+      options.add("number", {
+        label: "Level",
+        onChange(level) {
+          changeGroup(visual.group_type, level);
+        },
+        default: visual.level,
+      });
+
+      options.add("section", "Other...");
+
+      options.add("color", {
+        label: "Color",
+        onChange(s) {
+          appOptions.fill = s;
+          config.update();
+        },
+        default: appOptions.fill,
       });
 
       options.add(manualSizing(config));

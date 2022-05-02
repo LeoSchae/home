@@ -5,6 +5,9 @@ import type { LayeredConfig, Layer } from ".";
 import styles from "./Options.css";
 
 const OPTION_TYPES = {
+  section: function (name: string, options?: { level?: "h1" | "h2" | "h3" }) {
+    return { input: jsx(options?.level ?? "h2", {}, name) };
+  },
   number: function (options: {
     label: string;
     onChange?: (n: number) => any;
@@ -105,7 +108,7 @@ const OPTION_TYPES = {
       ),
     };
   },
-  custom: function (options: { label: Node | string; input: Node }) {
+  custom: function (options: { label?: Node | string; input?: Node }) {
     return {
       label:
         typeof options.label === "string" ? (
@@ -273,12 +276,15 @@ export function manualSizing(
   ];
 }
 
+export type Option<K extends keyof typeof OPTION_TYPES> = [
+  type: K,
+  ...args: Parameters<typeof OPTION_TYPES[K]>
+];
+
 export class OptionPane {
   container: HTMLElement = (<div></div>);
 
-  add<K extends keyof typeof OPTION_TYPES>(
-    args: [type: K, ...args: Parameters<typeof OPTION_TYPES[K]>]
-  ): unknown;
+  add<K extends keyof typeof OPTION_TYPES>(args: Option<K>): unknown;
   add<K extends keyof typeof OPTION_TYPES>(
     type: K,
     ...args: Parameters<typeof OPTION_TYPES[K]>
