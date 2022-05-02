@@ -134,9 +134,9 @@ window.customElements.define(
       };
 
       let options = config.addLayer("options", layers.Options());
+      console.log(options);
 
-      options.add({
-        type: "color",
+      options.add("color", {
         label: "Color",
         onChange(s) {
           appOptions.fill = s;
@@ -145,8 +145,7 @@ window.customElements.define(
         default: appOptions.fill,
       });
 
-      options.add({
-        type: "number",
+      options.add("number", {
         label: "Level",
         onChange(level) {
           changeGroup(visual.group_type, level);
@@ -154,8 +153,7 @@ window.customElements.define(
         default: visual.level,
       });
 
-      options.add({
-        type: "radio",
+      options.add("radio", {
         label: "Group",
         default: "Gamma_1",
         values: [
@@ -184,8 +182,7 @@ window.customElements.define(
 
       options.add(manualSizing(config));
 
-      options.add({
-        type: "multiButton",
+      options.add("multiButton", {
         label: "Export as",
         values: [
           { name: "SVG", label: "SVG" },

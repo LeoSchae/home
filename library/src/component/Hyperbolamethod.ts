@@ -22,19 +22,17 @@ function renderHyperbolamethod3d(
     W: number;
     J: number;
     color?: {
-      fill?: string;
-      error?: string;
-      gridLine?: string;
-      hypLine?: string;
+      shadeTop?: string;
+      shadeFront?: string;
+      shadeSide?: string;
     };
   }
 ) {
   let { N, J, W } = opts;
   let {
-    fill = "#0000FF33",
-    error: errorFill = "#ffcc0033",
-    gridLine: gridFill = "#444444",
-    hypLine: hypFill = "#000000",
+    shadeTop = "#0000FF33",
+    shadeFront = "#ffcc0033",
+    shadeSide = "#444444",
   } = opts.color || {};
 
   let lNJ = Math.log(N / W) / J;
@@ -46,47 +44,52 @@ function renderHyperbolamethod3d(
 
   function drawBoxSpike(cuts: number[], [i, j, k]: [number, number, number]) {
     // z face
-    r.fillStyle = "#00000055";
+    let alphaHex = "ff";
+
+    r.fillStyle = shadeFront + alphaHex;
     r.beginPath();
     r.moveTo(...proj(cuts[i], cuts[j], cuts[k]))
       .lineTo(...proj(cuts[i - 1], cuts[j], cuts[k]))
       .lineTo(...proj(cuts[i - 1], cuts[j - 1], cuts[k]))
       .lineTo(...proj(cuts[i], cuts[j - 1], cuts[k]))
       .closePath()
-      .fill();
-    r.fillStyle = "#00000033";
+      .fill()
+      .stroke();
+
+    r.fillStyle = shadeTop + alphaHex;
     r.beginPath();
     r.moveTo(...proj(cuts[i], cuts[j], cuts[k]))
       .lineTo(...proj(cuts[i - 1], cuts[j], cuts[k]))
       .lineTo(...proj(cuts[i - 1], cuts[j], cuts[k - 1]))
       .lineTo(...proj(cuts[i], cuts[j], cuts[k - 1]))
       .closePath()
-      .fill();
-    r.fillStyle = "#00000088";
+      .fill()
+      .stroke();
+    r.fillStyle = shadeSide + alphaHex;
     r.beginPath();
     r.moveTo(...proj(cuts[i], cuts[j], cuts[k]))
       .lineTo(...proj(cuts[i], cuts[j], cuts[k - 1]))
       .lineTo(...proj(cuts[i], cuts[j - 1], cuts[k - 1]))
       .lineTo(...proj(cuts[i], cuts[j - 1], cuts[k]))
       .closePath()
-      .fill();
+      .fill()
+      .stroke();
   }
 
   r.lineWidth = 1.5;
-  r.strokeStyle = "#00000055";
-  r.beginPath();
-  r.moveTo(...proj(W, W, W)).lineTo(...proj(N, W, W));
-  r.moveTo(...proj(W, W, W)).lineTo(...proj(W, N, W));
-  r.moveTo(...proj(W, W, W)).lineTo(...proj(W, W, N));
-  r.stroke();
-
   r.strokeStyle = "#000000";
   r.beginPath();
-  r.moveTo(...proj(N, W, W)).lineTo(...proj(N + (N - W) * 0.1, W, W));
-  r.moveTo(...proj(W, N, W)).lineTo(...proj(W, N + (N - W) * 0.1, W));
-  r.moveTo(...proj(W, W, N)).lineTo(...proj(W, W, N + (N - W) * 0.1));
+  r.moveTo(...proj(W, W, W)).lineTo(...proj(N + (N - W) * 0.1, W, W));
+  r.moveTo(...proj(W, W, W)).lineTo(...proj(W, N + (N - W) * 0.1, W));
+  r.moveTo(...proj(W, W, W)).lineTo(...proj(W, W, N + (N - W) * 0.1));
   r.stroke();
 
+  /*r.beginPath().moveTo(...proj(cuts[0], W, W));
+  for (let i = 1; i < cuts.length; i++)
+    r.lineTo(...proj(cuts[i], cuts[cuts.length - i], W));
+  r.stroke();*/
+
+  r.lineWidth = 0.75;
   for (let ix = 1; ix < cuts.length; ix++)
     for (let iy = 1; iy < cuts.length - ix + 1; iy++)
       drawBoxSpike(cuts, [ix, iy, cuts.length + 1 - ix - iy]);
@@ -207,18 +210,19 @@ window.customElements.define(
   "hyperbola-app",
   layers.LayeredComponent({
     connected(config) {
-      let state: Parameters<typeof renderHyperbolamethod>[1] & {
-        dim: "2D" | "3D";
-      } = {
+      let state = {
         N: 100,
         W: 10,
         J: 10,
         dim: "3D",
         color: {
+          shadeTop: "#bbbbbb",
+          shadeFront: "#555555",
+          shadeSide: "#111111",
           hypLine: "#000000",
           gridLine: "#000000",
-          fill: "#000000aa",
-          error: "#00000033",
+          fill: "#333333",
+          error: "#999999",
         },
       };
 
@@ -242,8 +246,7 @@ window.customElements.define(
       );
 
       let options = config.addLayer("options", layers.Options());
-      options.add({
-        type: "number",
+      options.add("number", {
         label: "Cuts",
         onChange: (x) => {
           state.J = x;
@@ -252,8 +255,7 @@ window.customElements.define(
         default: state.J,
       });
 
-      options.add({
-        type: "radio",
+      options.add("radio", {
         label: "Dimension",
         values: [
           { name: "2D", label: "2D" },
@@ -266,8 +268,48 @@ window.customElements.define(
         },
       });
 
-      options.add({
-        type: "multiButton",
+      options.add("color", {
+        label: "3D-top",
+        onChange: (c) => {
+          state.color.shadeTop = c;
+          config.update();
+        },
+        default: state.color.shadeTop,
+      });
+      options.add("color", {
+        label: "3D-front",
+        onChange: (c) => {
+          state.color.shadeFront = c;
+          config.update();
+        },
+        default: state.color.shadeFront,
+      });
+      options.add("color", {
+        label: "3D-side",
+        onChange: (c) => {
+          state.color.shadeSide = c;
+          config.update();
+        },
+        default: state.color.shadeSide,
+      });
+      options.add("color", {
+        label: "2D-lower",
+        onChange: (c) => {
+          state.color.fill = c;
+          config.update();
+        },
+        default: state.color.fill,
+      });
+      options.add("color", {
+        label: "2D-upper",
+        onChange: (c) => {
+          state.color.error = c;
+          config.update();
+        },
+        default: state.color.error,
+      });
+
+      options.add("multiButton", {
         label: "Export as",
         values: [
           { name: "SVG", label: "SVG" },

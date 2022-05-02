@@ -39,18 +39,32 @@ export type LayeredConfig = {
  */
 export type LayerObject<
   N extends Node | Node[] | undefined = undefined,
-  O = {}
+  O = undefined
 > = {
   connected: (
     config: LayeredConfig
-  ) => O & (N extends undefined ? {} : { nodes: N });
+  ) => N extends undefined
+    ? O extends undefined
+      ? {}
+      : { handle: O }
+    : O extends undefined
+    ? { nodes: N }
+    : { nodes: N; handle: O };
   disconnected?: (config: LayeredConfig) => unknown;
 
   update?: (config: LayeredConfig, nodes: N) => unknown;
   resized?: (config: LayeredConfig, nodes: N) => unknown;
 };
 export type Layer<N extends Node | Node[] | undefined = undefined, O = {}> =
-  | ((config: LayeredConfig) => O & (N extends undefined ? {} : { nodes: N }))
+  | ((
+      config: LayeredConfig
+    ) => N extends undefined
+      ? O extends undefined
+        ? {}
+        : { handle: O }
+      : O extends undefined
+      ? { nodes: N }
+      : { nodes: N; handle: O })
   | LayerObject<N, O>;
 
 /** The handle returned by addLayer */
@@ -114,7 +128,7 @@ abstract class LayeredElement extends HTMLElement {
       },
       containerElement: container,
       hostElement: this,
-      update: function (layer?: string | Layer<any>): unknown {
+      update: function (layer?: string | LayerObject<any>): unknown {
         if (updateState === 2) return;
         if (updateState === 0) requestAnimationFrame(updateLayers);
         if (layer === undefined) {
@@ -142,7 +156,7 @@ abstract class LayeredElement extends HTMLElement {
         }
 
         let layerObject: undefined | LayerObject<any, any>,
-          instance: O & { nodes?: Node | Node[] };
+          instance: { nodes?: Node | Node[]; handle?: O };
         if (typeof layer === "function") {
           instance = layer(config);
           layerObject = undefined;
@@ -160,12 +174,10 @@ abstract class LayeredElement extends HTMLElement {
         layers.set(name, { nodes, layer: layerObject, update: false });
         config.update(name);
 
-        let handle: LayerHandle<O> = {
-          ...instance,
-          nodes: undefined,
-          update: () => {
-            this.update(name);
-          },
+        let handle: LayerHandle<O> = instance.handle as any;
+        if (!handle) handle = {} as any;
+        handle.update = () => {
+          this.update(name);
         };
 
         return handle;

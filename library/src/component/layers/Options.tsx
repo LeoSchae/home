@@ -126,7 +126,7 @@ type Options = {
   ): unknown;
 };
 
-export default function (): Layer<undefined, Options> {
+export default function (): Layer<undefined, OptionPane> {
   return (config: LayeredConfig) => {
     let optionsFrame = (
       <div class={styles.class.container}>
@@ -149,108 +149,161 @@ export default function (): Layer<undefined, Options> {
       ></button>
     );
 
-    let list = <ul></ul>;
-    optionsFrame.append(list);
+    let pane = new OptionPane();
+    pane.container.className = styles.class.list;
+    optionsFrame.append(pane.container);
 
     config.attachToShaddow(
       <style __html={styles.css} />,
       optionsFrame,
       optionsButton
     );
-    return {
-      addOption(option: { label: Node; input: Node }) {
-        list.appendChild(
-          <li>
-            {option.label}: {option.input}
-          </li>
-        );
-      },
-      add<K extends keyof typeof OPTION_TYPES>(
-        option: { type: K } & Parameters<typeof OPTION_TYPES[K]>[0]
-      ) {
-        let opt = OPTION_TYPES[option.type](option as any);
-        this.addOption(opt);
-      },
-    };
+
+    return { nodes: undefined, handle: pane };
   };
 }
 
 export function manualSizing(
   config: LayeredConfig
-): Parameters<Options["add"]>[0] {
-  let x: HTMLInputElement, y: HTMLInputElement;
-  let inputs: HTMLElement, auto: HTMLElement, manual: HTMLElement;
-  let observer = new ResizeObserver(() => {
-    if (config.containerElement.style.width === "") {
-      return;
+): [type: "custom", ...args: Parameters<typeof OPTION_TYPES["custom"]>] {
+  let widthInput: HTMLInputElement = (
+      <input type="number" style="width:6em;" />
+    ) as any,
+    heightInput: HTMLInputElement = (
+      <input type="number" style="width:6em;" />
+    ) as any;
+  let currentSizing: HTMLElement = <span>auto sizing</span>;
+
+  let fixedSizeObserver = new ResizeObserver(() => {
+      if (config.containerElement.style.width === "") {
+        return;
+      }
+      let parent = config.hostElement;
+      if (!parent) return;
+      let { clientWidth: cw, clientHeight: ch } = config.containerElement;
+      let { clientWidth: ww, clientHeight: wh } = parent;
+      let scale = Math.min(ww / cw, wh / ch);
+      config.containerElement.style.transformOrigin = "top left";
+      config.containerElement.style.transform = `translate(${
+        (ww - cw * scale) / 2
+      }px, ${(wh - ch * scale) / 2}px) scale(${scale}, ${scale})`;
+    }),
+    observing = false;
+
+  let setSize = (width: number, height: number) => {
+    let auto = width < 0 || height < 0 || isNaN(width) || isNaN(height);
+
+    // Only observe when using fixed width / height
+    if (auto && observing) {
+      fixedSizeObserver.unobserve(config.containerElement);
+      fixedSizeObserver.unobserve(config.hostElement);
+      observing = false;
     }
-    let parent = config.hostElement;
-    if (!parent) return;
-    let { clientWidth: cw, clientHeight: ch } = config.containerElement;
-    let { clientWidth: ww, clientHeight: wh } = parent;
-    let scale = Math.min(ww / cw, wh / ch);
-    config.containerElement.style.transformOrigin = "top left";
-    config.containerElement.style.transform = `translate(${
-      (ww - cw * scale) / 2
-    }px, ${(wh - ch * scale) / 2}px) scale(${scale}, ${scale})`;
-  });
+    if (!observing && !auto) {
+      fixedSizeObserver.observe(config.containerElement);
+      fixedSizeObserver.observe(config.hostElement);
+      observing = true;
+    }
 
-  manual = (
-    <span>
-      {[
-        (x = (<input type="number" />) as any),
-        " x ",
-        (y = (<input type="number" />) as any),
+    if (auto) {
+      config.containerElement.style.width = "";
+      config.containerElement.style.height = "";
+      config.containerElement.style.outline = "";
+      config.containerElement.style.transform = "";
+      config.containerElement.style.transformOrigin = "";
+
+      currentSizing.textContent = "auto sizing";
+    } else {
+      config.containerElement.style.width = width + "px";
+      config.containerElement.style.height = height + "px";
+      config.containerElement.style.outline = "1px dashed black";
+
+      currentSizing.textContent = width + " x " + height;
+    }
+
+    (dialog as any).close();
+  };
+
+  let dialog: HTMLDialogElement = (
+    <dialog>
+      <form
+        onsubmit={() => {
+          setSize(parseInt(widthInput.value), parseInt(heightInput.value));
+          return false;
+        }}
+      >
+        <p>Choose new size:</p>
+        {widthInput}
+        {" x "}
+        {heightInput}
+        <br />
+        <input type="submit" value="Apply" />
         <input
           type="button"
-          value="Apply"
+          value="Reset"
           onclick={() => {
-            let w = parseInt(x.value);
-            let h = parseInt(y.value);
-
-            config.containerElement.style.width = w + "px";
-            config.containerElement.style.height = h + "px";
-            config.containerElement.style.outline = "1px dashed black";
+            setSize(-1, -1);
           }}
-        />,
-        <input
-          type="button"
-          value="Default"
-          onclick={() => {
-            config.containerElement.style.width = "";
-            config.containerElement.style.height = "";
-            config.containerElement.style.outline = "";
-            config.containerElement.style.transform = "";
-            config.containerElement.style.transformOrigin = "";
-            inputs.replaceChildren(auto);
-            observer.unobserve(config.containerElement);
-            observer.unobserve(config.hostElement);
-          }}
-        />,
-      ]}
-    </span>
-  );
+        />
+      </form>
+    </dialog>
+  ) as any;
 
-  auto = (
+  let inputs: HTMLElement, auto: HTMLElement;
+
+  inputs = (
     <span>
-      [Automatic]
       <input
         type="button"
         value="Change"
         onclick={() => {
-          inputs.replaceChildren(manual);
-          observer.observe(config.containerElement);
-          observer.observe(config.hostElement);
+          (dialog as any).showModal();
         }}
       />
+      {dialog}
     </span>
   );
 
-  inputs = <span>{auto}</span>;
+  return [
+    "custom",
+    {
+      label: <span>Canvas size ({currentSizing})</span>,
+      input: inputs,
+    },
+  ];
+}
 
-  return {
-    type: "custom",
-    label: "Change Size",
-    input: inputs,
-  };
+export class OptionPane {
+  container: HTMLElement = (<div></div>);
+
+  add<K extends keyof typeof OPTION_TYPES>(
+    args: [type: K, ...args: Parameters<typeof OPTION_TYPES[K]>]
+  ): unknown;
+  add<K extends keyof typeof OPTION_TYPES>(
+    type: K,
+    ...args: Parameters<typeof OPTION_TYPES[K]>
+  ): unknown;
+  add(type: string | [string, ...any[]], ...args: any[]) {
+    if (Array.isArray(type)) {
+      args = type.slice(1);
+      type = type[0];
+    }
+    var opt = (OPTION_TYPES as any)[type](...args);
+    this.addOption(opt);
+  }
+
+  addOption(option: { label?: Node; input: Node }) {
+    this.container.appendChild(
+      <div style="margin-top: 10px;">
+        {option.label ? (
+          <div>
+            <b>{option.label}:</b>
+          </div>
+        ) : (
+          []
+        )}
+        <div>{option.input}</div>
+      </div>
+    );
+  }
 }
