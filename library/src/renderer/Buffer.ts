@@ -4,6 +4,8 @@ enum DrawOp {
   BEGIN,
   MOVE,
   LINE,
+  QUADRATIC,
+  CUBIC,
   ARC,
   CLOSE,
   STROKE,
@@ -64,6 +66,21 @@ export default class Renderer2DBuffer implements Renderer2D {
   }
   lineTo(x: number, y: number) {
     this.data.push(DrawOp.LINE, x, y);
+    return this;
+  }
+  quadraticTo(cpX: number, cpY: number, x: number, y: number): this {
+    this.data.push(DrawOp.QUADRATIC, cpX, cpY, x, y);
+    return this;
+  }
+  cubicTo(
+    cp1X: number,
+    cp1Y: number,
+    cp2X: number,
+    cp2Y: number,
+    x: number,
+    y: number
+  ): this {
+    this.data.push(DrawOp.CUBIC, cp1X, cp1Y, cp2X, cp2Y, x, y);
     return this;
   }
   closePath() {
@@ -138,6 +155,24 @@ export default class Renderer2DBuffer implements Renderer2D {
         case DrawOp.LINE:
           r.lineTo(s * data[++i] + x0, s * data[++i] + y0);
           break;
+        case DrawOp.QUADRATIC:
+          r.quadraticTo(
+            s * data[++i] + x0,
+            s * data[++i] + y0,
+            s * data[++i] + x0,
+            s * data[++i] + y0
+          );
+          break;
+        case DrawOp.CUBIC:
+          r.cubicTo(
+            s * data[++i] + x0,
+            s * data[++i] + y0,
+            s * data[++i] + x0,
+            s * data[++i] + y0,
+            s * data[++i] + x0,
+            s * data[++i] + y0
+          );
+          break;
         case DrawOp.ARC:
           r.arc(
             s * data[++i] + x0,
@@ -166,12 +201,8 @@ export default class Renderer2DBuffer implements Renderer2D {
           r.closePath();
           break;
         default:
-          assertUnreachable(d);
+          let neverAssertion: never = d;
       }
     }
   }
-}
-
-function assertUnreachable(d: never) {
-  throw "Asserted Unrechable";
 }

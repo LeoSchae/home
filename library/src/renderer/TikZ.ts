@@ -15,7 +15,10 @@ type PicStyle = {
 
 export default class TikZ implements Renderer2D {
   private TeX: string;
+  width: number;
+  height: number;
   path: string | undefined;
+  pos: [number, number] | undefined;
   private style: PicStyle = {
     stroke: {
       color: "black",
@@ -34,6 +37,8 @@ export default class TikZ implements Renderer2D {
   }
 
   constructor(width: number, height: number) {
+    this.width = width;
+    this.height = height;
     this.TeX =
       `\\begin{tikzpicture}[x=1pt,y=-1pt,every node/.style={inner sep=0,outer sep=0}]%\n` +
       `\\fontfamily{ptm}\\selectfont%\n` +
@@ -147,17 +152,51 @@ export default class TikZ implements Renderer2D {
 
   beginPath() {
     this.path = undefined;
+    this.pos = undefined;
     return this;
   }
   moveTo(x: number, y: number) {
     let rounded = this.round;
     this.path = (this.path || "") + ` (${rounded(x)},${rounded(y)})`;
+    this.pos = [x, y];
     return this;
   }
   lineTo(x: number, y: number) {
     if (!this.path) return this.moveTo(x, y);
     let rounded = this.round;
-    this.path += ` -- (${rounded(x)}, ${rounded(y)})`;
+    this.path += ` -- (${rounded(x)},${rounded(y)})`;
+    this.pos = [x, y];
+    return this;
+  }
+  quadraticTo(cpX: number, cpY: number, x: number, y: number): this {
+    if (!this.path) return this.moveTo(x, y);
+    let [pX, pY] = this.pos as [number, number];
+    // Tikz only supports cubic curves. Convert quadratic to cubic.
+    return this.cubicTo(
+      pX + (2 / 3) * (cpX - pX),
+      pY + (2 / 3) * (cpY - pY),
+      x + (2 / 3) * (cpX - x),
+      y + (2 / 3) * (cpY - y),
+      x,
+      y
+    );
+  }
+  cubicTo(
+    cp1X: number,
+    cp1Y: number,
+    cp2X: number,
+    cp2Y: number,
+    x: number,
+    y: number
+  ): this {
+    if (!this.path) return this.moveTo(x, y);
+    let rounded = this.round;
+    this.path += ` .. controls (${rounded(cp1X)},${rounded(
+      cp1Y
+    )}) and (${rounded(cp2X)},${rounded(cp2Y)}) .. (${rounded(x)},${rounded(
+      y
+    )})`;
+    this.pos = [x, y];
     return this;
   }
   closePath() {
@@ -182,6 +221,8 @@ export default class TikZ implements Renderer2D {
   ) {
     let sx = x + radius * Math.cos(startAngle),
       sy = y + radius * Math.sin(startAngle);
+    let ex = x + radius * Math.cos(endAngle),
+      ey = y + radius * Math.sin(endAngle);
     startAngle /= 2 * Math.PI;
     endAngle /= 2 * Math.PI;
     startAngle -= Math.floor(startAngle);
@@ -196,6 +237,7 @@ export default class TikZ implements Renderer2D {
     this.path += ` arc(${rounded(startAngle * 360)}:${rounded(
       endAngle * 360
     )}:${rounded(radius)})`;
+    this.pos = [ex, ey];
     return this;
   }
   stroke() {

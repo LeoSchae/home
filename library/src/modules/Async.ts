@@ -7,7 +7,7 @@ export class AsyncManager<K> {
 
   constructor() {}
 
-  getNew(context: K): OptionsFactory {
+  getNew(context: K, timeBudget?: number): OptionsFactory {
     return {
       create: () => {
         let m = this.map;
@@ -19,7 +19,7 @@ export class AsyncManager<K> {
           active = [];
           m.set(context, active);
         }
-        let o = new AsyncOptions();
+        let o = new AsyncOptions(timeBudget);
         active.push(o);
         return o;
       },
@@ -44,17 +44,15 @@ type Options = {
 };
 
 export class AsyncOptions implements Options {
-  private I: number;
+  private I: number = -1;
   private i: number = 0;
   private t: number = performance.now();
   private t0: number | undefined;
   private d: number;
-  aborted: boolean;
+  aborted: boolean = false;
 
-  constructor() {
-    this.I = -1;
-    this.d = 16;
-    this.aborted = false;
+  constructor(timeBudget = 16) {
+    this.d = timeBudget;
   }
 
   begin() {

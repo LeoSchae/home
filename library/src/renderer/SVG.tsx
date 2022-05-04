@@ -146,6 +146,29 @@ export default class SVG implements Renderer2D {
     this._path += `L${rounded(x)} ${rounded(y)}`;
     return this;
   }
+  quadraticTo(cpX: number, cpY: number, x: number, y: number): this {
+    if (!this._path) return this.moveTo(x, y);
+    let rounded = this.round;
+    this._path += `Q${rounded(cpX)} ${rounded(cpY)} ${rounded(x)} ${rounded(
+      y
+    )}`;
+    return this;
+  }
+  cubicTo(
+    cp1X: number,
+    cp1Y: number,
+    cp2X: number,
+    cp2Y: number,
+    x: number,
+    y: number
+  ): this {
+    if (!this._path) return this.moveTo(x, y);
+    let rounded = this.round;
+    this._path += `C${rounded(cp1X)} ${rounded(cp1Y)} ${rounded(
+      cp2X
+    )} ${rounded(cp2Y)} ${rounded(x)} ${rounded(y)}`;
+    return this;
+  }
   closePath() {
     this._path = (this._path || "") + "Z";
     return this;

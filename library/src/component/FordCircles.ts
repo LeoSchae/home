@@ -8,47 +8,237 @@ import { BBSprite, FracSprite, TextSprite } from "../canvas/sprites";
 import { DragZoomHover } from "../modules/Interact";
 import { Complex } from "../modules/math";
 import * as layers from "./layers";
+import { runInContext } from "vm";
+import * as asyncLib from "@lib/modules/Async";
+
+function download(
+  content: string,
+  name: string,
+  dataType: string = "text/plain"
+) {
+  let data = `data:${dataType};base64,${window.btoa(content)}`;
+  let link = document.createElement("a");
+  link.setAttribute("download", name);
+  link.href = data;
+  link.click();
+}
+
+const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
+  r: render.Renderer2D,
+  Q: number,
+  options: { projection: { origin: [number, number]; scale: number } }
+) {
+  let measure = new render.Canvas(
+    document
+      .createElement("canvas")
+      .getContext("2d") as CanvasRenderingContext2D
+  );
+  let { projection } = options;
+  let { origin, scale } = projection;
+
+  r.fillStyle = "#AAAAAA";
+  r.beginPath();
+  r.arc(...origin, scale, 0, 2 * Math.PI - 0.01, true);
+  r.fillAndStroke();
+  //domainCircle(r, [0, 0.5], 0.5, pr);
+  //r.stroke();
+
+  let fr = FareyFractions(Q);
+
+  let fs = 12;
+  r.fontSize = fs;
+  let textUpTo = Q; //bestQ(pr.scale, fs) + 5;
+  let annotations: [number, number, number][][] = Array(textUpTo)
+    .fill(null)
+    .map(() => []);
+
+  r.fillStyle = "#FFFFFF";
+  for (let [a, b] of fr) {
+    yield;
+
+    let segments = 10;
+    if (a == 0) continue;
+    if (b === 1) segments = 40;
+    let xPosition = a / b;
+    let radius = 0.5 / b / b;
+    let midP = domainCircle(
+      r,
+      [xPosition, radius],
+      radius,
+      projection,
+      segments
+    );
+    r.fillAndStroke();
+    if (b <= textUpTo) annotations[b - 1].push([a, midP[0], midP[1]]);
+  }
+
+  r.fillStyle = "#555555";
+  for (let q0 = 0; q0 < annotations.length; q0++) {
+    let q = q0 + 1;
+
+    r.fontSize = q == 1 ? scale / 2 : scale / q / q;
+    measure.fontSize = q == 1 ? scale / 2 : scale / q / q;
+    let qSprite;
+    for (let [p, m0, m1] of annotations[q0]) {
+      if (q == 1) {
+        TextSprite(measure, "" + p).draw(r, m0, m1);
+        continue;
+      }
+      qSprite ??= TextSprite(measure, "" + q);
+      FracSprite(TextSprite(measure, "" + p), qSprite).draw(r, m0, m1);
+    }
+  }
+});
+
+const fordCirclesInPlane = asyncLib.wrap.async(function* (
+  r: render.Renderer2D,
+  Q: number,
+  options: {
+    projection: { origin: [number, number]; scale: number };
+  }
+) {
+  let measure = new render.Canvas(
+    document
+      .createElement("canvas")
+      .getContext("2d") as CanvasRenderingContext2D
+  );
+
+  r.fillStyle = "#AAAAAA";
+  let { width, height } = r as any;
+  r.moveTo(0, 0)
+    .lineTo(0, height)
+    .lineTo(width, height)
+    .lineTo(width, 0)
+    .closePath()
+    .fill();
+  r.fillStyle = "#000000";
+  let { projection } = options;
+  let { origin, scale } = projection;
+
+  let fs = 12;
+  r.fontSize = fs;
+  let textUpTo = Q; //bestQ(pr.scale, fs) + 5;
+  let annotations: number[][] = Array(textUpTo)
+    .fill(null)
+    .map(() => []);
+
+  r.lineWidth = 1.25;
+  r.fontSize = 10;
+  drawCarthesian2DAxis(r as any, projection, { noY: true, labelX: "" });
+  annotateCarthesian2DAxis(r as any, "x", projection, [
+    { sprite: TextSprite(measure, "0"), at: 0 },
+    { sprite: TextSprite(measure, "1"), at: 1 },
+  ]);
+
+  let fractions = FareyFractions(Q);
+
+  function map(r: number, i: number) {
+    return [r * scale + origin[0], -i * scale + origin[1]] as [number, number];
+  }
+
+  // Find all fracions on screen
+
+  r.fillStyle = "#FFFFFF";
+  for (let [a, b] of fractions) {
+    yield;
+
+    let xPosition = a / b;
+    let radius = 0.5 / b / b;
+
+    r.beginPath();
+    r.arc(
+      ...map(xPosition, radius),
+      radius * scale,
+      0,
+      2 * Math.PI - 0.01,
+      true
+    );
+    r.closePath();
+    r.stroke();
+    r.fill();
+
+    if (b < textUpTo) annotations[b - 1].push(a);
+  }
+  let d = 0;
+  r.fillStyle = "#000000";
+  for (let q0 = 0; q0 < annotations.length; q0++) {
+    let q = q0 + 1;
+
+    r.fontSize = (scale * 0.3) / q / q;
+    measure.fontSize = (scale * 0.3) / q / q;
+    let qSprite;
+    for (let p of annotations[q0]) {
+      yield;
+      let x = map(p / q, 0)[0];
+      if (x < -2 * fs || x > width + 2 * fs) continue;
+      d++;
+      qSprite ??= TextSprite(measure, "" + q);
+      FracSprite(TextSprite(measure, "" + p), qSprite).draw(
+        r,
+        ...map(p / q, 0.5 / q / q)
+      );
+    }
+  }
+});
+
+function domainCircle(
+  r: render.Renderer2D,
+  center: [number, number],
+  radius: number,
+  projection: { origin: [number, number]; scale: number },
+  segments = 20
+) {
+  let { origin = [0, 0], scale = 1 } = projection || {};
+  function map(r: number, i: number) {
+    let abs = Math.exp(-2 * Math.PI * i);
+    return [
+      Math.cos(2 * Math.PI * r) * abs * scale + origin[0],
+      -Math.sin(2 * Math.PI * r) * abs * scale + origin[1],
+    ] as [number, number];
+  }
+
+  let stepSize = (2 * Math.PI) / segments;
+
+  let len = 0;
+  let middleP = [0, 0];
+
+  r.beginPath();
+  let oldP = map(center[0] + radius, center[1]);
+  r.moveTo(...oldP);
+  for (let s = 1; s < segments + 1; s++) {
+    let newP = map(
+      center[0] + Math.cos(stepSize * s) * radius,
+      center[1] + Math.sin(stepSize * s) * radius
+    );
+    let midP = map(
+      center[0] + Math.cos(stepSize * (s - 0.5)) * radius,
+      center[1] + Math.sin(stepSize * (s - 0.5)) * radius
+    );
+    let l = Math.sqrt(
+      (newP[0] - oldP[0]) * (newP[0] - oldP[0]) +
+        (newP[1] - oldP[1]) * (newP[1] - oldP[1])
+    );
+    len += l;
+    middleP[0] += l * midP[0];
+    middleP[1] += l * midP[1];
+    r.quadraticTo(
+      2 * midP[0] - 0.5 * (oldP[0] + newP[0]),
+      2 * midP[1] - 0.5 * (oldP[1] + newP[1]),
+      ...newP
+    );
+    oldP = newP;
+  }
+  r.closePath();
+  return [middleP[0] / len, middleP[1] / len];
+}
 
 window.customElements.define(
   "ford-circles",
   layers.LayeredComponent({
     connected(config) {
-      const app = this;
+      let asyncManager = new asyncLib.AsyncManager<"draw">();
 
-      const pr = new ComplexScTr([100, 100], 100);
-
-      function fixTrZoom() {
-        let p0 = pr.project(new Complex(0));
-        let p1 = pr.project(new Complex(1));
-        let d = Math.abs(p0[0] - p1[0]);
-
-        let mod = false;
-
-        let { width, height } = config;
-
-        if (p0[1] < height / 6) {
-          pr.addTranslation([0, -p0[1] + height / 6]);
-          mod = true;
-        } else if (p0[1] > (5 * height) / 6) {
-          pr.addTranslation([0, -p0[1] + (5 * height) / 6]);
-          mod = true;
-        }
-        if (p1[0] < 0.5 * width) {
-          pr.addTranslation([-p1[0] + 0.5 * width, 0]);
-          mod = true;
-        }
-        if (p0[0] > width * 0.5) {
-          pr.addTranslation([-p0[0] + 0.5 * width, 0]);
-          mod = true;
-        }
-
-        if (d < 0.25 * width) {
-          pr.addZoom((0.25 * width) / d, [width / 2, height / 2]);
-          mod = true;
-        }
-
-        if (mod) config.update();
-      }
+      const pr = new ComplexScTr([config.width / 2, config.height / 2], 100);
 
       const dzh = new DragZoomHover(
         (dragDir) => {
@@ -59,8 +249,8 @@ window.customElements.define(
           let p0 = pr.project(new Complex(0));
           let p1 = pr.project(new Complex(1));
           let d = Math.abs(p0[0] - p1[0]);
-          if (zoomFactor <= (0.25 * config.width) / d)
-            zoomFactor = (0.25 * config.width) / d;
+          if (zoomFactor <= (0.1 * config.width) / d)
+            zoomFactor = (0.1 * config.width) / d;
           pr.addZoom(zoomFactor, center);
 
           config.update();
@@ -71,6 +261,7 @@ window.customElements.define(
 
       let options = config.addLayer("Options", layers.Options());
       let Q = 30;
+      let mode: "Halfplane" | "Circle" = "Halfplane";
       options.add("number", {
         label: "Circles up to denominator",
         onChange(q) {
@@ -79,62 +270,80 @@ window.customElements.define(
         },
         default: Q,
       });
+      options.add("radio", {
+        label: "Show in:",
+        values: [
+          { name: "Halfplane", label: "Upper halfplane" },
+          { name: "Cirlce", label: "Unit circle" },
+        ],
+        default: mode,
+        onChange(name) {
+          mode = name as any;
+          config.update();
+        },
+      });
+
+      options.add("multiButton", {
+        label: "Export as",
+        values: [
+          { name: "SVG", label: "SVG" },
+          { name: "TikZ", label: "TikZ" },
+        ],
+        async onClick(name) {
+          let r: render.SVG | render.TikZ;
+          let fileName: string = "Hyperbola";
+          let dataType: string;
+          if (name == "SVG") {
+            r = new render.SVG(config.width, config.height);
+            fileName += ".svg";
+            dataType = "image/svg+xml";
+          } else if (name == "TikZ") {
+            r = new render.TikZ(config.width, config.height);
+            fileName += ".tikz";
+            dataType = "text/plain";
+          } else throw new Error("Unknown format");
+
+          let promise;
+          if (mode == "Halfplane")
+            promise = fordCirclesInPlane(r, Q, { projection: pr });
+          else promise = fordCirclesInUnitSphere(r, Q, { projection: pr });
+
+          promise.catch((e) => console.log(e));
+
+          await promise;
+
+          download(r.toFileString(), fileName, dataType);
+        },
+      });
 
       config.addLayer(
         "draw",
         layers.Canvas({
           update(config, ctx) {
-            fixTrZoom();
             let r = new render.Canvas(ctx);
 
             ctx.clearRect(0, 0, config.width, config.height);
 
-            ctx.lineWidth = 1.25;
-            drawCarthesian2DAxis(r, pr);
+            asyncManager.abortAll("draw");
 
-            let fs = 10;
-            r.fontSize = fs;
-            let textUpTo = bestQ(pr.scale, fs);
-
-            let fractions = FareyFractions(Q);
-
-            // Find all fracions on screen
-            let spr = [];
-
-            r.fillStyle = "#FF333322";
-            for (let [a, b] of fractions) {
-              let xPosition = a / b;
-              let radius = 0.5 / b / b;
-
-              r.beginPath();
-              r.arc(
-                ...pr.project([xPosition, radius]),
-                radius * pr.scale,
-                0,
-                2 * Math.PI - 0.01,
-                true
-              );
-              r.closePath();
-              r.stroke();
-              r.fill();
-
-              if (b <= textUpTo) {
-                spr.push({
-                  sprite:
-                    b === 1
-                      ? TextSprite(r, "" + a)
-                      : FracSprite(
-                          TextSprite(r, "" + a),
-                          TextSprite(r, "" + b)
-                        ),
-                  at: a / b,
-                });
-              }
-            }
-
-            r.fillStyle = "#000000";
-            // annotate Fractions
-            annotateCarthesian2DAxis(r, "x", pr, spr);
+            if (mode === "Halfplane")
+              fordCirclesInPlane(
+                r,
+                Q,
+                { projection: pr },
+                asyncManager.getNew("draw", 100)
+              ).catch((e) => {
+                if (e !== "aborted") console.log(e);
+              });
+            else
+              fordCirclesInUnitSphere(
+                r,
+                Q,
+                { projection: pr },
+                asyncManager.getNew("draw", 100)
+              ).catch((e) => {
+                if (e !== "aborted") console.log(e);
+              });
           },
         })
       );

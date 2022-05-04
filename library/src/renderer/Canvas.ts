@@ -112,6 +112,23 @@ export default class Canvas implements Renderer2D, MeasureText {
     return this;
   }
 
+  quadraticTo(cpX: number, cpY: number, x: number, y: number) {
+    this._ctx.quadraticCurveTo(cpX, cpY, x, y);
+    return this;
+  }
+
+  cubicTo(
+    cp1X: number,
+    cp1Y: number,
+    cp2X: number,
+    cp2Y: number,
+    x: number,
+    y: number
+  ) {
+    this._ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, x, y);
+    return this;
+  }
+
   closePath() {
     this._ctx.closePath();
     return this;

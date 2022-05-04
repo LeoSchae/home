@@ -47,6 +47,19 @@ export interface Renderer2D {
   /** Draw a line from the current to the target location. */
   lineTo(x: number, y: number): this;
 
+  /** Draw a quadratic curve from the current location. */
+  quadraticTo(cpX: number, cpY: number, x: number, y: number): this;
+
+  /** Draw a cubic curve (bezier curve) from the current location. */
+  cubicTo(
+    cp1X: number,
+    cp1Y: number,
+    cp2X: number,
+    cp2Y: number,
+    x: number,
+    y: number
+  ): this;
+
   /** Close the current path. */
   closePath(): this;
 

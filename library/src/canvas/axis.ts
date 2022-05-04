@@ -102,6 +102,8 @@ export function drawCarthesian2DAxis(
   } & render.MeasureText,
   projection: { origin: [number, number]; scale: number },
   {
+    noX = false,
+    noY = false,
     arrowSize: as = 7,
     fontSize: fs = 13,
     labelX = TeX.mathBB("R"),
@@ -128,29 +130,30 @@ export function drawCarthesian2DAxis(
   const dx = [pos1[0] - origin[0], pos1[1] - origin[1]] as [number, number];
   const dy = [posi[0] - origin[0], posi[1] - origin[1]] as [number, number];
 
-  const [, , rx, ry] = infArrow(ctx, width, height, origin, dx, {
-    arrowSize: as,
-  });
-  const [, , ix, iy] = infArrow(ctx, width, height, origin, dy, {
-    arrowSize: as,
-  });
-
-  // TODO drawing is not good for rotations!
-  if (labelX)
-    ctx.textNode(
-      labelX,
-      rx - 0.2 * fs,
-      ry + 0.2 * fs + as / 2,
-      render.TextAlign.TR
-    );
-
-  if (labelY)
-    ctx.textNode(
-      labelY,
-      ix - 0.2 * fs - as / 2,
-      iy + 0.2 * fs,
-      render.TextAlign.TR
-    );
+  if (!noX) {
+    const [, , rx, ry] = infArrow(ctx, width, height, origin, dx, {
+      arrowSize: as,
+    });
+    if (labelX)
+      ctx.textNode(
+        labelX,
+        rx - 0.2 * fs,
+        ry + 0.2 * fs + as / 2,
+        render.TextAlign.TR
+      );
+  }
+  if (!noY) {
+    const [, , ix, iy] = infArrow(ctx, width, height, origin, dy, {
+      arrowSize: as,
+    });
+    if (!noY && labelY)
+      ctx.textNode(
+        labelY,
+        ix - 0.2 * fs - as / 2,
+        iy + 0.2 * fs,
+        render.TextAlign.TR
+      );
+  }
 }
 
 export function annotateCarthesian2DAxis(
