@@ -2,6 +2,7 @@ import * as layers from "./layers";
 import * as render from "@lib/renderer";
 import * as math from "@lib/modules/math";
 import ScaledRender from "@lib/renderer/AutoScale";
+import { manualSizing } from "./layers/Options";
 
 function download(
   content: string,
@@ -246,6 +247,7 @@ window.customElements.define(
       );
 
       let options = config.addLayer("options", layers.Options());
+
       options.add("number", {
         label: "Cuts",
         onChange: (x) => {
@@ -309,6 +311,7 @@ window.customElements.define(
         default: state.color.error,
       });
 
+      options.add(manualSizing, config);
       options.add("multiButton", {
         label: "Export as",
         values: [

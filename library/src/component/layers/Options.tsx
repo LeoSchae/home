@@ -12,10 +12,7 @@ const OPTION_TYPES = {
     label: string;
     onChange?: (n: number) => any;
     default?: number;
-  }): {
-    label: Node;
-    input: Node;
-  } {
+  }) {
     const changed = options.onChange;
     return {
       label: <label>{options.label}</label>,
@@ -126,7 +123,9 @@ type Options = {
   addOption(option: { label: Node; input: Node }): unknown;
   add<K extends keyof typeof OPTION_TYPES>(
     option: { type: K } & Parameters<typeof OPTION_TYPES[K]>[0]
-  ): unknown;
+  ): "handle" extends keyof ReturnType<typeof OPTION_TYPES[K]>
+    ? ReturnType<typeof OPTION_TYPES[K]>["handle"]
+    : void;
 };
 
 export default function (): Layer<undefined, OptionPane> {
@@ -166,9 +165,10 @@ export default function (): Layer<undefined, OptionPane> {
   };
 }
 
-export function manualSizing(
-  config: LayeredConfig
-): [type: "custom", ...args: Parameters<typeof OPTION_TYPES["custom"]>] {
+export function manualSizing(config: LayeredConfig): {
+  label: Node;
+  input: Node;
+} {
   let widthInput: HTMLInputElement = (
       <input type="number" style="width:6em;" />
     ) as any,
@@ -267,13 +267,10 @@ export function manualSizing(
     </span>
   );
 
-  return [
-    "custom",
-    {
-      label: <span>Canvas size ({currentSizing})</span>,
-      input: inputs,
-    },
-  ];
+  return {
+    label: <span>Canvas size ({currentSizing})</span>,
+    input: inputs,
+  };
 }
 
 export type Option<K extends keyof typeof OPTION_TYPES> = [
@@ -281,24 +278,47 @@ export type Option<K extends keyof typeof OPTION_TYPES> = [
   ...args: Parameters<typeof OPTION_TYPES[K]>
 ];
 
+type OptionReturn<F extends (...args: any[]) => { [key: string]: any }> =
+  "handle" extends keyof ReturnType<F> ? ReturnType<F>["handle"] : void;
+
 export class OptionPane {
   container: HTMLElement = (<div></div>);
 
-  add<K extends keyof typeof OPTION_TYPES>(args: Option<K>): unknown;
+  add<K extends keyof typeof OPTION_TYPES>(
+    args: [type: K, ...args: Parameters<typeof OPTION_TYPES[K]>]
+  ): OptionReturn<typeof OPTION_TYPES[K]>;
+
   add<K extends keyof typeof OPTION_TYPES>(
     type: K,
     ...args: Parameters<typeof OPTION_TYPES[K]>
-  ): unknown;
-  add(type: string | [string, ...any[]], ...args: any[]) {
-    if (Array.isArray(type)) {
-      args = type.slice(1);
-      type = type[0];
+  ): OptionReturn<typeof OPTION_TYPES[K]>;
+
+  add<F extends (...args: any[]) => any>(
+    factory: F,
+    ...args: Parameters<F>
+  ): OptionReturn<F>;
+
+  add<F extends (...args: any[]) => any>(
+    args: [factory: F, ...args: Parameters<F>]
+  ): OptionReturn<F>;
+
+  add(typeOrFactory: any, ...args: any[]): any {
+    if (Array.isArray(typeOrFactory)) {
+      args = typeOrFactory.slice(1);
+      typeOrFactory = typeOrFactory[0];
     }
-    var opt = (OPTION_TYPES as any)[type](...args);
+    let factory: (...args: any[]) => any =
+      typeof typeOrFactory === "function"
+        ? typeOrFactory
+        : (OPTION_TYPES as any)[typeOrFactory];
+    var opt = factory(...args);
+    console.log(opt);
     this.addOption(opt);
+    if ("handle" in opt) return (opt as any).handle;
+    return undefined as any;
   }
 
-  addOption(option: { label?: Node; input: Node }) {
+  addOption(option: { label?: Node; input?: Node }) {
     this.container.appendChild(
       <div style="margin-top: 10px;">
         {option.label ? (

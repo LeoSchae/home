@@ -184,7 +184,7 @@ window.customElements.define(
         default: appOptions.fill,
       });
 
-      options.add(manualSizing(config));
+      options.add(manualSizing, config);
 
       options.add("multiButton", {
         label: "Export as",

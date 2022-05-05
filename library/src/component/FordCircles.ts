@@ -10,6 +10,7 @@ import { Complex } from "../modules/math";
 import * as layers from "./layers";
 import { runInContext } from "vm";
 import * as asyncLib from "@lib/modules/Async";
+import { manualSizing } from "./layers/Options";
 
 function download(
   content: string,
@@ -283,6 +284,7 @@ window.customElements.define(
         },
       });
 
+      options.add(manualSizing, config);
       options.add("multiButton", {
         label: "Export as",
         values: [
