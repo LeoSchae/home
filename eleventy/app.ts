@@ -1,24 +1,55 @@
 // @ts-ignore
 import Eleventy from "@11ty/eleventy/src/Eleventy";
+import * as fs from "fs";
 import * as ESBuild from "./plugins/esbuild";
 import * as PostCSS from "./plugins/postcss";
 import * as Logging from "./plugins/logging";
 import Navigation from "./plugins/navigation";
 import Inline from "./plugins/inline";
+import { build } from "esbuild";
 
 (global as any).DEBUG = true;
 
 (async function () {
-  let eleventy = new Eleventy("./website/", "./_build", {
+  const environment =
+    process.env.NODE_ENV === "development" ? "development" : "production";
+  const build_dir = "./_build";
+
+  const esbuildOptions =
+    environment === "production"
+      ? {
+          minify: true,
+          sourcemap: false,
+        }
+      : {
+          minify: false,
+          sourcemap: "inline",
+        };
+
+  let eleventy = new Eleventy("./website/", build_dir, {
     config: function (eleventyConfig: any) {
       (global as any).eleveventy = eleventyConfig;
       eleventyConfig.setWatchJavaScriptDependencies(false);
+      eleventyConfig.addGlobalData(
+        "isProduction",
+        environment === "production"
+      );
+
+      eleventyConfig.on(
+        "eleventy.before",
+        () =>
+          new Promise((resolve, reject) => {
+            fs.rm(build_dir, { recursive: true, force: true }, (err) => {
+              if (err) reject(err);
+              else resolve(undefined);
+            });
+          })
+      );
 
       eleventyConfig.addWatchTarget("./library/", "./inline/");
 
       // Passthrough
       eleventyConfig.addPassthroughCopy("website/fonts/");
-      eleventyConfig.addPassthroughCopy("website/favicon.svg");
 
       // Template formats
       eleventyConfig.setTemplateFormats(["njk", "md", "pcss", "ts", "tsx"]);
@@ -30,10 +61,7 @@ import Inline from "./plugins/inline";
       eleventyConfig.addPlugin(Navigation, {});
 
       eleventyConfig.addPlugin(ESBuild.EleventyPlugin, {
-        build: {
-          minify: false,
-          sourcemap: "inline",
-        },
+        build: esbuildOptions,
         plugins: [
           ESBuild.ConstImports(),
           ESBuild.CSSImports([require("postcss-minify")]),
@@ -89,7 +117,17 @@ import Inline from "./plugins/inline";
     },
   });
 
-  await eleventy.init();
-  await eleventy.watch();
-  eleventy.serve(8080);
+  switch (environment) {
+    case "development":
+      await eleventy.init();
+      await eleventy.watch();
+      eleventy.serve(8080);
+      break;
+    case "production":
+      await eleventy.write();
+      break;
+    default:
+      let assertUnreachable: never = environment;
+      break;
+  }
 })();

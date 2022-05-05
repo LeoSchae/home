@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node --files eleventy/app"
+    "dev": "NODE_ENV=development ts-node --files eleventy/app",
+    "build": "NODE_ENV=production ts-node --files eleventy/app"
   },
   "keywords": [],
   "author": "",
