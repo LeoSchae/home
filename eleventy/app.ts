@@ -85,7 +85,7 @@ import { build } from "esbuild";
         "urlCheck",
         function (this: EleventyThis, site: string) {
           for (let page of this.ctx.collections.all) {
-            if (page.url == site) return site;
+            if (page.url == site) return "/home" + site;
           }
           throw Error("Linked site '" + site + "' not found!");
         }
@@ -97,7 +97,7 @@ import { build } from "esbuild";
         "urlCheck",
         function (this: EleventyThis, site: string) {
           for (let page of this.ctx.collections.all) {
-            if (page.url == site) return site;
+            if (page.url == site) return "/home" + site;
           }
           throw Error("Linked site '" + site + "' not found!");
         }
@@ -109,13 +109,14 @@ import { build } from "esbuild";
         "urlCheck",
         function (site: string, all: EleventyPage[]) {
           for (let page of all) {
-            if (page.url == site) return site;
+            if (page.url == site) return "/home" + site;
           }
           throw Error("Linked site '" + site + "' not found!");
         }
       );
     },
   });
+  eleventy.setPathPrefix("/home/");
 
   switch (environment) {
     case "development":

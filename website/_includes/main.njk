@@ -25,7 +25,7 @@ content: [Website Content]
         {% inline "normalize.pcss" %} 
         {% inline "variables.pcss" %}
       </style>
-      <link rel="stylesheet" href="/katex_0.15.2.css">
+      <link rel="stylesheet" href="{% urlCheck "/katex_0.15.2.css" %}">
       <title>{{ title }}</title>
     {% endblock %}
   </head>

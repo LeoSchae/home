@@ -50,6 +50,7 @@ function Item({
 }
 
 function Name(item: { display: string; url?: string }) {
+  // TODO FIX
   if (item.url) return <a href={item.url}>{item.display}</a>;
   return <span tabindex="0">{item.display}</span>;
 }
@@ -64,6 +65,7 @@ export default function (
   eleventyConfig.addShortcode(
     "navigation_html",
     function (
+      this: any,
       collection: any[],
       opt?: {
         list_classes?: string[];
@@ -99,7 +101,10 @@ export default function (
         }
 
         if (key.length == 1) {
-          parent["url"] = page.url;
+          parent["url"] = eleventyConfig.javascriptFunctions.urlCheck.call(
+            this,
+            page.url
+          );
           continue;
         }
 
@@ -110,7 +115,13 @@ export default function (
             `warning: Duplicate navigation entry: "${page.url}" and "${child.url}"`
           );
         } else {
-          child = { display: key[1], url: page.url };
+          child = {
+            display: key[1],
+            url: eleventyConfig.javascriptFunctions.urlCheck.call(
+              this,
+              page.url
+            ),
+          };
           parent.children[key[1]] = child;
         }
       }

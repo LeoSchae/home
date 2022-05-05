@@ -74,7 +74,7 @@ nav:
 </style>
 
 {% for test in collections.projects %}
-<a class="project-card-a" href="{{test.url}}">
+<a class="project-card-a" href="{% urlCheck test.url %}">
 <div class="project-card">
 <div class="project-icon">{{test.data.icon | safe}}</div>
 <div class="project-text">
