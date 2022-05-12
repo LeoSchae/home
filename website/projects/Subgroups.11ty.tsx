@@ -18,7 +18,7 @@ export async function render(this: any, data: any) {
       <script>
         {await this.bundledScript("@lib/component/SubgroupsWC", data)}
       </script>
-      <subgroups-wc>{nojs}</subgroups-wc>
+      <subgroups-wc></subgroups-wc>
     </>
   );
 }

@@ -28,6 +28,7 @@ main a:hover {
 
 # About me
 
+g
 My name is Leo Schäfer, I studied Mathematics at the Georg-August University of Göttingen. My main interests lie in the field of analytic number theory.
 
 You can take a look at [some of my small web projects]({% urlCheck "/projects/", collections.all %} "A list of my smaller projects").
@@ -37,5 +38,5 @@ You can take a look at [some of my small web projects]({% urlCheck "/projects/",
 No cookies! Everything is static, built with [Eleventy](https://www.11ty.dev/ "A cool static site generator"), [PostCSS](https://postcss.org/ "Fancy things on top of CSS") and [ESBuild](https://esbuild.github.io/ "A bundler for javascript and typescript"). No data is collected :)
 
 {% if isProduction == false %}
-<a href="/buildlog.html" style="display: block; font-size: 0.75rem; float: right; bot: 0; right: 0; margin-top: 4rem;">buildlog</a>
+<a href="/home/buildlog.html" style="display: block; font-size: 0.75rem; float: right; bot: 0; right: 0; margin-top: 4rem;">buildlog</a>
 {% endif %}

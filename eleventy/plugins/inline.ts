@@ -34,18 +34,19 @@ export default function (
     }
   }
 
-  eleventyConfig.addNunjucksAsyncShortcode(
-    "inline",
-    async function (this: EleventyThis, path: string) {
-      path = resolve("./inline/", path);
+  async function inlinePath(path: string) {
+    path = resolve("./inline/", path);
 
-      let ext = getExtension(path);
-      if (!ext) throw "ERROR";
-      let contents = "";
-      if (ext.read) contents = (await readFile(path)).toString();
-      let render = await ext.compile(contents, path);
-      if (!render) throw "ERROR";
-      return await render();
-    }
-  );
+    let ext = getExtension(path);
+    if (!ext) throw new Error("No extension handler found");
+    let contents = "";
+    if (ext.read) contents = (await readFile(path)).toString();
+    let render = await ext.compile(contents, path);
+    if (!render) throw "ERROR";
+    return await render();
+  }
+
+  eleventyConfig.addJavaScriptFunction("inline", inlinePath);
+
+  eleventyConfig.addNunjucksAsyncShortcode("inline", inlinePath);
 }

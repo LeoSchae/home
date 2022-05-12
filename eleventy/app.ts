@@ -4,15 +4,24 @@ import * as fs from "fs";
 import * as ESBuild from "./plugins/esbuild";
 import * as PostCSS from "./plugins/postcss";
 import * as Logging from "./plugins/logging";
+import * as html_min from "html-minifier";
 import Navigation from "./plugins/navigation";
 import Inline from "./plugins/inline";
-import { build } from "esbuild";
-
-(global as any).DEBUG = true;
 
 (async function () {
   const environment =
     process.env.NODE_ENV === "development" ? "development" : "production";
+  const isDevelopment = environment === "development";
+  const isProduction = !isDevelopment;
+
+  const options = {
+    build_dir: "./_build",
+    output: {
+      minify: isProduction,
+      sourcemap: isDevelopment,
+    },
+  };
+
   const build_dir = "./_build";
 
   const esbuildOptions =
@@ -62,10 +71,15 @@ import { build } from "esbuild";
       eleventyConfig.addPlugin(Navigation, {});
 
       eleventyConfig.addPlugin(ESBuild.EleventyPlugin, {
-        build: esbuildOptions,
+        build: {
+          minify: options.output.minify,
+          sourcemap: options.output.sourcemap ? "inline" : false,
+        },
         plugins: [
           ESBuild.ConstImports(),
-          ESBuild.CSSImports([require("postcss-minify")]),
+          ESBuild.CSSImports(
+            options.output.minify ? [require("postcss-minify")] : []
+          ),
         ],
       });
 
@@ -78,6 +92,22 @@ import { build } from "esbuild";
           require("postcss-import"),
         ],
       });
+
+      if (options.output.minify)
+        eleventyConfig.addTransform(
+          "html-minifier",
+          function (content: string, outPath: string) {
+            console.log(outPath);
+            if (outPath.endsWith(".html"))
+              return html_min.minify(content, {
+                removeComments: true,
+                collapseWhitespace: true,
+                minifyCSS: true,
+                minifyJS: true,
+              });
+            return content;
+          }
+        );
 
       /**
        * Shortcode to check if a url is present within a collection on pages
