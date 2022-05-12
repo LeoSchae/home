@@ -25,7 +25,6 @@ export function data() {
     title: "Ford Circles",
     description: "View Ford circles.",
     icon: previewIcon(),
-    layout: "main.njk",
     layout_type: "fullscreen",
     tags: ["projects"],
     nav: { key: "Web Apps::Ford Circles" },

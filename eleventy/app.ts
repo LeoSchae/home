@@ -18,11 +18,11 @@ import { build } from "esbuild";
   const esbuildOptions =
     environment === "production"
       ? {
-          minify: true,
-          sourcemap: false,
+          minify: true, //false ,
+          sourcemap: "inline", //false,
         }
       : {
-          minify: false,
+          minify: true,
           sourcemap: "inline",
         };
 
@@ -34,6 +34,7 @@ import { build } from "esbuild";
         "isProduction",
         environment === "production"
       );
+      eleventyConfig.addGlobalData("layout", "sideNavigation.njk");
 
       eleventyConfig.on(
         "eleventy.before",
@@ -49,7 +50,7 @@ import { build } from "esbuild";
       eleventyConfig.addWatchTarget("./library/", "./inline/");
 
       // Passthrough
-      eleventyConfig.addPassthroughCopy("website/fonts/");
+      eleventyConfig.addPassthroughCopy("website/katex/");
 
       // Template formats
       eleventyConfig.setTemplateFormats(["njk", "md", "pcss", "ts", "tsx"]);
@@ -87,7 +88,11 @@ import { build } from "esbuild";
           for (let page of this.ctx.collections.all) {
             if (page.url == site) return "/home" + site;
           }
-          throw Error("Linked site '" + site + "' not found!");
+          eleventyConfig.javascriptFunctions.warn.call(
+            this,
+            "Linked site '" + site + "' not found!"
+          );
+          return "/home" + site;
         }
       );
       /**
@@ -99,7 +104,8 @@ import { build } from "esbuild";
           for (let page of this.ctx.collections.all) {
             if (page.url == site) return "/home" + site;
           }
-          throw Error("Linked site '" + site + "' not found!");
+          (this as any).warn("Linked site '" + site + "' not found!");
+          return "/home" + site;
         }
       );
       /**
@@ -107,11 +113,15 @@ import { build } from "esbuild";
        */
       eleventyConfig.addLiquidShortcode(
         "urlCheck",
-        function (site: string, all: EleventyPage[]) {
+        function (this: any, site: string, all: EleventyPage[]) {
           for (let page of all) {
             if (page.url == site) return "/home" + site;
           }
-          throw Error("Linked site '" + site + "' not found!");
+          eleventyConfig.javascriptFunctions.warn.call(
+            this,
+            "Linked site '" + site + "' not found!"
+          );
+          return "/home" + site;
         }
       );
     },

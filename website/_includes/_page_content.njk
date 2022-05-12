@@ -1,0 +1,24 @@
+{% block main %}
+{% set
+  _content_layout_type =
+    layout_type if layout_type in ["text", "fullscreen"]
+    else "text"
+ %}
+<style>
+.content-fullscreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.content-text {
+  max-width: min(750px, 90%);
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+<div class="content content-{{ _content_layout_type }}">
+  {{ content | safe }}
+</div>
+{% endblock %}

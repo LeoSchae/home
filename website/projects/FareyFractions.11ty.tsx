@@ -24,7 +24,6 @@ export function data() {
     title: "Farey Fractions",
     description: "Interactively view Farey fractions on a number line.",
     icon: previewIcon(),
-    layout: "main.njk",
     layout_type: "fullscreen",
     tags: ["projects"],
     nav: { key: "Web Apps::Farey Fractions" },

@@ -4,7 +4,6 @@ The basic website template. The variables used as content are:
 title: [Title for Window]
 layout_type: [Type of Page ("text", "fullscreen")]
 content: [Website Content]
-
 #}
 {% set layout_type = layout_type if layout_type in ["text", "fullscreen"] else "text" %}
 <!DOCTYPE html>
@@ -15,29 +14,19 @@ content: [Website Content]
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-      {% if description is defined %}
-        <meta name="description" content="{{ description }}">
-      {% else %}
-        {{ "No description meta tag set." | warn }}
-      {% endif %}
-      {#<link rel="stylesheet" href="{% urlCheck '/styles/newNav.css', collections.all %}">#}
+      {% include "_page_header.njk" %}
       <style>
-        {% inline "normalize.pcss" %} 
+        {% inline "essentials.pcss" %} 
         {% inline "variables.pcss" %}
       </style>
-      <link rel="stylesheet" href="{% urlCheck "/katex_0.15.2.css" %}">
-      <title>{{ title }}</title>
+      <link rel="stylesheet" href="{% urlCheck "/katex/katex_0.15.2.css" %}">
     {% endblock %}
   </head>
   <body>
     <div class="root root-{{ layout_type }}">
       {% block root_div %}
         {% include "_header.njk" %}
-        <main class="main main-{{ layout_type }}">
-          {% block main %}
-            {{ content | safe }}
-          {% endblock %}
-        </main>
+        {% include "_page_content.njk" %}  
       {% endblock %}
     </div>
   </body>

@@ -89,6 +89,7 @@ export class DragZoomHover {
     (e.currentTarget as HTMLElement).releasePointerCapture(pointerId);
   };
   private leave = (e: PointerEvent) => {
+    if (e.pointerType == "mouse" && this.state.length === 0) this.onHover(null);
     if (e.pointerType == "mouse" && e.button != 0) return;
     // Release pointer if no capture is present
 

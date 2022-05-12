@@ -28,7 +28,6 @@ export function data(this: any) {
     title: "Congruence Subgroups",
     description:
       "A small app that draws the fundamental domains of different congruence subgroups.",
-    layout: "main.njk",
     layout_type: "fullscreen",
     tags: ["projects"],
     nav: { key: "Web Apps::Subgroups" },

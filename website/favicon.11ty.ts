@@ -3,5 +3,6 @@ export function render() {
 }
 
 export const data = {
+  layout: "",
   permalink: () => "favicon.svg",
 };

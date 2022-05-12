@@ -1,7 +1,6 @@
 ---
 title: Leo Schäfer
 description: "Homepage of Leo."
-layout: "main.njk"
 ---
 
 <style type="text/css">
@@ -14,12 +13,6 @@ p:before {
   content: "";
   display: inline-block;
   width: 1em;
-}
-
-h1, h2, h3, p {
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 main a {

@@ -1,0 +1,6 @@
+<title>{{ title }}</title>
+{% if description is defined %}
+  <meta name="description" content="{{ description }}">
+{% else %}
+  {{ "No description meta tag set." | warn }}
+{% endif %} 
