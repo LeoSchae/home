@@ -20,9 +20,9 @@ export type JsCTX = TemplateCtx;
 export type AnyCTX = LiquidCTX | NunjucksCTX | HandlebarsCTX | JsCTX;
 
 /** Filter type */
-export type EleventyFilter<CTX> = (this: CTX, args: any[]) => any;
+export type Filter<CTX> = (this: CTX, ...args: any[]) => any;
 
-export type EleventyConfig = {
+export type Config = {
   addPlugin<OPT extends any[]>(
     plugin: (config: EleventyConfig, ...options: OPT) => unknown,
     OPT
@@ -77,14 +77,16 @@ export type EleventyConfig = {
   addHandlebarsShortcode(name: string, shortcode: Filter<HandlebarsCTX>);
   addShortcode(name: string, shortcode: Filter<AnyCTX>);
 
-  javascriptFunctions: { [key: string]: Filter<JsCTX> | unknown };
-  nunjucksFilters: { [key: string]: Filter<NunjucksCTX> | unknown };
-  liquidFilters: { [key: string]: Filter<LiquidCTX> | unknown };
-  handlebarsHelpers: { [key: string]: Filter<HandlebarsCTX> | unknown };
+  javascriptFunctions: { [key: string]: Filter<JsCTX> | undefined };
+  nunjucksFilters: { [key: string]: Filter<NunjucksCTX> | undefined };
+  liquidFilters: { [key: string]: Filter<LiquidCTX> | undefined };
+  handlebarsHelpers: { [key: string]: Filter<HandlebarsCTX> | undefined };
 
   // Data
 
   addGlobalData(name: string, value: any);
+
+  addLayoutAlias(from: string, to: string);
 
   // Watch / Serve / Pass
 
@@ -93,6 +95,7 @@ export type EleventyConfig = {
 
   addPassthroughCopy(target: string);
   setTemplateFormats(formats: string | string[]);
+  addTemplateFormats(formats: string | string[]);
 
   addTransform(
     name: string,
@@ -101,4 +104,21 @@ export type EleventyConfig = {
       content: string
     ) => string | Promise<string>
   );
+};
+export type ConfigReturn = {
+  templateFormats?: string[];
+  dataTemplateEngine?: string;
+  markdownTemplateEngine?: string;
+  htmlTemplateEngine?: string;
+
+  jsDataFileSuffix?: string;
+
+  pathPrefix?: string;
+  dir?: {
+    input?: string;
+    output?: string;
+    includes?: string;
+    layouts?: string;
+    data?: string;
+  };
 };

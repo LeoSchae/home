@@ -20,17 +20,18 @@ type Options = {
   };
 };
 
-export default function (config: types.EleventyConfig, options: Options) {
-  loggingPlugin(config, options);
+export default function (config: types.Config, options: Options) {
+  cleanBuildFolder(config, options);
+  logging(config, options);
   linkChecks(config, options);
 }
 
-function cleanBuildFolder(config: types.EleventyConfig, options: Options) {
+function cleanBuildFolder(config: types.Config, options: Options) {
   config.on(
     "eleventy.before",
     (options) =>
       new Promise((resolve, reject) => {
-        console.log("Removing build dir");
+        console.log(`Removing build dir. ('${options.dir.output}')`);
         fs.rm(options.dir.output, { recursive: true, force: true }, (err) => {
           if (err) reject(err);
           else resolve(undefined);
@@ -47,7 +48,7 @@ function cleanBuildFolder(config: types.EleventyConfig, options: Options) {
  * @param config
  * @param options
  */
-function linkChecks(config: types.EleventyConfig, options: Options) {
+function linkChecks(config: types.Config, options: Options) {
   // [unprefixed links]: [unprefixed url of calling page][]
   let toCheck: { [key: string]: string[] | undefined } = {};
 
@@ -60,7 +61,7 @@ function linkChecks(config: types.EleventyConfig, options: Options) {
     }
     for (let link of Object.keys(toCheck)) {
       for (let site of toCheck[link] as string[]) {
-        config.javascriptFunctions.warn.call({ page: { url: site } }, link);
+        config.javascriptFunctions.warn?.call({ page: { url: site } }, link);
       }
     }
   });
@@ -86,7 +87,7 @@ function linkChecks(config: types.EleventyConfig, options: Options) {
  * @param config
  * @param options
  */
-function loggingPlugin(config: types.EleventyConfig, options: Options) {
+function logging(config: types.Config, options: Options) {
   const levelList = ["info", "warn", "verbose"];
   const levelMap: { [key: string | number]: string | number } = {};
   for (var i = 0; i < levelList.length; i++) {

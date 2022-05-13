@@ -7,11 +7,13 @@ import * as html_min from "html-minifier";
 import Navigation from "./plugins/navigation";
 import Inline from "./plugins/inline";
 
-module.exports = function (eleventyConfig: types.EleventyConfig) {
+module.exports = function (eleventyConfig: types.Config): types.ConfigReturn {
   const environment =
     process.env.NODE_ENV === "development" ? "development" : "production";
   const isDevelopment = environment === "development";
   const isProduction = !isDevelopment;
+  eleventyConfig.addGlobalData("isProduction", isProduction);
+  eleventyConfig.addGlobalData("isDevelopment", isDevelopment);
 
   const options = {
     build_dir: "./_build",
@@ -21,6 +23,7 @@ module.exports = function (eleventyConfig: types.EleventyConfig) {
     },
   };
 
+  // Use browsersync (2.0)
   (eleventyConfig as any).setServerOptions({
     module: "@11ty/eleventy-server-browsersync",
 
@@ -33,14 +36,15 @@ module.exports = function (eleventyConfig: types.EleventyConfig) {
   });
 
   eleventyConfig.setWatchJavaScriptDependencies(false);
-  eleventyConfig.addGlobalData("isProduction", isProduction);
-  eleventyConfig.addGlobalData("isDevelopment", isDevelopment);
-  eleventyConfig.addGlobalData("layout", "sideNavigation.njk");
+
+  // Default layout
+  eleventyConfig.addLayoutAlias("default", "sideNavigation.njk");
+  eleventyConfig.addGlobalData("layout", "default");
 
   eleventyConfig.addWatchTarget("./library/");
   eleventyConfig.addWatchTarget("./inline/");
 
-  // Passthrough
+  // Passthrough katex
   eleventyConfig.addPassthroughCopy("website/katex/");
 
   // Template formats
