@@ -7,7 +7,7 @@ import * as html_min from "html-minifier";
 import Navigation from "./plugins/navigation";
 import Inline from "./plugins/inline";
 
-module.exports = function (eleventyConfig: types.EleventyConfig | any) {
+module.exports = function (eleventyConfig: types.EleventyConfig) {
   const environment =
     process.env.NODE_ENV === "development" ? "development" : "production";
   const isDevelopment = environment === "development";
@@ -21,7 +21,7 @@ module.exports = function (eleventyConfig: types.EleventyConfig | any) {
     },
   };
 
-  eleventyConfig.setServerOptions({
+  (eleventyConfig as any).setServerOptions({
     module: "@11ty/eleventy-server-browsersync",
 
     // Default Browsersync options shown:
@@ -37,18 +37,8 @@ module.exports = function (eleventyConfig: types.EleventyConfig | any) {
   eleventyConfig.addGlobalData("isDevelopment", isDevelopment);
   eleventyConfig.addGlobalData("layout", "sideNavigation.njk");
 
-  eleventyConfig.on(
-    "eleventy.before",
-    () =>
-      new Promise((resolve, reject) => {
-        fs.rm(options.build_dir, { recursive: true, force: true }, (err) => {
-          if (err) reject(err);
-          else resolve(undefined);
-        });
-      })
-  );
-
-  eleventyConfig.addWatchTarget("./library/", "./inline/");
+  eleventyConfig.addWatchTarget("./library/");
+  eleventyConfig.addWatchTarget("./inline/");
 
   // Passthrough
   eleventyConfig.addPassthroughCopy("website/katex/");
@@ -56,7 +46,11 @@ module.exports = function (eleventyConfig: types.EleventyConfig | any) {
   // Template formats
   eleventyConfig.setTemplateFormats(["njk", "md", "pcss", "ts", "tsx"]);
 
-  eleventyConfig.addPlugin(Essentials, {});
+  eleventyConfig.addPlugin(Essentials, {
+    links: {
+      prefix: "/home/",
+    },
+  });
 
   eleventyConfig.addPlugin(Inline, { inherit: ["pcss", "ts"] });
 
@@ -86,66 +80,16 @@ module.exports = function (eleventyConfig: types.EleventyConfig | any) {
   });
 
   if (options.output.minify)
-    eleventyConfig.addTransform(
-      "html-minifier",
-      function (content: string, outPath: string) {
-        console.log(outPath);
-        if (outPath.endsWith(".html"))
-          return html_min.minify(content, {
-            removeComments: true,
-            collapseWhitespace: true,
-            minifyCSS: true,
-            minifyJS: true,
-          });
-        return content;
-      }
-    );
-
-  /**
-   * Shortcode to check if a url is present within a collection on pages
-   */
-  eleventyConfig.addNunjucksShortcode(
-    "urlCheck",
-    function (this: any, site: string) {
-      for (let page of this.ctx.collections.all) {
-        if (page.url == site) return "/home" + site;
-      }
-      eleventyConfig.javascriptFunctions.warn.call(
-        this,
-        "Linked site '" + site + "' not found!"
-      );
-      return "/home" + site;
-    }
-  );
-  /**
-   * Shortcode to check if a url is present within a collection on pages
-   */
-  eleventyConfig.addJavaScriptFunction(
-    "urlCheck",
-    function (this: any, site: string) {
-      for (let page of this.ctx.collections.all) {
-        if (page.url == site) return "/home" + site;
-      }
-      (this as any).warn("Linked site '" + site + "' not found!");
-      return "/home" + site;
-    }
-  );
-  /**
-   * Shortcode to check if a url is present within a collection on pages
-   */
-  eleventyConfig.addLiquidShortcode(
-    "urlCheck",
-    function (this: any, site: string, all: any[]) {
-      for (let page of all) {
-        if (page.url == site) return "/home" + site;
-      }
-      eleventyConfig.javascriptFunctions.warn.call(
-        this,
-        "Linked site '" + site + "' not found!"
-      );
-      return "/home" + site;
-    }
-  );
+    eleventyConfig.addTransform("html-minifier", function (content: string) {
+      if (this.outputPath.endsWith(".html"))
+        return html_min.minify(content, {
+          removeComments: true,
+          collapseWhitespace: true,
+          minifyCSS: true,
+          minifyJS: true,
+        });
+      return content;
+    });
 
   return {
     pathPrefix: "/home/",

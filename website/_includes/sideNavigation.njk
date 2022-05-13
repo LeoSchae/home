@@ -8,7 +8,7 @@
     <style>
       {% inline 'essentials.pcss' %}
     </style>
-    <link rel="stylesheet" href="{% urlCheck '/katex/katex_0.15.2.css' %}" />
+    <link rel="stylesheet" href="{{ "/katex/katex_0.15.2.css" | link }}" />
   </head>
   <body>
     <style>
@@ -150,7 +150,7 @@
         border-bottom: 1px solid white;
       "
     >
-      <a href="{% urlCheck '/' %}">Leo's Website</a>
+      <a href="{{ "/" | link }}">Leo's Website</a>
       <label for="nav-sidebar-checkbox" id="nav-sidebar-checkbox-label">
         <svg style="height: 100%; width: 100%" viewBox="0 0 10 10">
           <path
@@ -210,7 +210,7 @@
       </nav>
     </aside>
     <div class="nav-home-top">
-      <a href="{% urlCheck '/' %}">Leo Schäfer</a>
+      <a href="{{ '/' | link }}">Leo Schäfer</a>
     </div>
 
     <main id="content-root">{% include "_page_content.njk"%}</main>

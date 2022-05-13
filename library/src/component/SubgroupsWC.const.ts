@@ -9,7 +9,7 @@ let initialized = false;
 export default function (this: any, data: any) {
   if (initialized) return;
   initialized = true;
-  KatexStylesheet = this.urlCheck(KatexStylesheet, data.collections.all);
+  KatexStylesheet = this.link(KatexStylesheet, data.collections.all);
 }
 
 export var KatexStylesheet = "/katex/katex_0.15.2.css";

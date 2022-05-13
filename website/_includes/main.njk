@@ -19,7 +19,7 @@ content: [Website Content]
         {% inline "essentials.pcss" %} 
         {% inline "variables.pcss" %}
       </style>
-      <link rel="stylesheet" href="{% urlCheck "/katex/katex_0.15.2.css" %}">
+      <link rel="stylesheet" href="{{ "/katex/katex_0.15.2.css" | link }}">
     {% endblock %}
   </head>
   <body>

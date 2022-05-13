@@ -28,10 +28,9 @@ main a:hover {
 
 # About me
 
-g
 My name is Leo Schäfer, I studied Mathematics at the Georg-August University of Göttingen. My main interests lie in the field of analytic number theory.
 
-You can take a look at [some of my small web projects]({% urlCheck "/projects/", collections.all %} "A list of my smaller projects").
+You can take a look at [some of my small web projects]({{ "/projects/" | link }} "A list of my smaller projects").
 
 ## About this website
 

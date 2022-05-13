@@ -28,12 +28,48 @@ export type EleventyConfig = {
     OPT
   );
 
-  on(event: string, handler: () => any);
+  on(
+    event: "eleventy.before",
+    handler: (options: {
+      dir: {
+        input: string;
+        output: string;
+        includes: string;
+        data: string;
+        layouts?: string;
+      };
+      runMode: "build" | "watch" | "serve";
+      outputMode: "fs" | "json" | "ndjson";
+    }) => any
+  );
+  on(
+    event: "eleventy.after",
+    handler: (options: {
+      dir: {
+        input: string;
+        output: string;
+        includes: string;
+        data: string;
+        layouts?: string;
+      };
+      results: {
+        inputPath: string;
+        outputPath: string;
+        url: string;
+        content: string;
+      }[];
+      runMode: "build" | "watch" | "serve";
+      outputMode: "fs" | "json" | "ndjson";
+    }) => any
+  );
+
+  // Filters and Shortcodes
+
+  addJavaScriptFunction(name: string, filter: Filter<JsCTX>);
 
   addLiquidFilter(name: string, filter: Filter<LiquidCTX>);
   addNunjucksFilter(name: string, filter: Filter<NunjucksCTX>);
   addHandlebarsHelper(name: string, filter: Filter<HandlebarsCTX>);
-  addJavaScriptFunction(name: string, filter: Filter<JsCTX>);
   addFilter(name: string, filter: Filter<AnyCTX>);
 
   addLiquidShortcode(name: string, shortcode: Filter<LiquidCTX>);
@@ -45,4 +81,24 @@ export type EleventyConfig = {
   nunjucksFilters: { [key: string]: Filter<NunjucksCTX> | unknown };
   liquidFilters: { [key: string]: Filter<LiquidCTX> | unknown };
   handlebarsHelpers: { [key: string]: Filter<HandlebarsCTX> | unknown };
+
+  // Data
+
+  addGlobalData(name: string, value: any);
+
+  // Watch / Serve / Pass
+
+  setWatchJavaScriptDependencies(value: boolean);
+  addWatchTarget(target: string);
+
+  addPassthroughCopy(target: string);
+  setTemplateFormats(formats: string | string[]);
+
+  addTransform(
+    name: string,
+    transform: (
+      this: { inputPath: string; outputPath: string },
+      content: string
+    ) => string | Promise<string>
+  );
 };

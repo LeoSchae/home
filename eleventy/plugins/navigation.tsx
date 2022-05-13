@@ -1,6 +1,7 @@
 /** @jsx jsx */
 /** @jsxFrag jsx.Fragment */
 import { jsx } from "@lib/UnsafeXML";
+import * as types from "../types";
 
 type HeaderItems = {
   display: string;
@@ -57,7 +58,7 @@ function Name(item: { display: string; url?: string }) {
 
 export default function (
   // @ts-ignore
-  eleventyConfig: typeof import("@11ty/eleventy/src/UserConfig"),
+  eleventyConfig: types.EleventyConfig,
   options: any
 ) {
   let { keyDelimiter = "::" } = options || {};
@@ -101,7 +102,7 @@ export default function (
         }
 
         if (key.length == 1) {
-          parent["url"] = eleventyConfig.javascriptFunctions.urlCheck.call(
+          parent["url"] = eleventyConfig.javascriptFunctions.link.call(
             this,
             page.url
           );
@@ -117,10 +118,7 @@ export default function (
         } else {
           child = {
             display: key[1],
-            url: eleventyConfig.javascriptFunctions.urlCheck.call(
-              this,
-              page.url
-            ),
+            url: eleventyConfig.javascriptFunctions.link.call(this, page.url),
           };
           parent.children[key[1]] = child;
         }
