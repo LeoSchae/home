@@ -21,7 +21,7 @@ export function strokeBounds(
     t = y - sprite.top,
     r = x + sprite.right,
     b = y + sprite.bot;
-  ctx.beginPath().lineTo(l, t).lineTo(r, t).lineTo(r, b).lineTo(l, b);
+  ctx.beginPath().line(l, t).line(r, t).line(r, b).line(l, b);
   ctx.closePath();
   ctx.stroke();
 }
@@ -63,7 +63,7 @@ export function TextSprite(
 
 /**
  * Create a sprite that draws a fraction. Fontsize and lineWidth from the context are used.
- * @param top Top sprite
+ * @param top p sprite
  * @param bot Bottom sprite
  * @returns The sprite that draws fraction
  */
@@ -105,8 +105,8 @@ export function FracSprite(top: BBSprite, bot: BBSprite): BBSprite {
       bot.draw(ctx, x + botOffsetX, y + botOffsetY);
 
       ctx.beginPath();
-      ctx.moveTo(x - halfLineLength, y);
-      ctx.lineTo(x + halfLineLength, y);
+      ctx.move(x - halfLineLength, y);
+      ctx.line(x + halfLineLength, y);
       ctx.stroke();
     },
   };

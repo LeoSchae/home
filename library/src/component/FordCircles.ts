@@ -39,7 +39,7 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
 
   r.fillStyle = "#AAAAAA";
   r.beginPath();
-  r.arc(...origin, scale, 0, 2 * Math.PI - 0.01, true);
+  r.arc(...origin, scale, 0, 2 * Math.PI - 0.01);
   r.fillAndStroke();
   //domainCircle(r, [0, 0.5], 0.5, pr);
   //r.stroke();
@@ -106,10 +106,10 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
 
   r.fillStyle = "#AAAAAA";
   let { width, height } = r as any;
-  r.moveTo(0, 0)
-    .lineTo(0, height)
-    .lineTo(width, height)
-    .lineTo(width, 0)
+  r.move(0, 0)
+    .line(0, height)
+    .line(width, height)
+    .line(width, 0)
     .closePath()
     .fill();
   r.fillStyle = "#000000";
@@ -147,13 +147,7 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
     let radius = 0.5 / b / b;
 
     r.beginPath();
-    r.arc(
-      ...map(xPosition, radius),
-      radius * scale,
-      0,
-      2 * Math.PI - 0.01,
-      true
-    );
+    r.arc(...map(xPosition, radius), radius * scale, 0, 2 * Math.PI - 0.01);
     r.closePath();
     r.stroke();
     r.fill();
@@ -205,7 +199,7 @@ function domainCircle(
 
   r.beginPath();
   let oldP = map(center[0] + radius, center[1]);
-  r.moveTo(...oldP);
+  r.move(...oldP);
   for (let s = 1; s < segments + 1; s++) {
     let newP = map(
       center[0] + Math.cos(stepSize * s) * radius,
@@ -222,7 +216,7 @@ function domainCircle(
     len += l;
     middleP[0] += l * midP[0];
     middleP[1] += l * midP[1];
-    r.quadraticTo(
+    r.quadratic(
       2 * midP[0] - 0.5 * (oldP[0] + newP[0]),
       2 * midP[1] - 0.5 * (oldP[1] + newP[1]),
       ...newP

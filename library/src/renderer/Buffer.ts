@@ -60,19 +60,19 @@ export default class Renderer2DBuffer implements Renderer2D {
     this.data.push(DrawOp.BEGIN);
     return this;
   }
-  moveTo(x: number, y: number) {
+  move(x: number, y: number) {
     this.data.push(DrawOp.MOVE, x, y);
     return this;
   }
-  lineTo(x: number, y: number) {
+  line(x: number, y: number) {
     this.data.push(DrawOp.LINE, x, y);
     return this;
   }
-  quadraticTo(cpX: number, cpY: number, x: number, y: number): this {
+  quadratic(cpX: number, cpY: number, x: number, y: number): this {
     this.data.push(DrawOp.QUADRATIC, cpX, cpY, x, y);
     return this;
   }
-  cubicTo(
+  cubic(
     cp1X: number,
     cp1Y: number,
     cp2X: number,
@@ -88,11 +88,11 @@ export default class Renderer2DBuffer implements Renderer2D {
     return this;
   }
   rect(x: number, y: number, w: number, h: number) {
-    this.moveTo(x, y);
-    this.lineTo(x + w, y);
-    this.lineTo(x + w, y + h);
-    this.lineTo(x, y + h);
-    this.lineTo(x, y);
+    this.move(x, y);
+    this.line(x + w, y);
+    this.line(x + w, y + h);
+    this.line(x, y + h);
+    this.line(x, y);
     return this;
   }
   arc(
@@ -101,9 +101,9 @@ export default class Renderer2DBuffer implements Renderer2D {
     radius: number,
     startAngle: number,
     endAngle: number,
-    ccw?: boolean
+    cw?: boolean
   ) {
-    this.data.push(DrawOp.ARC, x, y, radius, startAngle, endAngle, ccw);
+    this.data.push(DrawOp.ARC, x, y, radius, startAngle, endAngle, cw);
     return this;
   }
   stroke() {
@@ -153,10 +153,10 @@ export default class Renderer2DBuffer implements Renderer2D {
           r.fill();
           break;
         case DrawOp.LINE:
-          r.lineTo(s * data[++i] + x0, s * data[++i] + y0);
+          r.line(s * data[++i] + x0, s * data[++i] + y0);
           break;
         case DrawOp.QUADRATIC:
-          r.quadraticTo(
+          r.quadratic(
             s * data[++i] + x0,
             s * data[++i] + y0,
             s * data[++i] + x0,
@@ -164,7 +164,7 @@ export default class Renderer2DBuffer implements Renderer2D {
           );
           break;
         case DrawOp.CUBIC:
-          r.cubicTo(
+          r.cubic(
             s * data[++i] + x0,
             s * data[++i] + y0,
             s * data[++i] + x0,
@@ -184,7 +184,7 @@ export default class Renderer2DBuffer implements Renderer2D {
           );
           break;
         case DrawOp.MOVE:
-          r.moveTo(s * data[++i] + x0, s * data[++i] + y0);
+          r.move(s * data[++i] + x0, s * data[++i] + y0);
           break;
         case DrawOp.STROKE:
           r.stroke();

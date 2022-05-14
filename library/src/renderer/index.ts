@@ -42,16 +42,16 @@ export interface Renderer2D {
   beginPath(): this;
 
   /** Move the path to a location without drawing a line. */
-  moveTo(x: number, y: number): this;
+  move(x: number, y: number): this;
 
   /** Draw a line from the current to the target location. */
-  lineTo(x: number, y: number): this;
+  line(x: number, y: number): this;
 
   /** Draw a quadratic curve from the current location. */
-  quadraticTo(cpX: number, cpY: number, x: number, y: number): this;
+  quadratic(cpX: number, cpY: number, x: number, y: number): this;
 
   /** Draw a cubic curve (bezier curve) from the current location. */
-  cubicTo(
+  cubic(
     cp1X: number,
     cp1Y: number,
     cp2X: number,

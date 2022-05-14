@@ -135,26 +135,26 @@ export default class SVG implements Renderer2D {
     this._path = undefined;
     return this;
   }
-  moveTo(x: number, y: number) {
+  move(x: number, y: number) {
     let rounded = this.round;
     this._path = (this._path || "") + `M${rounded(x)} ${rounded(y)}`;
     return this;
   }
-  lineTo(x: number, y: number) {
-    if (!this._path) return this.moveTo(x, y);
+  line(x: number, y: number) {
+    if (!this._path) return this.move(x, y);
     let rounded = this.round;
     this._path += `L${rounded(x)} ${rounded(y)}`;
     return this;
   }
-  quadraticTo(cpX: number, cpY: number, x: number, y: number): this {
-    if (!this._path) return this.moveTo(x, y);
+  quadratic(cpX: number, cpY: number, x: number, y: number): this {
+    if (!this._path) return this.move(x, y);
     let rounded = this.round;
     this._path += `Q${rounded(cpX)} ${rounded(cpY)} ${rounded(x)} ${rounded(
       y
     )}`;
     return this;
   }
-  cubicTo(
+  cubic(
     cp1X: number,
     cp1Y: number,
     cp2X: number,
@@ -162,7 +162,7 @@ export default class SVG implements Renderer2D {
     x: number,
     y: number
   ): this {
-    if (!this._path) return this.moveTo(x, y);
+    if (!this._path) return this.move(x, y);
     let rounded = this.round;
     this._path += `C${rounded(cp1X)} ${rounded(cp1Y)} ${rounded(
       cp2X
@@ -174,11 +174,11 @@ export default class SVG implements Renderer2D {
     return this;
   }
   rect(x: number, y: number, w: number, h: number) {
-    this.moveTo(x, y);
-    this.lineTo(x + w, y);
-    this.lineTo(x + w, y + h);
-    this.lineTo(x, y + h);
-    this.lineTo(x, y);
+    this.move(x, y);
+    this.line(x + w, y);
+    this.line(x + w, y + h);
+    this.line(x, y + h);
+    this.line(x, y);
     return this;
   }
   arc(
@@ -189,6 +189,8 @@ export default class SVG implements Renderer2D {
     endAngle: number,
     cw?: boolean
   ) {
+    startAngle = -startAngle;
+    endAngle = -endAngle;
     let delta = (endAngle - startAngle) * _PI2;
     delta = delta - Math.floor(delta);
     if (delta >= 0.499 && delta <= 0.511) {
@@ -208,7 +210,7 @@ export default class SVG implements Renderer2D {
     let short = delta <= 0.5 == cw;
 
     let rounded = this.round;
-    this.lineTo(sx, sy);
+    this.line(sx, sy);
 
     this._path += `A ${rounded(radius)} ${rounded(radius)} 0 ${short ? 0 : 1} ${
       cw ? 1 : 0

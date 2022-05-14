@@ -1,22 +1,31 @@
+import { startTimer } from "winston";
 import { Renderer2D } from ".";
 import Buffer from "./Buffer";
 
+const twoPi = 2 * Math.PI;
+const _twoPi = 0.5 / Math.PI;
+
+const twoOverPi = 0.5 / Math.PI;
+
 export default class Renderer2DAutoScale extends Buffer {
-  minX: number | undefined;
-  minY: number | undefined;
-  maxX: number | undefined;
-  maxY: number | undefined;
+  minX: number = Number.POSITIVE_INFINITY;
+  minY: number = Number.POSITIVE_INFINITY;
+  maxX: number = Number.NEGATIVE_INFINITY;
+  maxY: number = Number.NEGATIVE_INFINITY;
+
+  addVisiblePoint(x: number, y: number) {
+    this.minX = Math.min(x, this.minX);
+    this.maxX = Math.max(x, this.maxX);
+    this.minY = Math.min(y, this.minY);
+    this.maxY = Math.max(y, this.maxY);
+  }
 
   addVisibleBox(left: number, top: number, right: number, bottom: number) {
     let { minX, minY, maxX, maxY } = this;
-    this.minX =
-      minX === undefined ? Math.min(left, right) : Math.min(left, right, minX);
-    this.maxX =
-      maxX === undefined ? Math.max(left, right) : Math.max(left, right, maxX);
-    this.minY =
-      minY === undefined ? Math.min(top, bottom) : Math.min(top, bottom, minY);
-    this.maxY =
-      maxY === undefined ? Math.max(top, bottom) : Math.max(top, bottom, maxY);
+    this.minX = Math.min(left, right, minX);
+    this.maxX = Math.max(left, right, maxX);
+    this.minY = Math.min(top, bottom, minY);
+    this.maxY = Math.max(top, bottom, maxY);
   }
 
   arc(
@@ -25,22 +34,51 @@ export default class Renderer2DAutoScale extends Buffer {
     radius: number,
     startAngle: number,
     endAngle: number,
-    ccw?: boolean
+    cw?: boolean
   ): this {
-    super.arc(x, y, radius, startAngle, endAngle, ccw);
-    console.warn("NOT IMPLEMENTED FOR SCALING!");
+    super.arc(x, y, radius, startAngle, endAngle, cw);
+
+    this.addVisiblePoint(
+      x + radius * Math.cos(startAngle),
+      y - radius * Math.sin(startAngle)
+    );
+    this.addVisiblePoint(
+      x + radius * Math.cos(endAngle),
+      y - radius * Math.sin(endAngle)
+    );
+
+    let startQuarter = startAngle * _twoPi;
+    startQuarter = (startQuarter - Math.floor(startQuarter)) * 4;
+    let endQuarter = endAngle * _twoPi;
+    endQuarter = (endQuarter - Math.floor(endQuarter)) * 4;
+
+    if (cw) {
+      let tmp = startQuarter;
+      startQuarter = endQuarter;
+      endQuarter = tmp;
+    }
+
+    if (endQuarter < startQuarter) endQuarter += 4;
+
+    for (let i = Math.ceil(startQuarter); i < endQuarter; i++) {
+      let even = i % 2 == 0;
+      this.addVisiblePoint(
+        x + (even ? (i == 0 || i == 4 ? radius : -radius) : 0),
+        y + (!even ? (i == 1 || i == 5 ? -radius : radius) : 0)
+      );
+    }
     return this;
   }
 
-  moveTo(x: number, y: number): this {
-    super.moveTo(x, y);
-    this.addVisibleBox(x, y, x, y);
+  move(x: number, y: number): this {
+    super.move(x, y);
+    this.addVisiblePoint(x, y);
     return this;
   }
 
-  lineTo(x: number, y: number): this {
-    super.lineTo(x, y);
-    this.addVisibleBox(x, y, x, y);
+  line(x: number, y: number): this {
+    super.line(x, y);
+    this.addVisiblePoint(x, y);
     return this;
   }
 

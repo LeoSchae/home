@@ -155,24 +155,24 @@ export default class TikZ implements Renderer2D {
     this.pos = undefined;
     return this;
   }
-  moveTo(x: number, y: number) {
+  move(x: number, y: number) {
     let rounded = this.round;
     this.path = (this.path || "") + ` (${rounded(x)},${rounded(y)})`;
     this.pos = [x, y];
     return this;
   }
-  lineTo(x: number, y: number) {
-    if (!this.path) return this.moveTo(x, y);
+  line(x: number, y: number) {
+    if (!this.path) return this.move(x, y);
     let rounded = this.round;
     this.path += ` -- (${rounded(x)},${rounded(y)})`;
     this.pos = [x, y];
     return this;
   }
-  quadraticTo(cpX: number, cpY: number, x: number, y: number): this {
-    if (!this.path) return this.moveTo(x, y);
+  quadratic(cpX: number, cpY: number, x: number, y: number): this {
+    if (!this.path) return this.move(x, y);
     let [pX, pY] = this.pos as [number, number];
     // Tikz only supports cubic curves. Convert quadratic to cubic.
-    return this.cubicTo(
+    return this.cubic(
       pX + (2 / 3) * (cpX - pX),
       pY + (2 / 3) * (cpY - pY),
       x + (2 / 3) * (cpX - x),
@@ -181,7 +181,7 @@ export default class TikZ implements Renderer2D {
       y
     );
   }
-  cubicTo(
+  cubic(
     cp1X: number,
     cp1Y: number,
     cp2X: number,
@@ -189,7 +189,7 @@ export default class TikZ implements Renderer2D {
     x: number,
     y: number
   ): this {
-    if (!this.path) return this.moveTo(x, y);
+    if (!this.path) return this.move(x, y);
     let rounded = this.round;
     this.path += ` .. controls (${rounded(cp1X)},${rounded(
       cp1Y
@@ -204,11 +204,11 @@ export default class TikZ implements Renderer2D {
     return this;
   }
   rect(x: number, y: number, w: number, h: number) {
-    this.moveTo(x, y);
-    this.lineTo(x + w, y);
-    this.lineTo(x + w, y + h);
-    this.lineTo(x, y + h);
-    this.lineTo(x, y);
+    this.move(x, y);
+    this.line(x + w, y);
+    this.line(x + w, y + h);
+    this.line(x, y + h);
+    this.line(x, y);
     return this;
   }
   arc(
@@ -219,6 +219,8 @@ export default class TikZ implements Renderer2D {
     endAngle: number,
     cw?: boolean
   ) {
+    startAngle = -startAngle;
+    endAngle = -endAngle;
     let sx = x + radius * Math.cos(startAngle),
       sy = y + radius * Math.sin(startAngle);
     let ex = x + radius * Math.cos(endAngle),
@@ -232,7 +234,7 @@ export default class TikZ implements Renderer2D {
     if (cw && endAngle < startAngle) endAngle += 1;
     if (!cw && startAngle < endAngle) endAngle -= 1;
 
-    this.lineTo(sx, sy);
+    this.line(sx, sy);
     let rounded = this.round;
     this.path += ` arc(${rounded(startAngle * 360)}:${rounded(
       endAngle * 360

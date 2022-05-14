@@ -12,26 +12,26 @@ export function hyperbolicLine(
   if (to == oo) {
     let x = (from as Complex).real * scale + origin[0],
       y = -(from as Complex).imag * scale + origin[1];
-    ctx.lineTo(x, y);
-    ctx.lineTo(x, 0);
+    ctx.line(x, y);
+    ctx.line(x, 0);
     return;
   }
   if (from == oo) {
     let x = (to as Complex).real * scale + origin[0],
       y = -(to as Complex).imag * scale + origin[1];
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, y);
+    ctx.move(x, 0);
+    ctx.line(x, y);
     return;
   }
 
   let c1 = from as Complex;
   let c2 = to as Complex;
 
-  ctx.lineTo(c1.real * scale + origin[0], -c1.imag * scale + origin[1]);
+  ctx.line(c1.real * scale + origin[0], -c1.imag * scale + origin[1]);
 
   if (Math.abs(c1.real - c2.real) < 0.0000000001) {
     // Draw straight line between points
-    ctx.lineTo(c2.real * scale + origin[0], -c2.imag * scale + origin[1]);
+    ctx.line(c2.real * scale + origin[0], -c2.imag * scale + origin[1]);
     return;
   }
 
@@ -43,5 +43,5 @@ export function hyperbolicLine(
   let a1 = c1.arg();
   let a2 = c2.arg();
 
-  ctx.arc(CP[0], CP[1], c1.abs() * scale, -a1, -a2, a1 > a2);
+  ctx.arc(CP[0], CP[1], c1.abs() * scale, a1, a2, a1 > a2);
 }

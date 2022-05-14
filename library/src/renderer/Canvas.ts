@@ -102,22 +102,22 @@ export default class Canvas implements Renderer2D, MeasureText {
     return this;
   }
 
-  moveTo(x: number, y: number) {
+  move(x: number, y: number) {
     this._ctx.moveTo(x, y);
     return this;
   }
 
-  lineTo(x: number, y: number) {
+  line(x: number, y: number) {
     this._ctx.lineTo(x, y);
     return this;
   }
 
-  quadraticTo(cpX: number, cpY: number, x: number, y: number) {
+  quadratic(cpX: number, cpY: number, x: number, y: number) {
     this._ctx.quadraticCurveTo(cpX, cpY, x, y);
     return this;
   }
 
-  cubicTo(
+  cubic(
     cp1X: number,
     cp1Y: number,
     cp2X: number,
@@ -147,14 +147,9 @@ export default class Canvas implements Renderer2D, MeasureText {
     endAngle: number,
     cw?: boolean
   ) {
-    this._ctx.arc(
-      x,
-      y,
-      radius,
-      startAngle - PI_2 * Math.floor(_PI_2 * startAngle),
-      endAngle - PI_2 * Math.floor(_PI_2 * endAngle),
-      !cw
-    );
+    startAngle = startAngle - PI_2 * Math.floor(_PI_2 * startAngle);
+    endAngle = endAngle - PI_2 * Math.floor(_PI_2 * endAngle);
+    this._ctx.arc(x, y, radius, -startAngle, -endAngle, !cw);
     return this;
   }
 
