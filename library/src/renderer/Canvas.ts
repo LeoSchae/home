@@ -72,7 +72,7 @@ export default class Canvas implements Renderer2D, MeasureText {
     };
   }
 
-  textNode(text: string, x: number, y: number, align: TextAlign) {
+  drawText(text: string, x: number, y: number, align: TextAlign) {
     let bl: CanvasTextBaseline = "middle",
       al: CanvasTextAlign = "center";
     switch (align & 0b1100) {
@@ -97,7 +97,7 @@ export default class Canvas implements Renderer2D, MeasureText {
     return this;
   }
 
-  beginPath() {
+  begin() {
     this._ctx.beginPath();
     return this;
   }
@@ -129,7 +129,7 @@ export default class Canvas implements Renderer2D, MeasureText {
     return this;
   }
 
-  closePath() {
+  close() {
     this._ctx.closePath();
     return this;
   }

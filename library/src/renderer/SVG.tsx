@@ -95,7 +95,7 @@ export default class SVG implements Renderer2D {
     this.style.fontSize = fontSize;
   }
 
-  textNode(text: string, x: number, y: number, align: TextAlign = 0) {
+  drawText(text: string, x: number, y: number, align: TextAlign = 0) {
     let bl: "text-after-edge" | "hanging" | "middle" = "middle",
       al: "start" | "end" | "middle" = "middle";
     switch (align & 0b1100) {
@@ -131,7 +131,7 @@ export default class SVG implements Renderer2D {
     return this;
   }
 
-  beginPath() {
+  begin() {
     this._path = undefined;
     return this;
   }
@@ -169,7 +169,7 @@ export default class SVG implements Renderer2D {
     )} ${rounded(cp2Y)} ${rounded(x)} ${rounded(y)}`;
     return this;
   }
-  closePath() {
+  close() {
     this._path = (this._path || "") + "Z";
     return this;
   }

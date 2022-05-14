@@ -106,7 +106,7 @@ window.customElements.define(
 
             // Draw textbox
             let ts = TextSprite(r, "Fractions with denominator up to " + Q);
-            r.beginPath();
+            r.begin();
             r.rect(
               0,
               r.height,

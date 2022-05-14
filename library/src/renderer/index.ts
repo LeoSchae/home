@@ -36,10 +36,10 @@ export interface Renderer2D {
   /**
    * @param align The alignment of the text. Defaults to `C = 0`.
    */
-  textNode(text: string, x: number, y: number, align?: TextAlign): this;
+  drawText(text: string, x: number, y: number, align?: TextAlign): this;
 
   /** Begin a new Path. This clears all points from the current path. */
-  beginPath(): this;
+  begin(): this;
 
   /** Move the path to a location without drawing a line. */
   move(x: number, y: number): this;
@@ -61,17 +61,19 @@ export interface Renderer2D {
   ): this;
 
   /** Close the current path. */
-  closePath(): this;
+  close(): this;
 
   /**
    * Draw a arc of a circle centered at (x,y).
    * Drawing a full circle is not possible.
+   * The angle is measured in the mathematical sense
+   * (counterclockwise starting at positive x axis).
    * @param x center x
    * @param y center y
    * @param radius radius
-   * @param startAngle The start angle in radians
-   * @param endAngle The end angle in radians
-   * @param cw Whether the arc should run clockwise. Defaults to false.
+   * @param startAngle The start angle in radians.
+   * @param endAngle The end angle in radians.
+   * @param cw Whether the arc should run clockwise. Defaults to false (counterclockwise).
    */
   arc(
     x: number,

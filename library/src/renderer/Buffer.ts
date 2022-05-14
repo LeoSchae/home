@@ -52,11 +52,11 @@ export default class Renderer2DBuffer implements Renderer2D {
   } {
     throw new Error("Method not implemented.");
   }
-  textNode(text: string, x: number, y: number, align: TextAlign = 0) {
+  drawText(text: string, x: number, y: number, align: TextAlign = 0) {
     this.data.push(DrawOp.TEXTNODE, text, x, y, align);
     return this;
   }
-  beginPath() {
+  begin() {
     this.data.push(DrawOp.BEGIN);
     return this;
   }
@@ -83,7 +83,7 @@ export default class Renderer2DBuffer implements Renderer2D {
     this.data.push(DrawOp.CUBIC, cp1X, cp1Y, cp2X, cp2Y, x, y);
     return this;
   }
-  closePath() {
+  close() {
     this.data.push(DrawOp.CLOSE);
     return this;
   }
@@ -135,7 +135,7 @@ export default class Renderer2DBuffer implements Renderer2D {
 
       switch (d) {
         case DrawOp.BEGIN:
-          r.beginPath();
+          r.begin();
           break;
         case DrawOp.CH_FONTSIZE:
           r.fontSize = data[++i];
@@ -190,7 +190,7 @@ export default class Renderer2DBuffer implements Renderer2D {
           r.stroke();
           break;
         case DrawOp.TEXTNODE:
-          r.textNode(
+          r.drawText(
             data[++i],
             s * data[++i] + x0,
             s * data[++i] + y0,
@@ -198,7 +198,7 @@ export default class Renderer2DBuffer implements Renderer2D {
           );
           break;
         case DrawOp.CLOSE:
-          r.closePath();
+          r.close();
           break;
         default:
           let neverAssertion: never = d;

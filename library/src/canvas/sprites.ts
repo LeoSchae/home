@@ -21,8 +21,8 @@ export function strokeBounds(
     t = y - sprite.top,
     r = x + sprite.right,
     b = y + sprite.bot;
-  ctx.beginPath().line(l, t).line(r, t).line(r, b).line(l, b);
-  ctx.closePath();
+  ctx.begin().line(l, t).line(r, t).line(r, b).line(l, b);
+  ctx.close();
   ctx.stroke();
 }
 
@@ -55,7 +55,7 @@ export function TextSprite(
     left,
     right,
     draw: function (ctx: render.Renderer2D, x: number, y: number) {
-      ctx.textNode(this.text, x - this.dx, y, 0 as render.TextAlign);
+      ctx.drawText(this.text, x - this.dx, y, 0 as render.TextAlign);
     },
   };
   return sprite;
@@ -104,7 +104,7 @@ export function FracSprite(top: BBSprite, bot: BBSprite): BBSprite {
       top.draw(ctx, x + topOffsetX, y + topOffsetY);
       bot.draw(ctx, x + botOffsetX, y + botOffsetY);
 
-      ctx.beginPath();
+      ctx.begin();
       ctx.move(x - halfLineLength, y);
       ctx.line(x + halfLineLength, y);
       ctx.stroke();

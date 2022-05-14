@@ -220,7 +220,7 @@ window.customElements.define(
         let i = 0;
         for (let m of visual.group) {
           yield;
-          ctx.beginPath();
+          ctx.begin();
           for (let i = 0; i < visual.domain.length; i++) {
             hyperbolicLine(
               ctx,
@@ -229,7 +229,7 @@ window.customElements.define(
               m.transform(visual.domain[(i + 1) % visual.domain.length])
             );
           }
-          //ctx.closePath();
+          //ctx.close();
           ctx.fillAndStroke();
         }
       }
@@ -297,7 +297,7 @@ window.customElements.define(
                 katex.render(m.toTeX(), popup.container);
 
                 r.fillStyle = "#CCCCEEAA";
-                r.beginPath();
+                r.begin();
                 for (let i = 0; i < domain.length; i++) {
                   hyperbolicLine(
                     r,
@@ -306,7 +306,7 @@ window.customElements.define(
                     m.transform(domain[(i + 1) % domain.length])
                   );
                 }
-                r.closePath();
+                r.close();
                 r.fill();
                 r.stroke();
                 r.fillStyle = "#000000";

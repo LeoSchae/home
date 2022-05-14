@@ -60,7 +60,7 @@ function perviewIcon(this: any, data: any) {
 
   let i = 0;
   for (let m of grp) {
-    ctx.beginPath();
+    ctx.begin();
     for (let i = 0; i < dom.length; i++) {
       hyperbolicLine(
         ctx,

@@ -38,25 +38,25 @@ function previewIcon() {
 
   let shift = 150;
 
-  r.beginPath();
+  r.begin();
   r.arc(0, shift - 100, 100, Math.PI / 2, 0, false);
   r.arc(200, shift - 100, 100, Math.PI, Math.PI / 2, false);
-  r.closePath();
+  r.close();
   r.stroke();
 
-  r.beginPath();
+  r.begin();
   r.arc(100, shift - 25, 25, 0, 2 * Math.PI - 0.01, true);
-  r.closePath();
+  r.close();
   r.fillAndStroke();
 
-  r.beginPath();
+  r.begin();
   r.arc(200 / 3, shift - 100 / 9, 100 / 9, 0, 2 * Math.PI - 0.01, true);
-  r.closePath();
+  r.close();
   r.fillAndStroke();
 
-  r.beginPath();
+  r.begin();
   r.arc(400 / 3, shift - 100 / 9, 100 / 9, 0, 2 * Math.PI - 0.01, true);
-  r.closePath();
+  r.close();
   r.fillAndStroke();
 
   return r.toXML();

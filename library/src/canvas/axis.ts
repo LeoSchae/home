@@ -63,13 +63,13 @@ function infArrow(
   const s = [p[0] + t[1] * d[0], p[1] + t[1] * d[1]];
   const e = [p[0] + (t[2] - 1) * d[0], p[1] + (t[2] - 1) * d[1]];
 
-  ctx.beginPath();
+  ctx.begin();
   ctx.move(s[0], s[1]);
   ctx.line(e[0] - 2 * d[0], e[1] - 2 * d[1]);
   ctx.stroke();
 
   let a = arrowSize;
-  ctx.beginPath();
+  ctx.begin();
   ctx.move(e[0], e[1]);
   ctx.line(e[0] - a * d[0] + 0.5 * a * d[1], e[1] - a * d[1] - 0.5 * a * d[0]);
   ctx.line(e[0] - a * d[0] - 0.5 * a * d[1], e[1] - a * d[1] + 0.5 * a * d[0]);
@@ -129,7 +129,7 @@ export function drawCarthesian2DAxis(
       arrowSize: as,
     });
     if (labelX)
-      ctx.textNode(
+      ctx.drawText(
         labelX,
         rx - 0.2 * fs,
         ry + 0.2 * fs + as / 2,
@@ -141,7 +141,7 @@ export function drawCarthesian2DAxis(
       arrowSize: as,
     });
     if (!noY && labelY)
-      ctx.textNode(
+      ctx.drawText(
         labelY,
         ix - 0.2 * fs - as / 2,
         iy + 0.2 * fs,
@@ -173,7 +173,7 @@ export function annotateCarthesian2DAxis(
           l = x - 0.5,
           r = x + 0.5,
           b = y0 + 3;
-        ctx.beginPath().move(l, t).line(r, t).line(r, b).line(l, b).closePath();
+        ctx.begin().move(l, t).line(r, t).line(r, b).line(l, b).close();
         ctx.fill();
         sprite.draw(ctx, x, y0 + sprite.top + gap);
       }

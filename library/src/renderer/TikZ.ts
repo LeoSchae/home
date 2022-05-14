@@ -120,7 +120,7 @@ export default class TikZ implements Renderer2D {
     this.style.fontSize = fontSize;
   }
 
-  textNode(text: string, x: number, y: number, align: TextAlign = 0) {
+  drawText(text: string, x: number, y: number, align: TextAlign = 0) {
     let anchor: string | undefined;
     switch (align & 0b1100) {
       case TextAlign.T:
@@ -150,7 +150,7 @@ export default class TikZ implements Renderer2D {
     return this;
   }
 
-  beginPath() {
+  begin() {
     this.path = undefined;
     this.pos = undefined;
     return this;
@@ -199,7 +199,7 @@ export default class TikZ implements Renderer2D {
     this.pos = [x, y];
     return this;
   }
-  closePath() {
+  close() {
     this.path += " -- cycle";
     return this;
   }

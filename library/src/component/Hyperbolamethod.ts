@@ -48,44 +48,44 @@ function renderHyperbolamethod3d(
     let alphaHex = "ff";
 
     r.fillStyle = shadeFront + alphaHex;
-    r.beginPath();
+    r.begin();
     r.move(...proj(cuts[i], cuts[j], cuts[k]))
       .line(...proj(cuts[i - 1], cuts[j], cuts[k]))
       .line(...proj(cuts[i - 1], cuts[j - 1], cuts[k]))
       .line(...proj(cuts[i], cuts[j - 1], cuts[k]))
-      .closePath()
+      .close()
       .fill()
       .stroke();
 
     r.fillStyle = shadeTop + alphaHex;
-    r.beginPath();
+    r.begin();
     r.move(...proj(cuts[i], cuts[j], cuts[k]))
       .line(...proj(cuts[i - 1], cuts[j], cuts[k]))
       .line(...proj(cuts[i - 1], cuts[j], cuts[k - 1]))
       .line(...proj(cuts[i], cuts[j], cuts[k - 1]))
-      .closePath()
+      .close()
       .fill()
       .stroke();
     r.fillStyle = shadeSide + alphaHex;
-    r.beginPath();
+    r.begin();
     r.move(...proj(cuts[i], cuts[j], cuts[k]))
       .line(...proj(cuts[i], cuts[j], cuts[k - 1]))
       .line(...proj(cuts[i], cuts[j - 1], cuts[k - 1]))
       .line(...proj(cuts[i], cuts[j - 1], cuts[k]))
-      .closePath()
+      .close()
       .fill()
       .stroke();
   }
 
   r.lineWidth = 1.5;
   r.strokeStyle = "#000000";
-  r.beginPath();
+  r.begin();
   r.move(...proj(W, W, W)).line(...proj(N + (N - W) * 0.1, W, W));
   r.move(...proj(W, W, W)).line(...proj(W, N + (N - W) * 0.1, W));
   r.move(...proj(W, W, W)).line(...proj(W, W, N + (N - W) * 0.1));
   r.stroke();
 
-  /*r.beginPath().move(...proj(cuts[0], W, W));
+  /*r.begin().move(...proj(cuts[0], W, W));
   for (let i = 1; i < cuts.length; i++)
     r.line(...proj(cuts[i], cuts[cuts.length - i], W));
   r.stroke();*/
@@ -125,16 +125,16 @@ function renderHyperbolamethod(
   r.fillStyle = fill;
   r.strokeStyle = gridFill;
   r.lineWidth = 1.5;
-  r.beginPath();
+  r.begin();
   r.move(cuts[0], N - cuts[0]).line(cuts[0], N - cuts[J]);
   for (var i = 1; i < cuts.length; i++)
     r.line(cuts[i - 1], N - cuts[J - i]).line(cuts[i], N - cuts[J - i]);
-  r.line(cuts[J], N - cuts[0]).closePath();
+  r.line(cuts[J], N - cuts[0]).close();
   //r.stroke();
   r.fill();
 
   // fill error;
-  r.beginPath();
+  r.begin();
   r.fillStyle = errorFill;
   r.lineWidth = 1.5;
   r.move(cuts[0], N - cuts[J]);
@@ -149,7 +149,7 @@ function renderHyperbolamethod(
   let p: [number, number];
   r.lineWidth = 1;
   // longest boxes (|_| shaped)
-  r.beginPath();
+  r.begin();
   p = [cuts[1], N - cuts[J]];
   r.move(W, N - W)
     .line(W, p[1])
@@ -172,7 +172,7 @@ function renderHyperbolamethod(
   r.stroke();
 
   // Hyperbola
-  r.beginPath();
+  r.begin();
   let steps = 100;
   r.lineWidth = 2;
   r.strokeStyle = hypFill;
@@ -181,7 +181,7 @@ function renderHyperbolamethod(
     let v = Math.pow(N / W, i / steps);
     r.line(W * v, N - N / v);
   }
-  r.closePath();
+  r.close();
   r.stroke();
 }
 
@@ -253,16 +253,16 @@ window.customElements.define(
             let scale2 = new ScaledRender();
             scale.addVisiblePoint = (x, y) => {
               scale2
-                .beginPath()
+                .begin()
                 .arc(x, y, 1, 0.01, 2 * Math.PI, false)
                 .fill();
             };
 
-            scale.beginPath();
-            scale.arc(0, 0, 100, -3, 0.1);
+            scale.begin();
+            scale.arc(0, 0, 100, -0.101, -0.1, true);
             scale.stroke();
-            scale2.beginPath();
-            scale2.arc(0, 0, 100, -3, 0.1);
+            scale2.begin();
+            scale2.arc(0, 0, 100, -0.101, -0.1, true);
             scale2.stroke();
 
             scale2.applyScaled(
