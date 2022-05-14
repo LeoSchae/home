@@ -243,38 +243,6 @@ window.customElements.define(
         })
       );
 
-      config.addLayer(
-        "test",
-        layers.Canvas({
-          update(config, ctx) {
-            ctx.clearRect(0, 0, config.width, config.height);
-            let scale = new ScaledRender();
-
-            let scale2 = new ScaledRender();
-            scale.addVisiblePoint = (x, y) => {
-              scale2
-                .begin()
-                .arc(x, y, 1, 0.01, 2 * Math.PI, false)
-                .fill();
-            };
-
-            scale.begin();
-            scale.arc(0, 0, 100, -0.101, -0.1, true);
-            scale.stroke();
-            scale2.begin();
-            scale2.arc(0, 0, 100, -0.101, -0.1, true);
-            scale2.stroke();
-
-            scale2.applyScaled(
-              new render.Canvas(ctx),
-              config.width,
-              config.height,
-              { buffer: 0 }
-            );
-          },
-        })
-      );
-
       let options = config.addLayer("options", layers.Options());
 
       options.add("number", {

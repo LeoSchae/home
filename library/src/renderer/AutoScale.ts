@@ -20,14 +20,6 @@ export default class Renderer2DAutoScale extends Buffer {
     this.maxY = Math.max(y, this.maxY);
   }
 
-  addVisibleBox(left: number, top: number, right: number, bottom: number) {
-    let { minX, minY, maxX, maxY } = this;
-    this.minX = Math.min(left, right, minX);
-    this.maxX = Math.max(left, right, maxX);
-    this.minY = Math.min(top, bottom, minY);
-    this.maxY = Math.max(top, bottom, maxY);
-  }
-
   arc(
     x: number,
     y: number,
