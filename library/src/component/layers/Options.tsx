@@ -312,7 +312,7 @@ export class OptionPane {
         ? typeOrFactory
         : (OPTION_TYPES as any)[typeOrFactory];
     var opt = factory(...args);
-    console.log(opt);
+
     this.addOption(opt);
     if ("handle" in opt) return (opt as any).handle;
     return undefined as any;

@@ -32,8 +32,8 @@ export default class TikZ implements Renderer2D {
     fontSize: 13,
   };
 
-  private round(x: number) {
-    return Math.round(x * 1000) / 1000;
+  round(x: number) {
+    return Math.round(x * 10000) / 10000;
   }
 
   constructor(width: number, height: number) {

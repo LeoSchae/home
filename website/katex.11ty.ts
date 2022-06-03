@@ -5,8 +5,10 @@
 
 import * as fs from "fs";
 
+const katex_folder = "./node_modules/katex/dist/";
+
 export function render(this: any, data: any) {
-  let file = "./node_modules/katex/dist/" + data.pagination.items[0];
+  let file = katex_folder + data.pagination.items[0];
   return new Promise((res, rej) => {
     fs.readFile(file, (err, data) => {
       if (err) rej(err);
@@ -21,7 +23,7 @@ export const data = {
     data: "files",
     size: 1,
     before: function (mainFile: [string]) {
-      let files = fs.readdirSync("./node_modules/katex/dist/fonts/");
+      let files = fs.readdirSync(katex_folder + "fonts/");
       return mainFile.concat(files.map((f) => "fonts/" + f));
     },
   },

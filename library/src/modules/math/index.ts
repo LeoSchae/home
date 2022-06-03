@@ -34,6 +34,26 @@ export class Range {
   }
 }
 
+export function gcd(a: number, b: number) {
+  a = Math.abs(a);
+  b = Math.abs(b);
+  if (b > a) {
+    var temp = a;
+    a = b;
+    b = temp;
+  }
+  while (true) {
+    if (b == 0) return a;
+    a %= b;
+    if (a == 0) return b;
+    b %= a;
+  }
+}
+
+export function lcm(a: number, b: number) {
+  return b * (a / gcd(a, b));
+}
+
 /**
  * Function to convert different arguments to instances of the Complex class.
  * @param real

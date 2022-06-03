@@ -100,8 +100,8 @@ export function drawCarthesian2DAxis(
     noY = false,
     arrowSize: as = 7,
     fontSize: fs = 13,
-    labelX = TeX.mathBB("R"),
-    labelY = "i" + TeX.mathBB("R"),
+    labelX = "Re",
+    labelY = "Im",
   } = {}
 ) {
   let { origin, scale } = projection;
