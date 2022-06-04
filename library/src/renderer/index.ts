@@ -15,12 +15,20 @@ export enum TextAlign {
   BR = 0b0101,
 }
 
+export type SetOptions2D = {
+  lineWidth?: number;
+  fontSize?: number;
+  fill?: string;
+  stroke?: string;
+};
+
 /**
  * A type for different rendering backends.
  * By default all coordinates should be provided
  * with the origin in the top left corner.
  */
 export interface Renderer2D {
+  /*
   get lineWidth(): number;
   set lineWidth(lineWidth: number);
 
@@ -32,6 +40,9 @@ export interface Renderer2D {
 
   get strokeStyle(): string;
   set strokeStyle(strokeStyle: string);
+  */
+
+  set(options: SetOptions2D): this;
 
   /**
    * @param align The alignment of the text. Defaults to `C = 0`.

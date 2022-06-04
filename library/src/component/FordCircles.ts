@@ -37,7 +37,7 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
   let { projection } = options;
   let { origin, scale } = projection;
 
-  r.fillStyle = "#AAAAAA";
+  r.set({ fill: "#AAAAAA" });
   r.begin();
   r.arc(...origin, scale, 0, 2 * Math.PI - 0.01);
   r.fillAndStroke();
@@ -47,13 +47,13 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
   let fr = FareyFractions(Q);
 
   let fs = 12;
-  r.fontSize = fs;
+  r.set({ fontSize: fs });
   let textUpTo = Q; //bestQ(pr.scale, fs) + 5;
   let annotations: [number, number, number][][] = Array(textUpTo)
     .fill(null)
     .map(() => []);
 
-  r.fillStyle = "#FFFFFF";
+  r.set({ fill: "#FFFFFF" });
   for (let [a, b] of fr) {
     yield;
 
@@ -73,11 +73,11 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
     if (b <= textUpTo) annotations[b - 1].push([a, midP[0], midP[1]]);
   }
 
-  r.fillStyle = "#555555";
+  r.set({ fill: "#555555" });
   for (let q0 = 0; q0 < annotations.length; q0++) {
     let q = q0 + 1;
 
-    r.fontSize = q == 1 ? scale / 2 : scale / q / q;
+    r.set({ fontSize: q == 1 ? scale / 2 : scale / q / q });
     measure.fontSize = q == 1 ? scale / 2 : scale / q / q;
     let qSprite;
     for (let [p, m0, m1] of annotations[q0]) {
@@ -104,7 +104,7 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
       .getContext("2d") as CanvasRenderingContext2D
   );
 
-  r.fillStyle = "#AAAAAA";
+  r.set({ fill: "#AAAAAA" });
   let { width, height } = r as any;
   r.move(0, 0)
     .line(0, height)
@@ -112,19 +112,18 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
     .line(width, 0)
     .close()
     .fill();
-  r.fillStyle = "#000000";
+  r.set({ fill: "#000000" });
   let { projection } = options;
   let { origin, scale } = projection;
 
   let fs = 12;
-  r.fontSize = fs;
+  r.set({ fontSize: fs });
   let textUpTo = Q; //bestQ(pr.scale, fs) + 5;
   let annotations: number[][] = Array(textUpTo)
     .fill(null)
     .map(() => []);
 
-  r.lineWidth = 1.25;
-  r.fontSize = 10;
+  r.set({ lineWidth: 1.25, fontSize: 10 });
   drawCarthesian2DAxis(r as any, projection, { noY: true, labelX: "" });
   annotateCarthesian2DAxis(r as any, "x", projection, [
     { sprite: TextSprite(measure, "0"), at: 0 },
@@ -139,7 +138,7 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
 
   // Find all fracions on screen
 
-  r.fillStyle = "#FFFFFF";
+  r.set({ fill: "#FFFFFF" });
   for (let [a, b] of fractions) {
     yield;
 
@@ -155,11 +154,11 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
     if (b < textUpTo) annotations[b - 1].push(a);
   }
   let d = 0;
-  r.fillStyle = "#000000";
+  r.set({ fill: "#000000" });
   for (let q0 = 0; q0 < annotations.length; q0++) {
     let q = q0 + 1;
 
-    r.fontSize = (scale * 0.3) / q / q;
+    r.set({ fontSize: (scale * 0.3) / q / q });
     measure.fontSize = (scale * 0.3) / q / q;
     let qSprite;
     for (let p of annotations[q0]) {

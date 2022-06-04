@@ -1,4 +1,4 @@
-import { Renderer2D, TextAlign } from ".";
+import * as render from ".";
 
 type PicStyle = {
   stroke: {
@@ -13,7 +13,7 @@ type PicStyle = {
   fontSize: number;
 };
 
-export default class TikZ implements Renderer2D {
+export default class TikZ implements render.Renderer2D {
   private TeX: string;
   width: number;
   height: number;
@@ -120,21 +120,48 @@ export default class TikZ implements Renderer2D {
     this.style.fontSize = fontSize;
   }
 
-  drawText(text: string, x: number, y: number, align: TextAlign = 0) {
+  set(options: render.SetOptions2D) {
+    // Add as for assertion typechecks
+    for (var [k, v] of Object.entries(options) as [
+      keyof render.SetOptions2D,
+      any
+    ][]) {
+      switch (k) {
+        case "fontSize":
+          this.fontSize = v;
+          break;
+        case "lineWidth":
+          this.lineWidth = v;
+          break;
+        case "fill":
+          this.fillStyle = v;
+          break;
+        case "stroke":
+          this.strokeStyle = v;
+          break;
+        default:
+          let unreachable: never = k;
+          console.warn(`Unknown option key '${k}'`);
+      }
+    }
+    return this;
+  }
+
+  drawText(text: string, x: number, y: number, align: render.TextAlign = 0) {
     let anchor: string | undefined;
     switch (align & 0b1100) {
-      case TextAlign.T:
+      case render.TextAlign.T:
         anchor = "north";
         break;
-      case TextAlign.B:
+      case render.TextAlign.B:
         anchor = "south";
         break;
     }
     switch (align & 0b0011) {
-      case TextAlign.L:
+      case render.TextAlign.L:
         anchor = (anchor ? anchor + " " : "") + "west";
         break;
-      case TextAlign.R:
+      case render.TextAlign.R:
         anchor = (anchor ? anchor + " " : "") + "east";
         break;
     }

@@ -1,4 +1,5 @@
-import type { Renderer2D, TextAlign } from "./";
+import { Options } from "html-minifier";
+import type * as render from "./";
 
 enum DrawOp {
   BEGIN,
@@ -17,7 +18,7 @@ enum DrawOp {
   CH_FILLSTYLE,
 }
 
-export default class Renderer2DBuffer implements Renderer2D {
+export default class Renderer2DBuffer implements render.Renderer2D {
   private data: any[] = [];
 
   get strokeStyle(): string {
@@ -44,6 +45,31 @@ export default class Renderer2DBuffer implements Renderer2D {
   set fontSize(fontSize: number) {
     this.data.push(DrawOp.CH_FONTSIZE, fontSize);
   }
+  set(options: render.SetOptions2D) {
+    // Add types for unreachable checks
+    var k: keyof render.SetOptions2D, v: any;
+
+    for ([k, v] of Object.entries(options) as any) {
+      switch (k) {
+        case "fontSize":
+          this.fontSize = v;
+          break;
+        case "lineWidth":
+          this.lineWidth = v;
+          break;
+        case "fill":
+          this.fillStyle = v;
+          break;
+        case "stroke":
+          this.strokeStyle = v;
+          break;
+        default:
+          let unreachable: never = k;
+          console.warn(`Unknown option key '${k}'`);
+      }
+    }
+    return this;
+  }
   measureText(text: string): {
     top: number;
     bot: number;
@@ -52,7 +78,7 @@ export default class Renderer2DBuffer implements Renderer2D {
   } {
     throw new Error("Method not implemented.");
   }
-  drawText(text: string, x: number, y: number, align: TextAlign = 0) {
+  drawText(text: string, x: number, y: number, align: render.TextAlign = 0) {
     this.data.push(DrawOp.TEXTNODE, text, x, y, align);
     return this;
   }
@@ -121,7 +147,7 @@ export default class Renderer2DBuffer implements Renderer2D {
     return this;
   }
   applyWith(
-    r: Renderer2D,
+    r: render.Renderer2D,
     opts?: { scale?: number; origin?: [number, number] }
   ) {
     let s = opts?.scale || 1,
@@ -138,16 +164,16 @@ export default class Renderer2DBuffer implements Renderer2D {
           r.begin();
           break;
         case DrawOp.CH_FONTSIZE:
-          r.fontSize = data[++i];
+          r.set({ fontSize: data[++i] as number });
           break;
         case DrawOp.CH_LINEWIDTH:
-          r.lineWidth = data[++i];
+          r.set({ lineWidth: data[++i] as number });
           break;
         case DrawOp.CH_STROKESTYLE:
-          r.strokeStyle = data[++i];
+          r.set({ stroke: data[++i] });
           break;
         case DrawOp.CH_FILLSTYLE:
-          r.fillStyle = data[++i];
+          r.set({ fill: data[++i] });
           break;
         case DrawOp.FILL:
           r.fill();
@@ -201,7 +227,7 @@ export default class Renderer2DBuffer implements Renderer2D {
           r.close();
           break;
         default:
-          let neverAssertion: never = d;
+          let unreachable: never = d;
       }
     }
   }

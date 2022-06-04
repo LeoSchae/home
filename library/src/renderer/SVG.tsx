@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx, XML } from "../UnsafeXML";
-import { Renderer2D, TextAlign } from ".";
+import * as render from ".";
 
 const R2D = 180.0 / Math.PI;
 const PI2 = 2 * Math.PI;
@@ -19,7 +19,7 @@ type SVGStyle = {
   fontSize: number;
 };
 
-export default class SVG implements Renderer2D {
+export default class SVG implements render.Renderer2D {
   svg: XML;
 
   private _path: string | undefined;
@@ -95,22 +95,49 @@ export default class SVG implements Renderer2D {
     this.style.fontSize = fontSize;
   }
 
-  drawText(text: string, x: number, y: number, align: TextAlign = 0) {
+  set(options: render.SetOptions2D) {
+    // Add as for assertion typechecks
+    for (var [k, v] of Object.entries(options) as [
+      keyof render.SetOptions2D,
+      any
+    ][]) {
+      switch (k) {
+        case "fontSize":
+          this.fontSize = v;
+          break;
+        case "lineWidth":
+          this.lineWidth = v;
+          break;
+        case "fill":
+          this.fillStyle = v;
+          break;
+        case "stroke":
+          this.strokeStyle = v;
+          break;
+        default:
+          let unreachable: never = k;
+          console.warn(`Unknown option key '${k}'`);
+      }
+    }
+    return this;
+  }
+
+  drawText(text: string, x: number, y: number, align: render.TextAlign = 0) {
     let bl: "text-after-edge" | "hanging" | "middle" = "middle",
       al: "start" | "end" | "middle" = "middle";
     switch (align & 0b1100) {
-      case TextAlign.T:
+      case render.TextAlign.T:
         bl = "hanging";
         break;
-      case TextAlign.B:
+      case render.TextAlign.B:
         bl = "text-after-edge";
         break;
     }
     switch (align & 0b0011) {
-      case TextAlign.L:
+      case render.TextAlign.L:
         al = "start";
         break;
-      case TextAlign.R:
+      case render.TextAlign.R:
         al = "end";
         break;
     }

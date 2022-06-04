@@ -107,7 +107,7 @@ export function drawCarthesian2DAxis(
   let { origin, scale } = projection;
   const { width, height } = ctx;
 
-  ctx.fontSize = fs;
+  ctx.set({ fontSize: fs });
 
   const project = function (
     this: { ox: number; oy: number; ps: number },

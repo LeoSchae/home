@@ -47,7 +47,7 @@ function renderHyperbolamethod3d(
     // z face
     let alphaHex = "ff";
 
-    r.fillStyle = shadeFront + alphaHex;
+    r.set({ fill: shadeFront + alphaHex });
     r.begin();
     r.move(...proj(cuts[i], cuts[j], cuts[k]))
       .line(...proj(cuts[i - 1], cuts[j], cuts[k]))
@@ -56,8 +56,7 @@ function renderHyperbolamethod3d(
       .close()
       .fill()
       .stroke();
-
-    r.fillStyle = shadeTop + alphaHex;
+    r.set({ fill: shadeTop + alphaHex });
     r.begin();
     r.move(...proj(cuts[i], cuts[j], cuts[k]))
       .line(...proj(cuts[i - 1], cuts[j], cuts[k]))
@@ -66,7 +65,7 @@ function renderHyperbolamethod3d(
       .close()
       .fill()
       .stroke();
-    r.fillStyle = shadeSide + alphaHex;
+    r.set({ fill: shadeSide + alphaHex });
     r.begin();
     r.move(...proj(cuts[i], cuts[j], cuts[k]))
       .line(...proj(cuts[i], cuts[j], cuts[k - 1]))
@@ -77,8 +76,7 @@ function renderHyperbolamethod3d(
       .stroke();
   }
 
-  r.lineWidth = 1.5;
-  r.strokeStyle = "#000000";
+  r.set({ lineWidth: 1.5, stroke: "#000000" });
   r.begin();
   r.move(...proj(W, W, W)).line(...proj(N + (N - W) * 0.1, W, W));
   r.move(...proj(W, W, W)).line(...proj(W, N + (N - W) * 0.1, W));
@@ -90,7 +88,7 @@ function renderHyperbolamethod3d(
     r.line(...proj(cuts[i], cuts[cuts.length - i], W));
   r.stroke();*/
 
-  r.lineWidth = 0.75;
+  r.set({ lineWidth: 0.75 });
   for (let ix = 1; ix < cuts.length; ix++)
     for (let iy = 1; iy < cuts.length - ix + 1; iy++)
       drawBoxSpike(cuts, [ix, iy, cuts.length + 1 - ix - iy]);
@@ -122,9 +120,8 @@ function renderHyperbolamethod(
   let cuts = [...new math.Range(0, J + 1)].map((i) => W * Math.exp(i * lNJ));
 
   // fill below
-  r.fillStyle = fill;
-  r.strokeStyle = gridFill;
-  r.lineWidth = 1.5;
+  r.set({ fill, stroke: gridFill, lineWidth: 1.5 });
+
   r.begin();
   r.move(cuts[0], N - cuts[0]).line(cuts[0], N - cuts[J]);
   for (var i = 1; i < cuts.length; i++)
@@ -135,8 +132,7 @@ function renderHyperbolamethod(
 
   // fill error;
   r.begin();
-  r.fillStyle = errorFill;
-  r.lineWidth = 1.5;
+  r.set({ lineWidth: 1.5, fill: errorFill });
   r.move(cuts[0], N - cuts[J]);
   for (var i = 1; i < cuts.length; i++)
     r.line(cuts[i - 1], N - cuts[J - i + 1]).line(cuts[i], N - cuts[J - i + 1]);
@@ -147,7 +143,7 @@ function renderHyperbolamethod(
 
   /* Lines (every line only single stroked and with corners) */
   let p: [number, number];
-  r.lineWidth = 1;
+  r.set({ lineWidth: 1 });
   // longest boxes (|_| shaped)
   r.begin();
   p = [cuts[1], N - cuts[J]];
@@ -174,8 +170,8 @@ function renderHyperbolamethod(
   // Hyperbola
   r.begin();
   let steps = 100;
-  r.lineWidth = 2;
-  r.strokeStyle = hypFill;
+
+  r.set({ lineWidth: 2, stroke: hypFill });
   r.move(W, N - W);
   for (let i of [...new math.Range(0, steps + 1)]) {
     let v = Math.pow(N / W, i / steps);
@@ -186,7 +182,7 @@ function renderHyperbolamethod(
 }
 
 function draw(r: render.Renderer2D) {
-  r.fillStyle = "#FF000055";
+  r.set({ fill: "#FF000055" });
   r.move(50, 50);
   r.arc(50, 50, 20, 0, Math.PI, false);
 

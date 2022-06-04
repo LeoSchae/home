@@ -213,9 +213,11 @@ window.customElements.define(
       });
 
       function* bgDraw(ctx: render.Renderer2D) {
-        ctx.fillStyle = appOptions.fill + "55";
-        ctx.strokeStyle = appOptions.fill;
-        ctx.lineWidth = 1;
+        ctx.set({
+          lineWidth: 1,
+          fill: appOptions.fill + "55",
+          stroke: appOptions.fill,
+        });
 
         let i = 0;
         for (let m of visual.group) {

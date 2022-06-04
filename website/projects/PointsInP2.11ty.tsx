@@ -1,6 +1,7 @@
 /** @jsx jsx */
 /** @jsxFrag jsx.Fragment */
 import { jsx } from "@lib/UnsafeXML";
+import katex from "katex";
 
 let nojs = (
   <div style="display:grid;justify-items:center;align-items:center;width:100%;height:100%;">
@@ -26,7 +27,11 @@ export function data() {
     icon: previewIcon(),
     layout_type: "fullscreen",
     tags: ["projects"],
-    nav: { key: "Web Apps::P2 Points" },
+    nav: {
+      key:
+        "Web Apps::Points in " +
+        katex.renderToString(`\\mathbb{P}^2(\\mathbb{Q})`),
+    },
   };
 }
 

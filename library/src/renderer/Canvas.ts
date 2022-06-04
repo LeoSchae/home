@@ -1,9 +1,9 @@
-import { Renderer2D, MeasureText, TextAlign } from "./";
+import * as render from "./";
 
 const PI_2 = 2 * Math.PI;
 const _PI_2 = 0.5 / Math.PI;
 
-export default class Canvas implements Renderer2D, MeasureText {
+export default class Canvas implements render.Renderer2D, render.MeasureText {
   private _ctx: CanvasRenderingContext2D;
 
   private _lineWidth = 1;
@@ -60,6 +60,33 @@ export default class Canvas implements Renderer2D, MeasureText {
     this._strokeColor = strokeStyle;
   }
 
+  set(options: render.SetOptions2D) {
+    // Add as for assertion typechecks
+    for (var [k, v] of Object.entries(options) as [
+      keyof render.SetOptions2D,
+      any
+    ][]) {
+      switch (k) {
+        case "fontSize":
+          this.fontSize = v;
+          break;
+        case "lineWidth":
+          this.lineWidth = v;
+          break;
+        case "fill":
+          this.fillStyle = v;
+          break;
+        case "stroke":
+          this.strokeStyle = v;
+          break;
+        default:
+          let unreachable: never = k;
+          console.warn(`Unknown option key '${k}'`);
+      }
+    }
+    return this;
+  }
+
   measureText(text: string) {
     this._ctx.textAlign = "center";
     const tm = this._ctx.measureText(text);
@@ -72,22 +99,22 @@ export default class Canvas implements Renderer2D, MeasureText {
     };
   }
 
-  drawText(text: string, x: number, y: number, align: TextAlign) {
+  drawText(text: string, x: number, y: number, align: render.TextAlign) {
     let bl: CanvasTextBaseline = "middle",
       al: CanvasTextAlign = "center";
     switch (align & 0b1100) {
-      case TextAlign.T:
+      case render.TextAlign.T:
         bl = "top";
         break;
-      case TextAlign.B:
+      case render.TextAlign.B:
         bl = "bottom";
         break;
     }
     switch (align & 0b0011) {
-      case TextAlign.L:
+      case render.TextAlign.L:
         al = "left";
         break;
-      case TextAlign.R:
+      case render.TextAlign.R:
         al = "right";
         break;
     }
