@@ -9,19 +9,33 @@ h1 {
   border-bottom: 1px solid black;
 }
 
-p:before {
+p::before {
   content: "";
   display: inline-block;
   width: 1em;
 }
 
 main a {
+  position: relative;
   color: #017698;
-  text-decoration: underline dotted 1px;
+  text-decoration: none;
 }
 
 main a:hover {
   color: #004fd9;
+}
+
+main a::before {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  width: 100%;
+  box-sizing: content-box;
+  border-bottom: 1px dotted currentColor;
+}
+
+main a:hover::before {
+  border-bottom-style: solid;
 }
 
 </style>
@@ -34,7 +48,7 @@ You can take a look at [some of my small web projects]({{ "/projects/" | link }}
 
 ## About this website
 
-No cookies! Everything is static, built with [Eleventy](https://www.11ty.dev/ "A cool static site generator"), [PostCSS](https://postcss.org/ "Fancy things on top of CSS") and [ESBuild](https://esbuild.github.io/ "A bundler for javascript and typescript"). No data is collected :)
+No cookies! Everything is static and built with [Eleventy](https://www.11ty.dev/ "A cool static site generator"), [PostCSS](https://postcss.org/ "Fancy things on top of CSS"), [ESBuild](https://esbuild.github.io/ "A bundler for javascript and typescript") and <a href="https://katex.org/">{% math "\\KaTeX" %}</a>. No data is collected :)
 
 {% if isProduction == false %}
 <a href="/home/buildlog.html" style="display: block; font-size: 0.75rem; float: right; bot: 0; right: 0; margin-top: 4rem;">buildlog</a>

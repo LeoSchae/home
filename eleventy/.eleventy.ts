@@ -1,5 +1,5 @@
 import type * as types from "./types";
-import * as fs from "fs";
+import katex from "katex";
 import * as ESBuild from "./plugins/esbuild";
 import * as PostCSS from "./plugins/postcss";
 import Essentials from "./plugins/essentials";
@@ -82,6 +82,10 @@ module.exports = function (eleventyConfig: types.Config): types.ConfigReturn {
       require("postcss-import"),
     ],
   });
+
+  eleventyConfig.addShortcode("math", (TeX: string) =>
+    katex.renderToString(TeX)
+  );
 
   if (options.output.minify)
     eleventyConfig.addTransform("html-minifier", function (content: string) {

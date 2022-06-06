@@ -47,21 +47,30 @@ let renderPoints = asyncLib.wrap.async(function* (
   let fractions = FareyFractions(options.height);
 
   for (var x of fractions) {
+    if (x[0] == x[1]) continue;
     for (var y of fractions) {
+      if (y[0] == y[1]) continue;
       if (height(x, y, [1, 1]) > options.height) continue;
       yield;
-      let p = pr.project([x[0] / x[1], y[0] / y[1]]);
 
-      r.begin()
-        .arc(...p, 0.5, 0, 1.9999 * Math.PI, false)
-        .close()
-        .fill();
+      for (let [s0, s1] of [
+        [1, 1],
+        [-1, 1],
+        [1, -1],
+        [-1, -1],
+      ]) {
+        let p = pr.project([(s0 * x[0]) / x[1], (s1 * y[0]) / y[1]]);
+        r.begin()
+          .arc(...p, 0.5, 0, 1.9999 * Math.PI, false)
+          .close()
+          .fill();
+      }
     }
   }
-  let tpos = pr.project([0, 0]);
-  r.drawText("[0 : 0 : 1]", tpos[0] - 7, tpos[1] + 5, render.TextAlign.T);
-  tpos = pr.project([1, 1]);
-  r.drawText("[1 : 1 : 1]", tpos[0] + 7, tpos[1] - 5, render.TextAlign.B);
+  //let tpos = pr.project([0, 0]);
+  //r.drawText("[0 : 0 : 1]", tpos[0] - 7, tpos[1] + 5, render.TextAlign.T);
+  //tpos = pr.project([1, 1]);
+  //r.drawText("[1 : 1 : 1]", tpos[0] + 7, tpos[1] - 5, render.TextAlign.B);
 });
 
 window.customElements.define(
@@ -74,7 +83,7 @@ window.customElements.define(
 
       let parameters = {
         projection: pr,
-        height: 20,
+        height: 30,
       };
 
       const dzh = new DragZoomHover(
