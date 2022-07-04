@@ -1,30 +1,11 @@
-import {
-  ComplexScTr,
-  drawCarthesian2DAxis,
-  annotateCarthesian2DAxis,
-} from "../canvas/axis";
-import * as render from "../renderer";
+import { ComplexScTr } from "../canvas/axis";
 import { DragZoomHover } from "../modules/Interact";
 import * as math from "../modules/math";
 import * as layers from "./layers";
 import * as asyncLib from "@lib/modules/Async";
 import { manualSizing } from "./layers/Options";
-import { renderToString } from "katex";
-import {
-  Complete,
-  ellipsePoint,
-  FullBackend,
-  Renderer,
-} from "@lib/renderer/new";
-import { SVGBackend } from "@lib/renderer/newSVG";
-import { TikZBackend } from "@lib/renderer/newTikZ";
-import { ProxyBackend } from "@lib/renderer/newProxy";
-import { MeasuredRenderer } from "@lib/renderer/newScaled";
-import { Matrix22 } from "@lib/modules/math/matrix";
-import { InterceptedBackend, Transform } from "@lib/renderer/newIntercept";
-import { config } from "process";
+import { Renderer, CanvasBackend } from "@lib/renderer/";
 import { ExportButton } from "./layers/tmpExport";
-import { CanvasBackend } from "@lib/renderer/newCanvas";
 
 function download(
   content: string,
@@ -93,40 +74,8 @@ function diagonalizeSymmetric(
   return [eig1, eig2, theta];
 }
 
-function ellipseTrafo(
-  r: FullBackend<"path">,
-  trafo: Matrix22,
-  cx: number,
-  cy: number,
-  rx: number,
-  ry: number,
-  axisRotation: number,
-  start: number,
-  amount: number
-): [number, number, number, number, number] {
-  let m = new Matrix22(rx * rx, 0, 0, ry * ry);
-  m = trafo.mul(m.mul(trafo.T));
-  let radii = diagonalizeSymmetric(m.m[0], m.m[3], m.m[1]);
-
-  let theta = -radii[2];
-  let xrad = Math.sqrt(radii[0]),
-    yrad = Math.sqrt(radii[1]);
-
-  // find start and end angle
-
-  let p0 = trafo.of(ellipsePoint(0, 0, rx, ry, axisRotation, start));
-
-  p0 = Matrix22.rotation(theta).of(p0);
-
-  p0 = [(50 * p0[0]) / xrad, (50 * p0[1]) / yrad];
-
-  let arg = (0.5 * new math.Complex(...p0).arg()) / Math.PI;
-
-  return [xrad, yrad, theta, -arg, amount];
-}
-
 let renderPoints = asyncLib.wrap.async(function* (
-  r: FullBackend<"primitive">,
+  r: Renderer<"primitive">,
   options: {
     height: number;
     projection: ComplexScTr;
@@ -222,7 +171,7 @@ window.customElements.define(
         "draw",
         layers.Canvas({
           update(config, ctx) {
-            let re = Complete(new CanvasBackend(ctx));
+            let re = Renderer.from(new CanvasBackend(ctx));
 
             ctx.clearRect(0, 0, config.width, config.height);
 

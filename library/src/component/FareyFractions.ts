@@ -3,7 +3,7 @@ import {
   drawCarthesian2DAxis,
   annotateCarthesian2DAxis,
 } from "../canvas/axis";
-import * as render from "../renderer";
+import * as render from "../renderer/old";
 import { BBSprite, FracSprite, TextSprite } from "../canvas/sprites";
 import { DragZoomHover } from "../modules/Interact";
 import { Complex } from "../modules/math";

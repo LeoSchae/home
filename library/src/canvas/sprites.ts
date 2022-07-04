@@ -1,9 +1,9 @@
-import { FullBackend, Renderer } from "@lib/renderer/new";
-import type * as render from "../renderer";
+import { Renderer } from "@lib/renderer/";
+import type * as render from "../renderer/old";
 
 export type Sprite = {
   draw(
-    ctx: render.Renderer2D | FullBackend<"text">,
+    ctx: render.Renderer2D | Renderer<"text">,
     x: number,
     y: number
   ): unknown;

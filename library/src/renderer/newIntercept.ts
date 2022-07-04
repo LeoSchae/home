@@ -1,7 +1,6 @@
 import { Complex } from "@lib/modules/math";
 import { Matrix22 } from "@lib/modules/math/matrix";
-import { start } from "repl";
-import * as render from "./new";
+import { Backend, ellipsePoint, Renderer } from ".";
 
 type n = number;
 
@@ -65,7 +64,7 @@ function transformEllipse(
   newry = Math.sqrt(newry);
 
   // Find correct starting angle
-  let p0 = trafo.of(render.ellipsePoint(0, 0, rx, ry, axisRotation, start));
+  let p0 = trafo.of(ellipsePoint(0, 0, rx, ry, axisRotation, start));
   p0 = Matrix22.rotation(theta).of(p0);
 
   let newStart =
@@ -81,16 +80,16 @@ export function Transform(linear: Matrix22, translate: [number, number]) {
   }
 
   return {
-    move(this: render.FullPathBackend, x: number, y: number): boolean | void {
+    move(this: Renderer.Path, x: number, y: number): boolean | void {
       this.move(...transform(x, y));
       return true;
     },
-    line(this: render.FullPathBackend, x: number, y: number): boolean | void {
+    line(this: Renderer.Path, x: number, y: number): boolean | void {
       this.line(...transform(x, y));
       return true;
     },
     cubic(
-      this: render.FullPathBackend,
+      this: Renderer.Path,
       c1x: number,
       c1y: number,
       c2x: number,
@@ -106,7 +105,7 @@ export function Transform(linear: Matrix22, translate: [number, number]) {
       return true;
     },
     quadratic(
-      this: render.FullPathBackend,
+      this: Renderer.Path,
       cx: number,
       cy: number,
       x: number,
@@ -116,7 +115,7 @@ export function Transform(linear: Matrix22, translate: [number, number]) {
       return true;
     },
     ellipse(
-      this: render.FullPathBackend,
+      this: Renderer.Path,
       cx: number,
       cy: number,
       radiusX: number,
@@ -139,7 +138,7 @@ export function Transform(linear: Matrix22, translate: [number, number]) {
       return true;
     },
     arc(
-      this: render.FullPathBackend,
+      this: Renderer.Path,
       cx: number,
       cy: number,
       radius: number,
@@ -152,23 +151,23 @@ export function Transform(linear: Matrix22, translate: [number, number]) {
       );
       return true;
     },
-    close(this: render.FullPathBackend): boolean | void {},
+    close(this: Renderer.Path): boolean | void {},
     draw(
-      this: render.FullPathBackend,
+      this: Renderer.Path,
       stroke: boolean,
       fill: boolean
     ): boolean | void {},
-    clip(this: render.FullPathBackend): boolean | void {},
+    clip(this: Renderer.Path): boolean | void {},
   };
 }
 
 type PathIntercept = {
-  [key in keyof render.FullPathBackend]?: (
-    this: render.FullPathBackend,
-    ...args: Parameters<render.FullPathBackend[key]>
+  [key in keyof Renderer.Path]?: (
+    this: Renderer.Path,
+    ...args: Parameters<Renderer.Path[key]>
   ) => boolean | void;
 };
-class InterceptedPath implements render.FullPathBackend {
+class InterceptedPath implements Renderer.Path {
   private current: number | undefined;
 
   /**
@@ -179,15 +178,15 @@ class InterceptedPath implements render.FullPathBackend {
    */
   constructor(
     private intercepts: PathIntercept[],
-    private handler: render.FullPathBackend,
+    private handler: Renderer.Path,
     general: boolean = true
   ) {
     if (!general) this.current = intercepts.length - 1;
   }
 
-  private _do<K extends keyof render.FullPathBackend>(
+  private _do<K extends keyof Renderer.Path>(
     key: K,
-    args: Parameters<render.FullPathBackend[K]>
+    args: Parameters<Renderer.Path[K]>
   ) {
     if (this.current === undefined) {
       let h = new InterceptedPath(this.intercepts, this.handler, false);
@@ -280,8 +279,8 @@ class InterceptedPath implements render.FullPathBackend {
   }
 }
 
-export class InterceptedBackend<B extends render.FullBackend<"path">>
-  implements render.FullBackend<"path">
+export class InterceptedRenderer<B extends Renderer<"path">>
+  implements Renderer<"path">
 {
   intercepts: PathIntercept[] = [];
   constructor(public backend: B, intercepts?: { path?: PathIntercept }[]) {
@@ -292,8 +291,12 @@ export class InterceptedBackend<B extends render.FullBackend<"path">>
     if (intercept.path) this.intercepts.push(intercept.path);
   }
 
-  path(): render.FullPathBackend {
+  path(): Renderer.Path {
     return new InterceptedPath(this.intercepts, this.backend.path());
+  }
+  clear(color?: [number, number, number, number?] | string) {
+    this.backend.clear(color);
+    return this;
   }
   save() {
     this.backend.save();
@@ -303,7 +306,7 @@ export class InterceptedBackend<B extends render.FullBackend<"path">>
     this.backend.restore();
     return this;
   }
-  style(options: render.BackendStyleOptions<"path">) {
+  style(options: Renderer.Style<"path">) {
     this.backend.style(options);
     return this;
   }

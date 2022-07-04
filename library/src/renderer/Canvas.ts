@@ -1,4 +1,4 @@
-import * as render from "./";
+import * as render from "./old";
 
 const PI_2 = 2 * Math.PI;
 const _PI_2 = 0.5 / Math.PI;

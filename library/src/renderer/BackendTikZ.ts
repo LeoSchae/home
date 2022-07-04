@@ -1,5 +1,4 @@
-import * as render from "./new";
-import TikZ from "./TikZ";
+import { Align, Backend, ellipsePoint } from ".";
 
 function colorToTeX(
   color: [number, number, number, number?]
@@ -10,7 +9,7 @@ function colorToTeX(
   ];
 }
 
-class TikZPathBackend implements render.PathBackend {
+class TikZPathBackend implements Backend.Path {
   private d: string = "";
   private round: (x: number) => number = (x) => x;
 
@@ -76,7 +75,7 @@ class TikZPathBackend implements render.PathBackend {
       return this;
     }
 
-    let [x0, y0] = render.ellipsePoint(
+    let [x0, y0] = ellipsePoint(
       cx,
       cy,
       radiusX,
@@ -84,7 +83,7 @@ class TikZPathBackend implements render.PathBackend {
       axisRotation,
       angleOffset
     );
-    let [x1, y1] = render.ellipsePoint(
+    let [x1, y1] = ellipsePoint(
       cx,
       cy,
       radiusX,
@@ -119,7 +118,7 @@ class TikZPathBackend implements render.PathBackend {
   }
 }
 
-class TikZTextBackend implements render.TextBackend {
+class TikZTextBackend implements Backend.Text {
   private round = (x: number) => x;
 
   constructor(private tikz: TikZBackend) {}
@@ -128,22 +127,22 @@ class TikZTextBackend implements render.TextBackend {
     x: number,
     y: number,
     text: string,
-    align: render.Align = render.Align.C
-  ): render.TextBackend {
+    align: Align = Align.C
+  ): Backend.Text {
     let anchor: string | undefined;
-    switch (render.verticalAlign(align)) {
-      case render.Align.T:
+    switch (Align.vertical(align)) {
+      case Align.T:
         anchor = "north";
         break;
-      case render.Align.B:
+      case Align.B:
         anchor = "south";
         break;
     }
-    switch (align & 0b0011) {
-      case render.Align.L:
+    switch (Align.horizontal(align)) {
+      case Align.L:
         anchor = (anchor ? anchor + " " : "") + "west";
         break;
-      case render.Align.R:
+      case Align.R:
         anchor = (anchor ? anchor + " " : "") + "east";
         break;
     }
@@ -174,7 +173,7 @@ type TikZStyleObject = {
   fontSize: number;
 };
 
-export class TikZBackend implements render.Backend<"path" | "text"> {
+export class TikZBackend implements Backend<"path" | "text"> {
   width: number;
   height: number;
   TeX: string;
@@ -182,11 +181,8 @@ export class TikZBackend implements render.Backend<"path" | "text"> {
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
-    this.TeX =
-      `\\begin{tikzpicture}[x=1pt,y=-1pt,every node/.style={inner sep=0,outer sep=0}]%\n` +
-      `\\fontfamily{ptm}\\selectfont%\n` +
-      `\\useasboundingbox (0,0) rectangle (${width},${height});%\n` +
-      `\\clip (0,0) rectangle (${width},${height});%\n`;
+    this.TeX = "";
+    this.clear();
   }
 
   private _style_stack: TikZStyleObject[] = [];
@@ -224,6 +220,15 @@ export class TikZBackend implements render.Backend<"path" | "text"> {
     this.TeX += draw;
   }
 
+  clear() {
+    this.TeX =
+      `\\begin{tikzpicture}[x=1pt,y=-1pt,every node/.style={inner sep=0,outer sep=0}]%\n` +
+      `\\fontfamily{ptm}\\selectfont%\n` +
+      `\\useasboundingbox (0,0) rectangle (${this.width},${this.height});%\n` +
+      `\\clip (0,0) rectangle (${this.width},${this.height});%\n`;
+    return this;
+  }
+
   save() {
     let _style = this._style;
     let style = {
@@ -244,7 +249,7 @@ export class TikZBackend implements render.Backend<"path" | "text"> {
     this._style = style;
     return this;
   }
-  style(options: render.BackendStyleOptions<"path" | "text">) {
+  style(options: Backend.Style<"path" | "text">) {
     let color: [string, number];
     let style = this._style;
     for (let [k, v] of Object.entries(options) as [
@@ -280,11 +285,11 @@ export class TikZBackend implements render.Backend<"path" | "text"> {
     return this;
   }
 
-  path(): render.PathBackend {
+  path(): Backend.Path {
     return new TikZPathBackend(this);
   }
 
-  text(): render.TextBackend {
+  text(): Backend.Text {
     return new TikZTextBackend(this);
   }
 

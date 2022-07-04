@@ -2,11 +2,9 @@
 /** @jsxFrag jsx.Fragment */
 import { jsx } from "@lib/UnsafeXML";
 import { ComplexScTr } from "../../library/src/canvas/axis";
-import SVG from "@lib/renderer/SVG";
 import { congruenceSubgroups } from "@lib/modules/math";
 import { hyperbolicLine } from "@lib/modules/math/draw";
-import { Complete } from "@lib/renderer/new";
-import { SVGBackend } from "@lib/renderer/newSVG";
+import { Renderer, SVGBackend } from "@lib/renderer/";
 
 let nojs = (
   <div style="display:grid;justify-items:center;align-items:center;width:100%;height:100%;">
@@ -54,7 +52,7 @@ function perviewIcon(this: any, data: any) {
   let dom = congruenceSubgroups.Domain1.corners;
 
   let svg;
-  let ctx = Complete((svg = new SVGBackend(200, 200)));
+  let ctx = Renderer.from((svg = new SVGBackend(200, 200)));
   let projection = new ComplexScTr([100, 200], 100);
 
   ctx.style({

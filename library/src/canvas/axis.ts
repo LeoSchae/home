@@ -1,5 +1,5 @@
 import { Complex } from "../modules/math";
-import * as render from "../renderer";
+import * as render from "../renderer/old";
 import * as sprites from "./sprites";
 import TeX from "./TeX";
 

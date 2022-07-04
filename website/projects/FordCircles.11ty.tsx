@@ -1,6 +1,6 @@
 /** @jsx jsx */
 /** @jsxFrag jsx.Fragment */
-import { SVG } from "@lib/renderer";
+import { SVG } from "@lib/renderer/old";
 import { jsx } from "@lib/UnsafeXML";
 
 let nojs = (

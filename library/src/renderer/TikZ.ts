@@ -1,4 +1,4 @@
-import * as render from ".";
+import * as render from "./old";
 
 type PicStyle = {
   stroke: {

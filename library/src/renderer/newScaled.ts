@@ -1,23 +1,23 @@
 import { Matrix22 } from "@lib/modules/math/matrix";
-import * as render from "./new";
-import { InterceptedBackend, Transform } from "./newIntercept";
-import { ProxyBackend } from "./newProxy";
+import { ellipsePoint, Renderer } from ".";
+import { InterceptedRenderer, Transform } from "./newIntercept";
+import { RenderProxy } from "./RenderProxy";
 
 type PathIntercept = {
-  [key in keyof render.FullPathBackend]?: (
-    this: render.FullPathBackend,
-    ...args: Parameters<render.FullPathBackend[key]>
+  [key in keyof Renderer.Path]?: (
+    this: Renderer.Path,
+    ...args: Parameters<Renderer.Path[key]>
   ) => boolean | void;
 };
 
-export class MeasuredRenderer extends InterceptedBackend<ProxyBackend> {
+export class MeasuredRenderer extends InterceptedRenderer<RenderProxy> {
   minX: number = Number.POSITIVE_INFINITY;
   minY: number = Number.POSITIVE_INFINITY;
   maxX: number = Number.NEGATIVE_INFINITY;
   maxY: number = Number.NEGATIVE_INFINITY;
 
   constructor() {
-    super(new ProxyBackend());
+    super(new RenderProxy());
 
     const addVisiblePoint = (x: number, y: number) => {
       this.minX = Math.min(x, this.minX);
@@ -36,10 +36,10 @@ export class MeasuredRenderer extends InterceptedBackend<ProxyBackend> {
           angle: number
         ) {
           addVisiblePoint(
-            ...render.ellipsePoint(x, y, radius, radius, 0, angleOffset)
+            ...ellipsePoint(x, y, radius, radius, 0, angleOffset)
           );
           addVisiblePoint(
-            ...render.ellipsePoint(x, y, radius, radius, 0, angleOffset + angle)
+            ...ellipsePoint(x, y, radius, radius, 0, angleOffset + angle)
           );
 
           let startQuarter = angleOffset;
@@ -75,7 +75,7 @@ export class MeasuredRenderer extends InterceptedBackend<ProxyBackend> {
   }
 
   replay(
-    r: render.FullBackend<"path">,
+    r: Renderer<"path">,
     options?: { fit?: { width: number; height: number } }
   ) {
     if (options?.fit) {
@@ -87,7 +87,7 @@ export class MeasuredRenderer extends InterceptedBackend<ProxyBackend> {
         options.fit.height / height
       );
 
-      r = new InterceptedBackend(r, [
+      r = new InterceptedRenderer(r, [
         {
           path: Transform(new Matrix22(scale, 0, 0, scale), [
             0.5 * (options.fit.width - scale * width) - this.minX * scale,

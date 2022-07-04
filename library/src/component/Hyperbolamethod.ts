@@ -1,30 +1,13 @@
 import * as layers from "./layers";
-import * as render from "@lib/renderer";
+import * as render from "@lib/renderer/old";
 import * as math from "@lib/modules/math";
-import ScaledRender from "@lib/renderer/AutoScale";
 import { manualSizing } from "./layers/Options";
-import { Backend, Complete, FullBackend, Renderer } from "@lib/renderer/new";
+import { Renderer, CanvasBackend } from "@lib/renderer/";
 import { MeasuredRenderer } from "@lib/renderer/newScaled";
-import { stringify } from "querystring";
-import { SVGBackend } from "@lib/renderer/newSVG";
-import { TikZBackend } from "@lib/renderer/newTikZ";
 import { ExportButton } from "./layers/tmpExport";
-import { CanvasBackend } from "@lib/renderer/newCanvas";
-
-function download(
-  content: string,
-  name: string,
-  dataType: string = "text/plain"
-) {
-  let data = `data:${dataType};base64,${window.btoa(content)}`;
-  let link = document.createElement("a");
-  link.setAttribute("download", name);
-  link.href = data;
-  link.click();
-}
 
 function renderHyperbolamethod3d(
-  r: FullBackend<"path">,
+  r: Renderer<"path">,
   opts: {
     N: number;
     W: number;
@@ -102,7 +85,7 @@ function renderHyperbolamethod3d(
 }
 
 function renderHyperbolamethod(
-  r: FullBackend<"path" | "primitive">,
+  r: Renderer<"path" | "primitive">,
   opts: {
     N: number;
     W: number;
@@ -238,11 +221,11 @@ window.customElements.define(
           update(config, ctx) {
             ctx.clearRect(0, 0, config.width, config.height);
             let scale = new MeasuredRenderer();
-            let r = Complete(scale);
+            let r = Renderer.from(scale);
             if (state.dim == "2D") renderHyperbolamethod(r, state);
             else renderHyperbolamethod3d(r, state);
 
-            scale.replay(Complete(new CanvasBackend(ctx)), {
+            scale.replay(Renderer.from(new CanvasBackend(ctx)), {
               fit: { width: config.width, height: config.height },
             });
           },
@@ -326,7 +309,7 @@ window.customElements.define(
           },
           render(r) {
             let scale = new MeasuredRenderer();
-            let renderer = Complete(scale);
+            let renderer = Renderer.from(scale);
             if (state.dim == "2D") renderHyperbolamethod(renderer, state);
             else renderHyperbolamethod3d(renderer, state);
 

@@ -1,12 +1,5 @@
-import {
-  Align,
-  Backend,
-  BackendStyleOptions,
-  horizontalAlign,
-  PathBackend,
-  TextBackend,
-  verticalAlign,
-} from "./new";
+import { Colorizer } from "logform";
+import { Align, Backend } from ".";
 
 const twoPi = 2 * Math.PI;
 
@@ -23,7 +16,7 @@ function colorToCss(color: [number, number, number, number?]): string {
   return res;
 }
 
-class CanvasPathBackend implements PathBackend {
+class CanvasPathBackend implements Backend.Path {
   constructor(private ctx: CanvasRenderingContext2D) {}
   private _path: Path2D = new Path2D();
   move(x: number, y: number) {
@@ -88,37 +81,45 @@ class CanvasPathBackend implements PathBackend {
   }
 }
 
-class CanvasTextBackend implements TextBackend {
+class CanvasTextBackend implements Backend.Text {
   private fontSize: number = 9;
 
   constructor(private ctx: CanvasRenderingContext2D) {}
 
-  draw(
-    x: number,
-    y: number,
-    text: string,
-    align: Align = Align.C
-  ): TextBackend {
-    let bl: CanvasTextBaseline = "middle",
-      al: CanvasTextAlign = "center";
-    switch (verticalAlign(align)) {
+  draw(x: number, y: number, text: string, align: Align = Align.C) {
+    let baseline: CanvasTextBaseline = "middle",
+      justify: CanvasTextAlign = "center";
+
+    // Switch for exaustive type checking
+    let vAlign = Align.vertical(align),
+      hAlign = Align.horizontal(align);
+    switch (vAlign) {
       case Align.T:
-        bl = "top";
+        baseline = "top";
         break;
       case Align.B:
-        bl = "bottom";
+        baseline = "bottom";
         break;
+      case Align.C:
+        break;
+      default:
+        let never: never = vAlign;
     }
-    switch (horizontalAlign(align)) {
+    switch (hAlign) {
       case Align.L:
-        al = "left";
+        justify = "left";
         break;
       case Align.R:
-        al = "right";
+        justify = "right";
         break;
+      case Align.C:
+        break;
+      default:
+        let never: never = hAlign;
     }
-    this.ctx.textBaseline = bl;
-    this.ctx.textAlign = al;
+
+    this.ctx.textBaseline = baseline;
+    this.ctx.textAlign = justify;
     this.ctx.fillText(text, x, y);
     return this;
   }
@@ -127,6 +128,16 @@ class CanvasTextBackend implements TextBackend {
 export class CanvasBackend implements Backend<"path" | "text"> {
   constructor(private ctx: CanvasRenderingContext2D) {}
 
+  clear(color: [number, number, number, number?]) {
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    if (color) {
+      this.ctx.save();
+      this.ctx.fillStyle = colorToCss(color);
+      this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      this.ctx.restore();
+    }
+    return this;
+  }
   save() {
     this.ctx.save();
     return this;
@@ -135,7 +146,7 @@ export class CanvasBackend implements Backend<"path" | "text"> {
     this.ctx.restore();
     return this;
   }
-  style(options: BackendStyleOptions<"path" | "text">) {
+  style(options: Backend.Style<"path" | "text">) {
     let rgb: [number, number, number, number?];
     for (let [k, v] of Object.entries(options) as [
       keyof typeof options,
@@ -155,7 +166,6 @@ export class CanvasBackend implements Backend<"path" | "text"> {
           break;
         case "fontSize":
           this.ctx.font = v + "px Times New Roman";
-          console.log(v);
           break;
         default:
           let unreachable: never = k;
@@ -168,10 +178,10 @@ export class CanvasBackend implements Backend<"path" | "text"> {
     }
     return this;
   }
-  path(): PathBackend {
+  path(): Backend.Path {
     return new CanvasPathBackend(this.ctx);
   }
-  text(): TextBackend {
+  text(): Backend.Text {
     return new CanvasTextBackend(this.ctx);
   }
 }

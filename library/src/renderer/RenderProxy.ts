@@ -1,5 +1,4 @@
-import { formatMessages } from "esbuild";
-import * as render from "./new";
+import type { Renderer } from ".";
 
 enum PathActions {
   move,
@@ -14,6 +13,8 @@ enum PathActions {
 }
 
 enum BackendActions {
+  clear,
+  clear_color,
   save,
   restore,
   style,
@@ -21,11 +22,11 @@ enum BackendActions {
   path,
 }
 
-class ProxyPathBackend implements render.FullPathBackend {
+class ProxyPathBackend implements Renderer.Path {
   readonly id: number;
   private buffer: number[] = [];
 
-  constructor(private backend: ProxyBackend, id: number) {
+  constructor(private backend: RenderProxy, id: number) {
     this.id = id;
   }
 
@@ -102,7 +103,7 @@ class ProxyPathBackend implements render.FullPathBackend {
     this.backend._apply(this);
     return this;
   }
-  replayAction(from: number, backend: render.FullPathBackend): number {
+  replayAction(from: number, backend: Renderer.Path): number {
     let buffer = this.buffer;
     let action;
     let current;
@@ -172,13 +173,26 @@ class ProxyPathBackend implements render.FullPathBackend {
   }
 }
 
-export class ProxyBackend implements render.FullBackend<"path"> {
+export class RenderProxy implements Renderer<"path"> {
   private buffer: number[] = [];
   private pathBuffer: ProxyPathBackend[] = [];
-  private optionBuffer: render.BackendStyleOptions<"path">[] = [];
+  private optionBuffer: Renderer.Style<"path">[] = [];
 
   _apply(pathBuffer: ProxyPathBackend) {
     this.buffer.push(BackendActions.apply, pathBuffer.id);
+  }
+  clear(color: [number, number, number, number?]) {
+    if (color) {
+      let c3 = color[3];
+      this.buffer.push(
+        BackendActions.clear_color,
+        color[0],
+        color[1],
+        color[2],
+        c3 === undefined ? 0 : c3
+      );
+    } else this.buffer.push(BackendActions.clear);
+    return this;
   }
   save(): this {
     this.buffer.push(BackendActions.save);
@@ -188,12 +202,12 @@ export class ProxyBackend implements render.FullBackend<"path"> {
     this.buffer.push(BackendActions.restore);
     return this;
   }
-  style(options: render.BackendStyleOptions<"path">): this {
+  style(options: Renderer.Style<"path">): this {
     this.buffer.push(BackendActions.style);
     this.optionBuffer.push(options);
     return this;
   }
-  path(): render.FullPathBackend {
+  path(): Renderer.Path {
     let buff;
     this.buffer.push(BackendActions.path);
     this.pathBuffer.push(
@@ -201,18 +215,29 @@ export class ProxyBackend implements render.FullBackend<"path"> {
     );
     return buff;
   }
-  replay(backend: render.FullBackend<"path">) {
+  replay(backend: Renderer<"path">) {
     let buffer = this.buffer;
 
     let action;
 
     let current;
     let currentOption = 0;
-    let paths: [number, render.FullPathBackend][] = [];
+    let paths: [number, Renderer.Path][] = [];
 
     for (current = 0; current < buffer.length; current++) {
       action = buffer[current] as BackendActions;
       switch (action) {
+        case BackendActions.clear:
+          backend.clear();
+          break;
+        case BackendActions.clear_color:
+          backend.clear([
+            buffer[++current],
+            buffer[++current],
+            buffer[++current],
+            buffer[++current],
+          ]);
+          break;
         case BackendActions.save:
           backend.save();
           break;

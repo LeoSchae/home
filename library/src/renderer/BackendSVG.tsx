@@ -1,17 +1,8 @@
 /** @jsx jsx */
 import { jsx, XML } from "../UnsafeXML";
-import {
-  Align,
-  Backend,
-  BackendStyleOptions,
-  ellipsePoint,
-  horizontalAlign,
-  PathBackend,
-  TextBackend,
-  verticalAlign,
-} from "./new";
+import { Align, Backend, ellipsePoint } from ".";
 
-class SVGPathBackend implements PathBackend {
+class SVGPathBackend implements Backend.Path {
   private d: string = "";
   private round: (x: number) => number = (x) => x;
 
@@ -50,6 +41,8 @@ class SVGPathBackend implements PathBackend {
     angleOffset: number,
     angle: number
   ): this {
+    console.log(angle);
+
     let absAngle = Math.abs(angle);
     let fullTruns = Math.floor(absAngle);
     //TODO FULL CIRCLES
@@ -118,7 +111,7 @@ class SVGPathBackend implements PathBackend {
   }
 }
 
-export class SVGTextBackend implements TextBackend {
+export class SVGTextBackend implements Backend.Text {
   private round: (x: number) => number = (x) => x;
 
   constructor(private svg: SVGBackend) {}
@@ -126,7 +119,7 @@ export class SVGTextBackend implements TextBackend {
   draw(x: number, y: number, text: string, align: Align = Align.C) {
     let bl: "text-after-edge" | "hanging" | "middle" = "middle",
       al: "start" | "end" | "middle" = "middle";
-    switch (verticalAlign(align)) {
+    switch (Align.vertical(align)) {
       case Align.T:
         bl = "hanging";
         break;
@@ -134,7 +127,7 @@ export class SVGTextBackend implements TextBackend {
         bl = "text-after-edge";
         break;
     }
-    switch (horizontalAlign(align)) {
+    switch (Align.horizontal(align)) {
       case Align.L:
         al = "start";
         break;
@@ -220,6 +213,11 @@ export class SVGBackend implements Backend<"path" | "text"> {
     );
   }
 
+  clear() {
+    this._svg.children = [];
+    return this;
+  }
+
   save() {
     let _style = this._style;
     let style = {
@@ -240,7 +238,7 @@ export class SVGBackend implements Backend<"path" | "text"> {
     this._style = style;
     return this;
   }
-  style(options: BackendStyleOptions<"path" | "text">) {
+  style(options: Backend.Style<"path" | "text">) {
     let color: [string, number];
     let style = this._style;
     for (let [k, v] of Object.entries(options) as [
@@ -277,10 +275,10 @@ export class SVGBackend implements Backend<"path" | "text"> {
     }
     return this;
   }
-  path(): PathBackend {
+  path(): Backend.Path {
     return new SVGPathBackend(this);
   }
-  text(): TextBackend {
+  text(): Backend.Text {
     return new SVGTextBackend(this);
   }
 }

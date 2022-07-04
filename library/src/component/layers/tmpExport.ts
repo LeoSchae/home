@@ -1,6 +1,4 @@
-import { Backend, Complete, FullBackend, Renderer } from "@lib/renderer/new";
-import { SVGBackend } from "@lib/renderer/newSVG";
-import { TikZBackend } from "@lib/renderer/newTikZ";
+import { Backend, Renderer, SVGBackend, TikZBackend } from "@lib/renderer/";
 import { Option } from "./Options";
 
 function download(
@@ -51,7 +49,7 @@ export function ExportButton(options: {
           contents = () => (backend as TikZBackend).toTikZ();
         } else throw new Error();
 
-        await options.render(Complete(backend));
+        await options.render(Renderer.from(backend));
 
         download(contents(), fileName, dataType);
       },

@@ -1,15 +1,14 @@
 import { ComplexScTr } from "../canvas/axis";
-import * as render from "../renderer";
-import { BBSprite, FracSprite, TextSprite } from "../canvas/sprites";
+import * as render from "../renderer/old";
+import { FracSprite, TextSprite } from "../canvas/sprites";
 import { DragZoomHover } from "../modules/Interact";
 import { Complex } from "../modules/math";
 import * as layers from "./layers";
-import { runInContext } from "vm";
 import * as asyncLib from "@lib/modules/Async";
 import { manualSizing } from "./layers/Options";
-import { Complete, FullBackend, FullPathBackend } from "@lib/renderer/new";
-import { CanvasBackend } from "@lib/renderer/newCanvas";
+import { Renderer, CanvasBackend } from "@lib/renderer/";
 import { ExportButton } from "./layers/tmpExport";
+import { config } from "process";
 
 function download(
   content: string,
@@ -24,7 +23,7 @@ function download(
 }
 
 const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
-  r: FullBackend<"path" | "text">,
+  r: Renderer<"path" | "primitive" | "text">,
   Q: number,
   options: { projection: { origin: [number, number]; scale: number } }
 ) {
@@ -37,8 +36,8 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
   let { origin, scale } = projection;
 
   r.style({ fill: "#AAAAAA", stroke: [0, 0, 0] });
-  r.path()
-    .arc(...origin, scale, 0, 2 * Math.PI - 0.01)
+  r.primitive()
+    .circle(...origin, 2 * scale)
     .draw(true, true);
   //domainCircle(r, [0, 0.5], 0.5, pr);
   //r.stroke();
@@ -93,27 +92,20 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
 });
 
 const fordCirclesInPlane = asyncLib.wrap.async(function* (
-  r: FullBackend<"path" | "text">,
+  r: Renderer<"path" | "primitive" | "text">,
   Q: number,
   options: {
     projection: { origin: [number, number]; scale: number };
   }
 ) {
+  let width: number = undefined as any;
   let measure = new render.Canvas(
     document
       .createElement("canvas")
       .getContext("2d") as CanvasRenderingContext2D
   );
 
-  r.style({ fill: "#AAAAAA" });
-  let { width, height } = r as any;
-  r.path()
-    .move(0, 0)
-    .line(0, height)
-    .line(width, height)
-    .line(width, 0)
-    .close()
-    .fill();
+  r.clear("#AAAAAA");
   r.style({ fill: "#000000" });
   let { projection } = options;
   let { origin, scale } = projection;
@@ -147,11 +139,9 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
     let xPosition = a / b;
     let radius = 0.5 / b / b;
 
-    r.path()
-      .arc(...map(xPosition, radius), radius * scale, 0, 2 * Math.PI - 0.01)
-      .close()
-      .stroke()
-      .fill();
+    r.primitive()
+      .circle(...map(xPosition, radius), 2 * radius * scale)
+      .draw(true, true);
 
     if (b < textUpTo) annotations[b - 1].push(a);
   }
@@ -178,7 +168,7 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
 });
 
 function domainCircle(
-  r: render.Renderer2D | FullPathBackend,
+  r: render.Renderer2D | Renderer.Path,
   center: [number, number],
   radius: number,
   projection: { origin: [number, number]; scale: number },
@@ -301,7 +291,7 @@ window.customElements.define(
         "draw",
         layers.Canvas({
           update(config, ctx) {
-            let r = Complete(new CanvasBackend(ctx));
+            let r = Renderer.from(new CanvasBackend(ctx));
 
             ctx.clearRect(0, 0, config.width, config.height);
 

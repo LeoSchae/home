@@ -1,5 +1,4 @@
-import { Options } from "html-minifier";
-import type * as render from "./";
+import type * as render from "./old";
 
 enum DrawOp {
   BEGIN,

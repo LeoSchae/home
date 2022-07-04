@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { jsx, XML } from "../UnsafeXML";
-import * as render from ".";
+import * as render from "./old";
 
 const R2D = 180.0 / Math.PI;
 const PI2 = 2 * Math.PI;

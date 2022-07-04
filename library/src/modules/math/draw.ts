@@ -1,9 +1,8 @@
 import { Complex, oo } from ".";
-import * as render from "@lib/renderer";
-import { FullBackend, FullPathBackend } from "@lib/renderer/new";
+import { Renderer } from "@lib/renderer/";
 
 export function hyperbolicLine(
-  ctx: FullPathBackend,
+  ctx: Renderer.Path,
   { origin, scale }: { origin: [number, number]; scale: number },
   from: Complex | oo,
   to: Complex | oo

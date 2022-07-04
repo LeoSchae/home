@@ -3,7 +3,7 @@ import {
   ComplexScTr,
   drawCarthesian2DAxis,
 } from "../canvas/axis";
-import * as render from "../renderer";
+import * as render from "../renderer/old";
 import * as sprites from "../canvas/sprites";
 import * as asyncLib from "../modules/Async";
 import { DragZoomHover } from "../modules/Interact";
@@ -16,32 +16,9 @@ import katex from "katex";
 import { manualSizing } from "./layers/Options";
 
 import popupLayer from "./layers/Popup";
-import { Complete, FullBackend, Renderer } from "@lib/renderer/new";
-import { CanvasBackend } from "@lib/renderer/newCanvas";
+import { Renderer, CanvasBackend, Align, Backend } from "@lib/renderer/";
 import { ExportButton } from "./layers/tmpExport";
-
-function download(
-  content: string,
-  name: string,
-  dataType: string = "text/plain"
-) {
-  let data = `data:${dataType};base64,${window.btoa(content)}`;
-  let link = document.createElement("a");
-  link.setAttribute("download", name);
-  link.href = data;
-  link.click();
-}
-
-function setSize(
-  dim: { width: number; height: number } | "auto",
-  config: layers.LayeredConfig
-) {
-  if (dim == "auto") {
-  } else {
-    config.containerElement.style.width = dim.width + "px";
-    config.containerElement.style.height = dim.height + "px";
-  }
-}
+import { HTMLBackend } from "@lib/renderer/BackendHTML";
 
 window.customElements.define(
   "subgroups-wc",
@@ -198,32 +175,6 @@ window.customElements.define(
         })
       );
 
-      /*options.add("multiButton", {
-        label: "Export as",
-        values: [
-          { name: "SVG", label: "SVG" },
-          { name: "TikZ", label: "TikZ" },
-        ],
-        onClick(name) {
-          let r: render.SVG | render.TikZ;
-          let fileName: string = "Subgroups";
-          let dataType: string;
-          if (name == "SVG") {
-            r = new render.SVG(config.width, config.height);
-            fileName += ".svg";
-            dataType = "image/svg+xml";
-          } else if (name == "TikZ") {
-            r = new render.TikZ(config.width, config.height);
-            fileName += ".tikz";
-            dataType = "text/plain";
-          } else throw new Error("Unknown format");
-
-          let d = bgDraw(r);
-          while (!d.next().done) continue;
-          download(r.toFileString(), fileName, dataType);
-        },
-      });*/
-
       function* bgDraw(ctx: Renderer<"path">) {
         ctx.style({
           lineWidth: 1,
@@ -260,7 +211,7 @@ window.customElements.define(
               .callAsync(
                 null,
                 bgDraw,
-                [Complete(new CanvasBackend(ctx))],
+                [Renderer.from(new CanvasBackend(ctx))],
                 asyncManager.getNew("bgDraw")
               )
               .catch(() => {});
@@ -311,7 +262,7 @@ window.customElements.define(
                 katex.render(m.toTeX(), popup.container);
 
                 r.fillStyle = "#CCCCEEAA";
-                let pa = Complete(new CanvasBackend(ctx)).path();
+                let pa = Renderer.from(new CanvasBackend(ctx)).path();
                 for (let i = 0; i < domain.length; i++) {
                   hyperbolicLine(
                     pa,
@@ -356,6 +307,15 @@ window.customElements.define(
           },
         })
       );
+
+      let e = document.createElement("div");
+      e.style.width = "100%";
+      e.style.height = "100%";
+      e.style.fontFamily = "Times New Roman";
+      config.addLayer("test", e);
+
+      let txt = new HTMLBackend(e);
+      txt.text().draw(10, 10, "HALLO", Align.TL);
     },
   })
 );

@@ -1,5 +1,5 @@
 import { startTimer } from "winston";
-import { Renderer2D } from ".";
+import { Renderer2D } from "./old";
 import Buffer from "./Buffer";
 
 const twoPi = 2 * Math.PI;
