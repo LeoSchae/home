@@ -75,7 +75,7 @@ export class MeasuredRenderer extends InterceptedBackend<ProxyBackend> {
   }
 
   replay(
-    r: render.FullBackend,
+    r: render.FullBackend<"path">,
     options?: { fit?: { width: number; height: number } }
   ) {
     if (options?.fit) {

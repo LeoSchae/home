@@ -280,8 +280,8 @@ class InterceptedPath implements render.FullPathBackend {
   }
 }
 
-export class InterceptedBackend<B extends render.FullBackend>
-  implements render.FullBackend
+export class InterceptedBackend<B extends render.FullBackend<"path">>
+  implements render.FullBackend<"path">
 {
   intercepts: PathIntercept[] = [];
   constructor(public backend: B, intercepts?: { path?: PathIntercept }[]) {
@@ -303,7 +303,7 @@ export class InterceptedBackend<B extends render.FullBackend>
     this.backend.restore();
     return this;
   }
-  style(options: render.BackendStyleOptions) {
+  style(options: render.BackendStyleOptions<"path">) {
     this.backend.style(options);
     return this;
   }

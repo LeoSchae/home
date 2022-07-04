@@ -94,7 +94,7 @@ function diagonalizeSymmetric(
 }
 
 function ellipseTrafo(
-  r: FullBackend,
+  r: FullBackend<"path">,
   trafo: Matrix22,
   cx: number,
   cy: number,

@@ -174,7 +174,7 @@ type TikZStyleObject = {
   fontSize: number;
 };
 
-export class TikZBackend implements render.Backend<"text"> {
+export class TikZBackend implements render.Backend<"path" | "text"> {
   width: number;
   height: number;
   TeX: string;
@@ -236,17 +236,19 @@ export class TikZBackend implements render.Backend<"text"> {
       fontSize: _style.fontSize,
     };
     this._style_stack.push(style);
+    return this;
   }
   restore() {
     let style = this._style_stack.pop();
     if (!style) throw new Error("Stack is empty!");
     this._style = style;
+    return this;
   }
-  style(options: render.BackendStyleOptions<"text">) {
+  style(options: render.BackendStyleOptions<"path" | "text">) {
     let color: [string, number];
     let style = this._style;
     for (let [k, v] of Object.entries(options) as [
-      keyof render.BackendStyleOptions<"text">,
+      keyof typeof options,
       any
     ][]) {
       switch (k) {
@@ -275,7 +277,9 @@ export class TikZBackend implements render.Backend<"text"> {
           );
       }
     }
+    return this;
   }
+
   path(): render.PathBackend {
     return new TikZPathBackend(this);
   }

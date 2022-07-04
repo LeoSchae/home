@@ -60,7 +60,7 @@ export function TextSprite(
     left,
     right,
     draw: function (
-      ctx: render.Renderer2D | FullBackend<"text">,
+      ctx: render.Renderer2D | Renderer<any>,
       x: number,
       y: number
     ) {
@@ -111,7 +111,7 @@ export function FracSprite(top: BBSprite, bot: BBSprite): BBSprite {
     right: halfLineLength,
 
     draw: function (
-      ctx: render.Renderer2D | FullBackend<"text">,
+      ctx: render.Renderer2D | Renderer<any>,
       x: number,
       y: number
     ) {

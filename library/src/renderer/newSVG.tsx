@@ -184,7 +184,7 @@ function colorToHex(
   return [res, color[3] ?? 1];
 }
 
-export class SVGBackend implements Backend<"text"> {
+export class SVGBackend implements Backend<"path" | "text"> {
   _svg: XML;
 
   constructor(width: number, height: number) {
@@ -232,17 +232,19 @@ export class SVGBackend implements Backend<"text"> {
       fontSize: _style.fontSize,
     };
     this._style_stack.push(style);
+    return this;
   }
   restore() {
     let style = this._style_stack.pop();
     if (!style) throw new Error("Stack is empty!");
     this._style = style;
+    return this;
   }
-  style(options: BackendStyleOptions<"text">) {
+  style(options: BackendStyleOptions<"path" | "text">) {
     let color: [string, number];
     let style = this._style;
     for (let [k, v] of Object.entries(options) as [
-      keyof BackendStyleOptions<"text">,
+      keyof typeof options,
       any
     ][]) {
       switch (k) {
@@ -273,6 +275,7 @@ export class SVGBackend implements Backend<"text"> {
           );
       }
     }
+    return this;
   }
   path(): PathBackend {
     return new SVGPathBackend(this);

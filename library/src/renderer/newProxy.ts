@@ -172,10 +172,10 @@ class ProxyPathBackend implements render.FullPathBackend {
   }
 }
 
-export class ProxyBackend implements render.FullBackend {
+export class ProxyBackend implements render.FullBackend<"path"> {
   private buffer: number[] = [];
   private pathBuffer: ProxyPathBackend[] = [];
-  private optionBuffer: render.BackendStyleOptions[] = [];
+  private optionBuffer: render.BackendStyleOptions<"path">[] = [];
 
   _apply(pathBuffer: ProxyPathBackend) {
     this.buffer.push(BackendActions.apply, pathBuffer.id);
@@ -188,7 +188,7 @@ export class ProxyBackend implements render.FullBackend {
     this.buffer.push(BackendActions.restore);
     return this;
   }
-  style(options: render.BackendStyleOptions): this {
+  style(options: render.BackendStyleOptions<"path">): this {
     this.buffer.push(BackendActions.style);
     this.optionBuffer.push(options);
     return this;
@@ -201,7 +201,7 @@ export class ProxyBackend implements render.FullBackend {
     );
     return buff;
   }
-  replay(backend: render.FullBackend) {
+  replay(backend: render.FullBackend<"path">) {
     let buffer = this.buffer;
 
     let action;

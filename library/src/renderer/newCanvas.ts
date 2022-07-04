@@ -124,21 +124,21 @@ class CanvasTextBackend implements TextBackend {
   }
 }
 
-export class CanvasBackend implements Backend<"text"> {
+export class CanvasBackend implements Backend<"path" | "text"> {
   constructor(private ctx: CanvasRenderingContext2D) {}
 
-  save(): unknown {
+  save() {
     this.ctx.save();
     return this;
   }
-  restore(): unknown {
+  restore() {
     this.ctx.restore();
     return this;
   }
-  style(options: BackendStyleOptions<"text">): unknown {
+  style(options: BackendStyleOptions<"path" | "text">) {
     let rgb: [number, number, number, number?];
     for (let [k, v] of Object.entries(options) as [
-      keyof BackendStyleOptions<"text">,
+      keyof typeof options,
       any
     ][]) {
       switch (k) {

@@ -24,7 +24,7 @@ function download(
 }
 
 function renderHyperbolamethod3d(
-  r: FullBackend,
+  r: FullBackend<"path">,
   opts: {
     N: number;
     W: number;
@@ -102,7 +102,7 @@ function renderHyperbolamethod3d(
 }
 
 function renderHyperbolamethod(
-  r: FullBackend<"primitive">,
+  r: FullBackend<"path" | "primitive">,
   opts: {
     N: number;
     W: number;
@@ -238,7 +238,7 @@ window.customElements.define(
           update(config, ctx) {
             ctx.clearRect(0, 0, config.width, config.height);
             let scale = new MeasuredRenderer();
-            let r = Complete<undefined>(scale);
+            let r = Complete(scale);
             if (state.dim == "2D") renderHyperbolamethod(r, state);
             else renderHyperbolamethod3d(r, state);
 
@@ -326,7 +326,7 @@ window.customElements.define(
           },
           render(r) {
             let scale = new MeasuredRenderer();
-            let renderer = Complete<undefined>(scale);
+            let renderer = Complete(scale);
             if (state.dim == "2D") renderHyperbolamethod(renderer, state);
             else renderHyperbolamethod3d(renderer, state);
 

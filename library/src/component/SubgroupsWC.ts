@@ -16,7 +16,7 @@ import katex from "katex";
 import { manualSizing } from "./layers/Options";
 
 import popupLayer from "./layers/Popup";
-import { Complete, FullBackend } from "@lib/renderer/new";
+import { Complete, FullBackend, Renderer } from "@lib/renderer/new";
 import { CanvasBackend } from "@lib/renderer/newCanvas";
 import { ExportButton } from "./layers/tmpExport";
 
@@ -224,7 +224,7 @@ window.customElements.define(
         },
       });*/
 
-      function* bgDraw(ctx: FullBackend) {
+      function* bgDraw(ctx: Renderer<"path">) {
         ctx.style({
           lineWidth: 1,
           fill: appOptions.fill + "55",

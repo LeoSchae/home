@@ -24,7 +24,7 @@ function download(
 }
 
 const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
-  r: FullBackend<"text">,
+  r: FullBackend<"path" | "text">,
   Q: number,
   options: { projection: { origin: [number, number]; scale: number } }
 ) {
@@ -93,7 +93,7 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
 });
 
 const fordCirclesInPlane = asyncLib.wrap.async(function* (
-  r: FullBackend<"text">,
+  r: FullBackend<"path" | "text">,
   Q: number,
   options: {
     projection: { origin: [number, number]; scale: number };

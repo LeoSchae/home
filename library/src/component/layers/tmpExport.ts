@@ -19,7 +19,7 @@ export function ExportButton(options: {
   setup:
     | { fileName?: string; width: number; height: number }
     | (() => { fileName?: string; width: number; height: number });
-  render(r: FullBackend<"primitive" | "text">): void | Promise<void>;
+  render(r: Renderer<"path" | "primitive" | "text">): void | Promise<void>;
 }): Option<"multiButton"> {
   return [
     "multiButton",
@@ -34,7 +34,7 @@ export function ExportButton(options: {
         if (typeof options.setup === "function") opt = options.setup();
         else opt = options.setup;
 
-        let backend: Backend<"text">;
+        let backend: Backend<"path" | "text">;
         let fileName: string = opt.fileName || "Export";
         let dataType: string;
         let contents: () => string;

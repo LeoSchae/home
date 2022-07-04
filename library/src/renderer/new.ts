@@ -1,3 +1,6 @@
+import { addColors } from "winston/lib/winston/config";
+import { MeasuredRenderer } from "./newScaled";
+
 export enum Align {
   C = 0b0000,
   T = 0b1000,
@@ -24,17 +27,30 @@ type length = number;
 
 type color = [number, number, number, number?];
 
-type BackendType = "text" | "primitive" | undefined;
+type BackendType = "path" | "text" | "primitive" | never;
 
-export type BackendStyleOptions<T extends BackendType> = {
-  fill?: color;
-  stroke?: color;
-  lineWidth?: number;
-} & ("text" extends T ? { fontSize?: number } : {});
+export type BackendStyleOptions<T extends BackendType> = ("path" extends T
+  ? {
+      fill?: color;
+      stroke?: color;
+      lineWidth?: number;
+    }
+  : {}) &
+  ("primitive" extends T
+    ? {
+        fill?: color;
+        stroke?: color;
+        lineWidth?: number;
+      }
+    : {}) &
+  ("text" extends T
+    ? {
+        fill?: color;
+        fontSize?: number;
+      }
+    : {});
 
-export type FullBackendStyleOptions<
-  T extends "text" | "primitive" | undefined
-> = {
+export type FullBackendStyleOptions<T extends BackendType> = {
   fill?: color | string;
   stroke?: color | string;
   lineWidth?: number;
@@ -61,16 +77,36 @@ function parseColor(color?: color | string): color | undefined {
 
 function parseStyleOptions<T extends BackendType>(
   options: FullBackendStyleOptions<T>
-): BackendStyleOptions<T> {
-  let style: BackendStyleOptions<T> = {};
+): BackendStyleOptions<T>;
+function parseStyleOptions(
+  options: FullBackendStyleOptions<any>
+): BackendStyleOptions<any> {
+  let style: BackendStyleOptions<any> = {};
 
-  if (options.fill) style.fill = parseColor(options.fill);
-  if (options.stroke) style.stroke = parseColor(options.stroke);
-  if (options.lineWidth !== undefined) style.lineWidth = options.lineWidth;
-  if ("fontSize" in options)
-    (style as BackendStyleOptions<"text">).fontSize = (
-      options as FullBackendStyleOptions<"text">
-    ).fontSize;
+  // Use loop for static type checking
+  for (let [key, val] of Object.entries(options) as [
+    keyof FullBackendStyleOptions<any>,
+    any
+  ][]) {
+    if (val === undefined) continue;
+    switch (key) {
+      case "fill":
+        style.fill = parseColor(val);
+        break;
+      case "stroke":
+        style.stroke = parseColor(val);
+        break;
+      case "lineWidth":
+        style.lineWidth = val;
+        break;
+      case "fontSize":
+        style.fontSize = val;
+        break;
+      default:
+        let never: never = key;
+        console.log("Unknown style option '" + never + "'");
+    }
+  }
   return style;
 }
 
@@ -186,37 +222,43 @@ export type TextBackend = {
 /**
  * A minimal rendering backend. Used to create a fully supported renderer.
  */
-export type Backend<T extends "text" | undefined = undefined> = {
+export type Backend<T extends BackendType & ("text" | "path" | never)> = {
   /** Saves the current style options and clip path to a stack. */
-  save(): unknown;
+  save(): Backend<T>;
   /** Restores the latest style options and clip path from a stack */
-  restore(): unknown;
+  restore(): Backend<T>;
   /** Edit a set of style options */
-  style(options: BackendStyleOptions<T>): unknown;
-  /** Create a new path assigned to this backend */
-  path(): PathBackend;
-} & ("text" extends T
+  style(options: BackendStyleOptions<T>): Backend<T>;
+} & ("path" extends T
   ? {
-      text(): TextBackend;
+      /** Create a new path assigned to this backend */
+      path(): PathBackend;
     }
-  : {});
+  : {}) &
+  ("text" extends T
+    ? {
+        text(): TextBackend;
+      }
+    : {});
 
-export type FullBackend<
-  T extends "text" | "primitive" | undefined = undefined
-> = {
+export type FullBackend<T extends BackendType> = {
   /** Saves the current style options and clip path to a stack. */
   save(): FullBackend<T>;
   /** Restores the latest style options and clip path from a stack */
   restore(): FullBackend<T>;
   /** Edit a set of style options */
   style(options: FullBackendStyleOptions<T>): FullBackend<T>;
-  /** Create a new path assigned to this backend */
-  path(): FullPathBackend;
-} & ("text" extends T
+} & ("path" extends T
   ? {
-      text(): TextBackend;
+      /** Create a new path assigned to this backend */
+      path(): FullPathBackend;
     }
   : {}) &
+  ("text" extends T
+    ? {
+        text(): TextBackend;
+      }
+    : {}) &
   ("primitive" extends T
     ? {
         primitive(): Primitive;
@@ -243,11 +285,15 @@ export function ellipsePoint(
   return [cx + cos * x - sin * y, cy - sin * x - cos * y];
 }
 
-export function Complete<T extends "text" | undefined = any>(
-  backend: Backend<T>
-): FullBackend<T | "primitive"> {
+export function Complete<B extends Backend<"path">>(
+  backend: B
+): B extends Backend<infer T>
+  ? FullBackend<T | "primitive">
+  : FullBackend<"path" | "primitive"> {
+  // Carefull: calls to _backend are not typechecked
+
   let r = {
-    _backend: backend,
+    _backend: backend as Backend<"path">,
     save() {
       this._backend.save();
       return this;
@@ -256,10 +302,11 @@ export function Complete<T extends "text" | undefined = any>(
       this._backend.restore();
       return this;
     },
-    style(options: FullBackendStyleOptions<T>) {
+    style(options: FullBackendStyleOptions<any>) {
       this._backend.style(parseStyleOptions(options));
       return this;
     },
+    // path is asserted in argument.
     path() {
       return new Path(this._backend.path());
     },
@@ -271,13 +318,15 @@ export function Complete<T extends "text" | undefined = any>(
   // text backend
   if ("text" in backend)
     (r as any as FullBackend<"text">).text = function (this: typeof r) {
-      return (this._backend as Backend<"text">).text();
+      return (this._backend as any as Backend<"text">).text();
     };
 
   return r as any;
 }
 
-export class Renderer implements FullBackend<"primitive"> {
+export type Renderer<T extends BackendType> = FullBackend<T>;
+
+class Renderer2 implements FullBackend<"primitive"> {
   constructor(private backend: Backend<any>) {}
 
   save(): this {
@@ -434,7 +483,7 @@ export class Path implements FullPathBackend {
 }
 
 export class Primitive {
-  constructor(private r: FullBackend<undefined>) {}
+  constructor(private r: FullBackend<"path">) {}
 
   circle(
     x: number,
