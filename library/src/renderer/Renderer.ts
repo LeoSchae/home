@@ -3,23 +3,25 @@ import type { Backend } from "./Backend";
 type Require<T> = { [key in keyof T]-?: T[key] };
 
 export namespace Renderer {
+  export type Color = [number, number, number, number?] | string;
+
   export type Style<T extends Backend.Type> = ("path" extends T
     ? {
-        fill?: [number, number, number, number?] | string;
-        stroke?: [number, number, number, number?] | string;
+        fill?: Color;
+        stroke?: Color;
         lineWidth?: number;
       }
     : {}) &
     ("primitive" extends T
       ? {
-          fill?: [number, number, number, number?] | string;
-          stroke?: [number, number, number, number?] | string;
+          fill?: Color;
+          stroke?: Color;
           lineWidth?: number;
         }
       : {}) &
     ("text" extends T
       ? {
-          fill?: [number, number, number, number?] | string;
+          fill?: Color;
           fontSize?: number;
         }
       : {});
@@ -29,17 +31,26 @@ export namespace Renderer {
       ...args: Parameters<Require<Backend.Path>[key]>
     ) => Path;
   } & {
+    draw(stroke?: boolean, fill?: boolean): Path;
     fill(): Path;
     stroke(): Path;
   };
 
   export type Text = Backend.Text;
 
-  export type Primitive = Require<Backend.Primitive>;
+  export type Primitive = {
+    [k in keyof Require<Backend.Primitive>]: (
+      ...args: Parameters<Require<Backend.Primitive>[k]>
+    ) => {
+      draw(stroke?: boolean, fill?: boolean): void;
+      stroke(): void;
+      fill(): void;
+    };
+  };
 }
 
 export type Renderer<T extends Backend.Type> = {
-  clear(color?: [number, number, number, number?] | string): Renderer<T>;
+  clear(color?: Renderer.Color): Renderer<T>;
   /** Saves the current style options and clip path to a stack. */
   save(): Renderer<T>;
   /** Restores the latest style options and clip path from a stack */
@@ -63,9 +74,15 @@ export type Renderer<T extends Backend.Type> = {
       }
     : {});
 
-import { styleToBackendStyle, rendererFromBackend } from "./RendererConvert";
+import {
+  styleToBackendStyle,
+  rendererFromBackend,
+  parseColor,
+} from "./RendererConvert";
 
 export namespace Renderer {
   export const from = rendererFromBackend;
   export const toBackendStyle = styleToBackendStyle;
+
+  export const Color = parseColor;
 }

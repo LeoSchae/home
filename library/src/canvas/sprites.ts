@@ -31,6 +31,36 @@ export function strokeBounds(
   ctx.stroke();
 }
 
+export function fakeMeasure() {
+  const canvas = document
+    .createElement("canvas")
+    .getContext("2d") as CanvasRenderingContext2D;
+  canvas.textBaseline = "middle";
+  canvas.textAlign = "center";
+
+  let heightStr = "PQppqg";
+  let m = canvas.measureText(heightStr);
+  let top = m.actualBoundingBoxAscent,
+    bot = m.actualBoundingBoxDescent;
+
+  return {
+    set fontSize(fs: number) {
+      canvas.font = fs + "px 'LinuxLibertine', 'Times New Roman', Serif";
+      m = canvas.measureText(heightStr);
+      (top = m.actualBoundingBoxAscent), (bot = m.actualBoundingBoxDescent);
+    },
+    measureText(txt: string) {
+      let m = canvas.measureText(txt);
+      return {
+        top: top * 1.5,
+        bot: bot,
+        left: m.actualBoundingBoxLeft,
+        right: m.actualBoundingBoxRight,
+      };
+    },
+  };
+}
+
 /**
  * Create a sprite object for text.
  * @param ctx Rendering context used for measuring font.

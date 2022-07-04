@@ -3,9 +3,16 @@ import type { Renderer } from "./Renderer";
 import { Align } from "./Align";
 import { ellipsePoint } from ".";
 
-function parseColor(
+export function parseColor(
+  color?: [number, number, number, number?] | string
+): [number, number, number, number?] | undefined;
+export function parseColor(
+  color: [number, number, number, number?] | string
+): [number, number, number, number?];
+export function parseColor(
   color?: [number, number, number, number?] | string
 ): [number, number, number, number?] | undefined {
+  if (!color) return undefined;
   if (!(typeof color === "string")) return color;
   let c = parseInt("0x" + color.substring(1));
 
@@ -92,7 +99,7 @@ export function rendererFromBackend<B extends Backend<"path">>(
       return new Path(this._backend.path());
     },
     primitive() {
-      return new Primitive(this);
+      return new Primitive(this, this._backend.primitive?.());
     },
   };
 
@@ -238,8 +245,16 @@ class Path implements Renderer.Path {
   }
 }
 
+function wrapPrimitive(p: { draw(s: boolean, f: boolean): void }) {
+  return {
+    draw: (s: boolean = true, f: boolean = true) => p.draw(s, f),
+    stroke: () => p.draw(true, false),
+    fill: () => p.draw(false, true),
+  };
+}
+
 class Primitive {
-  constructor(private r: Renderer<"path">) {}
+  constructor(private r: Renderer<"path">, private b?: Backend.Primitive) {}
 
   circle(
     x: number,
@@ -251,6 +266,9 @@ class Primitive {
     fill(): void;
     stroke(): void;
   } {
+    if (this.b?.circle)
+      return wrapPrimitive(this.b.circle(x, y, diameter, align));
+
     let radius = 0.5 * diameter;
     switch (Align.vertical(align)) {
       case Align.T:
@@ -277,6 +295,7 @@ class Primitive {
   }
 
   square(x: number, y: number, width: number, align: Align = 0) {
+    if (this.b?.square) return wrapPrimitive(this.b.square(x, y, width, align));
     let halfWidth = 0.5 * width;
     switch (Align.vertical(align)) {
       case Align.T:

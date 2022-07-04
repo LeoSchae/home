@@ -132,6 +132,7 @@ export class CanvasBackend implements Backend<"path" | "text"> {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     if (color) {
       this.ctx.save();
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
       this.ctx.fillStyle = colorToCss(color);
       this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
       this.ctx.restore();
@@ -165,7 +166,7 @@ export class CanvasBackend implements Backend<"path" | "text"> {
           this.ctx.lineWidth = v;
           break;
         case "fontSize":
-          this.ctx.font = v + "px Times New Roman";
+          this.ctx.font = v + "px 'LinuxLibertine', 'Times New Roman', Serif";
           break;
         default:
           let unreachable: never = k;

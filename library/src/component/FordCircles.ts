@@ -1,4 +1,4 @@
-import { ComplexScTr } from "../canvas/axis";
+import { ComplexScTr, drawCarthesian2DAxis } from "../canvas/axis";
 import * as render from "../renderer/old";
 import { FracSprite, TextSprite } from "../canvas/sprites";
 import { DragZoomHover } from "../modules/Interact";
@@ -10,21 +10,10 @@ import { Renderer, CanvasBackend } from "@lib/renderer/";
 import { ExportButton } from "./layers/tmpExport";
 import { config } from "process";
 
-function download(
-  content: string,
-  name: string,
-  dataType: string = "text/plain"
-) {
-  let data = `data:${dataType};base64,${window.btoa(content)}`;
-  let link = document.createElement("a");
-  link.setAttribute("download", name);
-  link.href = data;
-  link.click();
-}
-
 const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
   r: Renderer<"path" | "primitive" | "text">,
   Q: number,
+  props: { width: number; height: number },
   options: { projection: { origin: [number, number]; scale: number } }
 ) {
   let measure = new render.Canvas(
@@ -94,6 +83,7 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
 const fordCirclesInPlane = asyncLib.wrap.async(function* (
   r: Renderer<"path" | "primitive" | "text">,
   Q: number,
+  props: { width: number; height: number },
   options: {
     projection: { origin: [number, number]; scale: number };
   }
@@ -118,11 +108,6 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
     .map(() => []);
 
   r.style({ lineWidth: 1.25, fontSize: 10 });
-  //drawCarthesian2DAxis(r as any, projection, { noY: true, labelX: "" });
-  /*annotateCarthesian2DAxis(r as any, "x", projection, [
-    { sprite: TextSprite(measure, "0"), at: 0 },
-    { sprite: TextSprite(measure, "1"), at: 1 },
-  ]);*/
 
   let fractions = FareyFractions(Q);
 
@@ -165,6 +150,18 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
       );
     }
   }
+
+  drawCarthesian2DAxis(r, {
+    position: props,
+    projection,
+    hideY: true,
+    xLabel: "",
+  });
+
+  /*annotateCarthesian2DAxis(r as any, "x", projection, [
+    { sprite: TextSprite(measure, "0"), at: 0 },
+    { sprite: TextSprite(measure, "1"), at: 1 },
+  ]);*/
 });
 
 function domainCircle(
@@ -281,8 +278,9 @@ window.customElements.define(
           },
           render(r) {
             if (mode == "Halfplane")
-              return fordCirclesInPlane(r, Q, { projection: pr });
-            else return fordCirclesInUnitSphere(r, Q, { projection: pr });
+              return fordCirclesInPlane(r, Q, config, { projection: pr });
+            else
+              return fordCirclesInUnitSphere(r, Q, config, { projection: pr });
           },
         })
       );
@@ -301,6 +299,7 @@ window.customElements.define(
               fordCirclesInPlane(
                 r,
                 Q,
+                config,
                 { projection: pr },
                 asyncManager.getNew("draw", 100)
               ).catch((e) => {
@@ -310,6 +309,7 @@ window.customElements.define(
               fordCirclesInUnitSphere(
                 r,
                 Q,
+                config,
                 { projection: pr },
                 asyncManager.getNew("draw", 100)
               ).catch((e) => {

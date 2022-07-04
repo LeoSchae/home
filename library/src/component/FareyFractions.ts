@@ -4,10 +4,16 @@ import {
   annotateCarthesian2DAxis,
 } from "../canvas/axis";
 import * as render from "../renderer/old";
-import { BBSprite, FracSprite, TextSprite } from "../canvas/sprites";
+import {
+  BBSprite,
+  fakeMeasure,
+  FracSprite,
+  TextSprite,
+} from "../canvas/sprites";
 import { DragZoomHover } from "../modules/Interact";
 import { Complex } from "../modules/math";
 import * as layers from "./layers";
+import { CanvasBackend, Renderer } from "@lib/renderer";
 
 window.customElements.define(
   "farey-fractions",
@@ -74,22 +80,29 @@ window.customElements.define(
         layers.Canvas({
           update(config, ctx) {
             fixTrZoom();
-            let r = new render.Canvas(ctx);
+            let r = Renderer.from(new CanvasBackend(ctx));
 
             ctx.clearRect(0, 0, config.width, config.height);
 
             ctx.lineWidth = 1.25;
 
-            drawCarthesian2DAxis(r, pr);
+            drawCarthesian2DAxis(r, {
+              position: { width: config.width, height: config.height },
+              projection: pr,
+            });
 
-            let fs = 10;
-            r.set({ fontSize: fs });
-            let Q = bestQ(pr.scale, fs);
+            let fontSize = 10;
+            let measure = fakeMeasure();
+
+            r.style({ fontSize });
+            measure.fontSize = fontSize;
+
+            let Q = bestQ(pr.scale, fontSize);
 
             // Find smallest and largest value on screen
             let min = Math.max(-pr.origin[0] / pr.scale, 0.00000000001);
             let max = Math.min(
-              (r.width - pr.origin[0]) / pr.scale,
+              (config.width - pr.origin[0]) / pr.scale,
               0.99999999999
             );
 
@@ -97,28 +110,16 @@ window.customElements.define(
             let [a, b, c, d] = bestFracsFor(Q, min);
 
             // Find all fracions on screen
-            let spr = fareyIter(r, [a, b, c, d], Q, max);
-            spr.push({ sprite: TextSprite(r, "1", { center: true }), at: 1 });
+            let spr = fareyIter(measure, [a, b, c, d], Q, max);
+            spr.push({
+              sprite: TextSprite(measure, "1", { center: true }),
+              at: 1,
+            });
             for (let o of spr) {
             }
 
             // annotate Fractions
             annotateCarthesian2DAxis(r, "x", pr, spr);
-
-            // Draw textbox
-            let ts = TextSprite(r, "Fractions with denominator up to " + Q);
-            r.begin();
-            r.rect(
-              0,
-              r.height,
-              ts.left + ts.right + 20,
-              -Math.round(ts.bot + ts.top + 10)
-            );
-            r.fillStyle = "#FFFFFF";
-            r.fill();
-            r.stroke();
-            r.fillStyle = "#000000";
-            ts.draw(r, ts.left + 10, r.height - ts.bot - 5);
           },
         })
       );

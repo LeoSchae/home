@@ -49,7 +49,7 @@ class TikZPathBackend implements Backend.Path {
     angle: number
   ): this {
     let absAngle = Math.abs(angle);
-    let fullTruns = Math.floor(angle);
+    let fullTruns = Math.floor(absAngle);
     //TODO FULL CIRCLES
     angle = Math.sign(angle) * (absAngle - fullTruns);
     if (angle >= 0.499 && angle <= 0.511) {
@@ -91,17 +91,15 @@ class TikZPathBackend implements Backend.Path {
       axisRotation,
       angleOffset + angle
     );
-    let ccw = angle >= 0;
 
     let rounded = this.round;
 
-    this.d += `(${rounded(x0)},${rounded(y0)}) {[rotate=${rounded(
-      axisRotation * 360
-    )}] arc[x radius=${rounded(radiusX)},y radius=${rounded(
-      radiusY
-    )},start angle=${rounded(360 * angleOffset)},delta angle=${rounded(
-      360 * angle
-    )}]}`;
+    // Invert angles since the y axis is flipped
+    this.d += `-- (${rounded(x0)},${rounded(y0)}) { arc[x radius=${rounded(
+      radiusX
+    )},y radius=${rounded(radiusY)},start angle=${-rounded(
+      360 * angleOffset
+    )},delta angle=${-rounded(360 * angle)}]}`;
     return this;
   }
   close(): this {
@@ -220,12 +218,26 @@ export class TikZBackend implements Backend<"path" | "text"> {
     this.TeX += draw;
   }
 
-  clear() {
+  clear(color?: [number, number, number, number?]) {
     this.TeX =
-      `\\begin{tikzpicture}[x=1pt,y=-1pt,every node/.style={inner sep=0,outer sep=0}]%\n` +
+      `\\begin{tikzpicture}[` + // Options
+      `x=1pt,y=-1pt,every node/.style={inner sep=0,outer sep=0}` +
+      `]%\n` +
       `\\fontfamily{ptm}\\selectfont%\n` +
       `\\useasboundingbox (0,0) rectangle (${this.width},${this.height});%\n` +
       `\\clip (0,0) rectangle (${this.width},${this.height});%\n`;
+    if (color) {
+      this.save();
+      this.style({ fill: color });
+      this.path()
+        .move(0, 0)
+        .line(this.width, 0)
+        .line(this.width, this.height)
+        .line(0, this.height)
+        .close()
+        .draw(false, true);
+      this.restore();
+    }
     return this;
   }
 

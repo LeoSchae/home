@@ -73,7 +73,10 @@ function transformEllipse(
   return [newrx, newry, theta, -newStart, trafo.det < 0 ? -amount : amount];
 }
 
-export function Transform(linear: Matrix22, translate: [number, number]) {
+export function Transform(
+  linear: Matrix22,
+  translate: [number, number]
+): PathIntercept {
   function transform(x: n, y: n): [n, n] {
     let p = linear.of([x, y]);
     return [p[0] + translate[0], p[1] + translate[1]];
@@ -154,8 +157,8 @@ export function Transform(linear: Matrix22, translate: [number, number]) {
     close(this: Renderer.Path): boolean | void {},
     draw(
       this: Renderer.Path,
-      stroke: boolean,
-      fill: boolean
+      stroke: boolean = true,
+      fill: boolean = true
     ): boolean | void {},
     clip(this: Renderer.Path): boolean | void {},
   };

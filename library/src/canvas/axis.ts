@@ -1,7 +1,8 @@
 import { Complex } from "../modules/math";
+import { Align, Renderer } from "@lib/renderer";
 import * as render from "../renderer/old";
 import * as sprites from "./sprites";
-import TeX from "./TeX";
+import { Options } from "@lib/component/layers";
 
 export class ComplexScTr {
   constructor(public origin: [number, number], public scale: number) {}
@@ -43,7 +44,7 @@ export class ComplexScTr {
  * @returns [sx, sy, ex, ey] The start and end points of the drawn arrow.
  */
 function infArrow(
-  ctx: render.Renderer2D,
+  ctx: Renderer<"path">,
   width: number,
   height: number,
   p: [number, number],
@@ -63,18 +64,20 @@ function infArrow(
   const s = [p[0] + t[1] * d[0], p[1] + t[1] * d[1]];
   const e = [p[0] + (t[2] - 1) * d[0], p[1] + (t[2] - 1) * d[1]];
 
-  ctx.begin();
-  ctx.move(s[0], s[1]);
-  ctx.line(e[0] - 2 * d[0], e[1] - 2 * d[1]);
-  ctx.stroke();
+  ctx
+    .path()
+    .move(s[0], s[1])
+    .line(e[0] - 2 * d[0], e[1] - 2 * d[1])
+    .stroke();
 
   let a = arrowSize;
-  ctx.begin();
-  ctx.move(e[0], e[1]);
-  ctx.line(e[0] - a * d[0] + 0.5 * a * d[1], e[1] - a * d[1] - 0.5 * a * d[0]);
-  ctx.line(e[0] - a * d[0] - 0.5 * a * d[1], e[1] - a * d[1] + 0.5 * a * d[0]);
-  ctx.line(e[0], e[1]);
-  ctx.fill();
+  ctx
+    .path()
+    .move(e[0], e[1])
+    .line(e[0] - a * d[0] + 0.5 * a * d[1], e[1] - a * d[1] - 0.5 * a * d[0])
+    .line(e[0] - a * d[0] - 0.5 * a * d[1], e[1] - a * d[1] + 0.5 * a * d[0])
+    .line(e[0], e[1])
+    .fill();
 
   return [s[0], s[1], e[0], e[1]];
 }
@@ -90,24 +93,30 @@ function infArrow(
  * @param options options for drawing
  */
 export function drawCarthesian2DAxis(
-  ctx: render.Renderer2D & {
-    width: number;
-    height: number;
-  } & render.MeasureText,
-  projection: { origin: [number, number]; scale: number },
-  {
-    noX = false,
-    noY = false,
-    arrowSize: as = 7,
-    fontSize: fs = 13,
-    labelX = "Re",
-    labelY = "Im",
-  } = {}
+  r: Renderer<"path" | "text">,
+  options: {
+    position: { x?: number; y?: number; width: number; height: number };
+    projection: { origin: [number, number]; scale: number };
+    fontSize?: number;
+    xLabel?: string;
+    yLabel?: string;
+    hideX?: boolean;
+    hideY?: boolean;
+    arrow?: { size?: number };
+  }
 ) {
-  let { origin, scale } = projection;
-  const { width, height } = ctx;
+  let {
+    position: { x = 0, y = 0, width, height },
+    projection: { origin, scale },
+    arrow: { size: arrowSize = 7 } = {},
+    fontSize = 13,
+    hideX = false,
+    hideY = false,
+    xLabel = "Re",
+    yLabel = "Im",
+  } = options;
 
-  ctx.set({ fontSize: fs });
+  r.style({ fontSize });
 
   const project = function (
     this: { ox: number; oy: number; ps: number },
@@ -124,41 +133,42 @@ export function drawCarthesian2DAxis(
   const dx = [pos1[0] - origin[0], pos1[1] - origin[1]] as [number, number];
   const dy = [posi[0] - origin[0], posi[1] - origin[1]] as [number, number];
 
-  if (!noX) {
-    const [, , rx, ry] = infArrow(ctx, width, height, origin, dx, {
-      arrowSize: as,
+  if (!hideX) {
+    const [, , rx, ry] = infArrow(r, width, height, origin, dx, {
+      arrowSize,
     });
-    if (labelX)
-      ctx.drawText(
-        labelX,
-        rx - 0.2 * fs,
-        ry + 0.2 * fs + as / 2,
-        render.TextAlign.TR
+    if (xLabel)
+      r.text().draw(
+        rx - 0.2 * fontSize,
+        ry + 0.2 * fontSize + arrowSize / 2,
+        xLabel,
+        Align.TR
       );
   }
-  if (!noY) {
-    const [, , ix, iy] = infArrow(ctx, width, height, origin, dy, {
-      arrowSize: as,
+
+  if (!hideY) {
+    const [, , ix, iy] = infArrow(r, width, height, origin, dy, {
+      arrowSize,
     });
-    if (!noY && labelY)
-      ctx.drawText(
-        labelY,
-        ix - 0.2 * fs - as / 2,
-        iy + 0.2 * fs,
-        render.TextAlign.TR
+    if (yLabel)
+      r.text().draw(
+        ix - 0.2 * fontSize - arrowSize / 2,
+        iy + 0.2 * fontSize,
+        yLabel,
+        Align.TR
       );
   }
 }
 
 export function annotateCarthesian2DAxis(
-  ctx: render.Renderer2D,
+  ctx: Renderer<"text" | "path">,
   axis: "x",
   { origin: p0, scale: ps }: { origin: [number, number]; scale: number },
   annotations: { sprite: sprites.BBSprite; at: number }[],
   { gap = 5 } = {}
 ) {
-  var width: number = (ctx as any).width || 0;
-  var height: number = (ctx as any).height || 0;
+  var width: number = (ctx as any).width || Infinity;
+  var height: number = (ctx as any).height || Infinity;
 
   if (axis == "x") {
     let x0 = p0[0];
@@ -173,8 +183,7 @@ export function annotateCarthesian2DAxis(
           l = x - 0.5,
           r = x + 0.5,
           b = y0 + 3;
-        ctx.begin().move(l, t).line(r, t).line(r, b).line(l, b).close();
-        ctx.fill();
+        ctx.path().move(l, t).line(r, t).line(r, b).line(l, b).close().fill();
         sprite.draw(ctx, x, y0 + sprite.top + gap);
       }
     }

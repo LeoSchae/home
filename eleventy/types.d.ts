@@ -23,10 +23,12 @@ export type AnyCTX = LiquidCTX | NunjucksCTX | HandlebarsCTX | JsCTX;
 export type Filter<CTX> = (this: CTX, ...args: any[]) => any;
 
 export type Config = {
-  addPlugin<OPT extends any[]>(
-    plugin: (config: EleventyConfig, ...options: OPT) => unknown,
-    OPT
-  );
+  addPlugin<F extends (config: Config, ...args: any[]) => any>(
+    plugin: F,
+    ...args: F extends (config: Config, ...args: infer ARGS) => any
+      ? ARGS
+      : unknown[]
+  ): unknown;
 
   on(
     event: "eleventy.before",
@@ -41,7 +43,7 @@ export type Config = {
       runMode: "build" | "watch" | "serve";
       outputMode: "fs" | "json" | "ndjson";
     }) => any
-  );
+  ): unknown;
   on(
     event: "eleventy.after",
     handler: (options: {
@@ -61,21 +63,24 @@ export type Config = {
       runMode: "build" | "watch" | "serve";
       outputMode: "fs" | "json" | "ndjson";
     }) => any
-  );
+  ): unknown;
 
   // Filters and Shortcodes
 
-  addJavaScriptFunction(name: string, filter: Filter<JsCTX>);
+  addJavaScriptFunction(name: string, filter: Filter<JsCTX>): unknown;
 
-  addLiquidFilter(name: string, filter: Filter<LiquidCTX>);
-  addNunjucksFilter(name: string, filter: Filter<NunjucksCTX>);
-  addHandlebarsHelper(name: string, filter: Filter<HandlebarsCTX>);
-  addFilter(name: string, filter: Filter<AnyCTX>);
+  addLiquidFilter(name: string, filter: Filter<LiquidCTX>): unknown;
+  addNunjucksFilter(name: string, filter: Filter<NunjucksCTX>): unknown;
+  addHandlebarsHelper(name: string, filter: Filter<HandlebarsCTX>): unknown;
+  addFilter(name: string, filter: Filter<AnyCTX>): unknown;
 
-  addLiquidShortcode(name: string, shortcode: Filter<LiquidCTX>);
-  addNunjucksShortcode(name: string, shortcode: Filter<NunjucksCTX>);
-  addHandlebarsShortcode(name: string, shortcode: Filter<HandlebarsCTX>);
-  addShortcode(name: string, shortcode: Filter<AnyCTX>);
+  addLiquidShortcode(name: string, shortcode: Filter<LiquidCTX>): unknown;
+  addNunjucksShortcode(name: string, shortcode: Filter<NunjucksCTX>): unknown;
+  addHandlebarsShortcode(
+    name: string,
+    shortcode: Filter<HandlebarsCTX>
+  ): unknown;
+  addShortcode(name: string, shortcode: Filter<AnyCTX>): unknown;
 
   javascriptFunctions: { [key: string]: Filter<JsCTX> | undefined };
   nunjucksFilters: { [key: string]: Filter<NunjucksCTX> | undefined };
@@ -84,18 +89,18 @@ export type Config = {
 
   // Data
 
-  addGlobalData(name: string, value: any);
+  addGlobalData(name: string, value: any): unknown;
 
-  addLayoutAlias(from: string, to: string);
+  addLayoutAlias(from: string, to: string): unknown;
 
   // Watch / Serve / Pass
 
-  setWatchJavaScriptDependencies(value: boolean);
-  addWatchTarget(target: string);
+  setWatchJavaScriptDependencies(value: boolean): unknown;
+  addWatchTarget(target: string): unknown;
 
-  addPassthroughCopy(target: string);
-  setTemplateFormats(formats: string | string[]);
-  addTemplateFormats(formats: string | string[]);
+  addPassthroughCopy(target: string): unknown;
+  setTemplateFormats(formats: string | string[]): unknown;
+  addTemplateFormats(formats: string | string[]): unknown;
 
   addTransform(
     name: string,
@@ -103,7 +108,7 @@ export type Config = {
       this: { inputPath: string; outputPath: string },
       content: string
     ) => string | Promise<string>
-  );
+  ): unknown;
 };
 export type ConfigReturn = {
   templateFormats?: string[];

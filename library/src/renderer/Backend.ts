@@ -129,8 +129,6 @@ export namespace Backend {
       align?: Align
     ): {
       draw(stroke?: boolean, fill?: boolean): void;
-      fill(): void;
-      stroke(): void;
     };
     square?(
       x: number,
@@ -139,8 +137,6 @@ export namespace Backend {
       align?: Align
     ): {
       draw(stroke?: boolean, fill?: boolean): void;
-      fill(): void;
-      stroke(): void;
     };
   };
 
@@ -165,14 +161,20 @@ export type Backend<T extends Backend.Type> = {
       /** Create a new path assigned to this backend */
       path(): Backend.Path;
     }
-  : {}) &
+  : {
+      path?(): Backend.Path;
+    }) &
   ("text" extends T
     ? {
         text(): Backend.Text;
       }
-    : {}) &
+    : {
+        text?(): Backend.Text;
+      }) &
   ("primitive" extends T
     ? {
         primitive(): Backend.Primitive;
       }
-    : {});
+    : {
+        primitive?(): Backend.Primitive;
+      });

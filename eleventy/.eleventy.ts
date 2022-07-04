@@ -6,6 +6,7 @@ import Essentials from "./plugins/essentials";
 import * as html_min from "html-minifier";
 import Navigation from "./plugins/navigation";
 import Inline from "./plugins/inline";
+import { AcceptedPlugin } from "postcss";
 
 module.exports = function (eleventyConfig: types.Config): types.ConfigReturn {
   const environment =
@@ -46,6 +47,7 @@ module.exports = function (eleventyConfig: types.Config): types.ConfigReturn {
 
   // Passthrough katex
   eleventyConfig.addPassthroughCopy("website/katex/");
+  eleventyConfig.addPassthroughCopy("website/fonts/");
 
   // Template formats
   eleventyConfig.setTemplateFormats(["njk", "md", "pcss", "ts", "tsx"]);
@@ -74,6 +76,7 @@ module.exports = function (eleventyConfig: types.Config): types.ConfigReturn {
   });
 
   eleventyConfig.addPlugin(PostCSS.EleventyPlugin, {
+    ignores: [],
     plugins: [
       require("postcss-minify"),
       require("postcss-nested"),

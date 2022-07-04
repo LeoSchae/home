@@ -1,6 +1,7 @@
 /** @jsx jsx */
 import { jsx, XML } from "../UnsafeXML";
 import { Align, Backend, ellipsePoint } from ".";
+import { svg } from "lit";
 
 class SVGPathBackend implements Backend.Path {
   private d: string = "";
@@ -41,8 +42,6 @@ class SVGPathBackend implements Backend.Path {
     angleOffset: number,
     angle: number
   ): this {
-    console.log(angle);
-
     let absAngle = Math.abs(angle);
     let fullTruns = Math.floor(absAngle);
     //TODO FULL CIRCLES
@@ -102,7 +101,7 @@ class SVGPathBackend implements Backend.Path {
     return this;
   }
   draw(stroke: boolean, fill: boolean): this {
-    this.svg._draw(this.d, stroke, fill);
+    this.svg._draw_path(this.d, stroke, fill);
     return this;
   }
   clip(): this {
@@ -137,17 +136,17 @@ export class SVGTextBackend implements Backend.Text {
     }
     let rounded = this.round;
 
-    this.svg._svg.append(
+    this.svg._do_draw(
       <text
         x={rounded(x)}
         y={rounded(y)}
-        font-size={this.svg._style.fontSize}
-        font-family="Times New Roman"
         dominant-baseline={bl}
         text-anchor={al}
       >
         {text}
-      </text>
+      </text>,
+      false,
+      true
     );
     return this;
   }
@@ -177,8 +176,77 @@ function colorToHex(
   return [res, color[3] ?? 1];
 }
 
-export class SVGBackend implements Backend<"path" | "text"> {
+function reAlign(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  current: Align,
+  target: Align
+) {
+  width /= 2;
+  height /= 2;
+  switch (Align.horizontal(current)) {
+    case Align.L:
+      x -= width;
+      break;
+    case Align.R:
+      x += width;
+      break;
+  }
+  switch (Align.horizontal(target)) {
+    case Align.L:
+      x += width;
+      break;
+    case Align.R:
+      x -= width;
+      break;
+  }
+  switch (Align.vertical(current)) {
+    case Align.T:
+      y -= height;
+      break;
+    case Align.B:
+      y += height;
+      break;
+  }
+  switch (Align.vertical(target)) {
+    case Align.T:
+      y += height;
+      break;
+    case Align.B:
+      y -= height;
+      break;
+  }
+  return [x, y];
+}
+
+class SVGPrimitiveBackend implements Backend.Primitive {
+  constructor(private svg: SVGBackend) {}
+
+  circle(x: number, y: number, diameter: number, align: Align = Align.C) {
+    let svg = this.svg;
+    return {
+      draw(s = true, f = true) {
+        [x, y] = reAlign(x, y, diameter, diameter, Align.C, align);
+        svg._do_draw(<circle cx={x} cy={y} r={diameter / 2} />, s, f);
+      },
+    };
+  }
+  square(x: number, y: number, width: number, align: Align = Align.C) {
+    let svg = this.svg;
+    return {
+      draw(s = true, f = true) {
+        [x, y] = reAlign(x, y, width, width, Align.TL, align);
+        svg._do_draw(<rect x={x} y={y} width={width} height={width} />, s, f);
+      },
+    };
+  }
+}
+
+export class SVGBackend implements Backend<"path" | "text" | "primitive"> {
   _svg: XML;
+  private _sg: XML | undefined;
 
   constructor(width: number, height: number) {
     this._svg = (
@@ -203,18 +271,47 @@ export class SVGBackend implements Backend<"path" | "text"> {
     fontSize: 9,
   };
 
-  _draw(pathData: string, stroke: boolean, fill: boolean) {
-    this._svg.append(
-      <path
-        d={pathData}
-        {...(stroke ? this._style.stroke : {})}
-        {...(fill ? this._style.fill : { fill: "none" })}
-      />
-    );
+  /**
+   * Get the style group
+   */
+  _get_sg() {
+    if (this._sg) return this._sg;
+    this._sg = <g />;
+    this._sg.applyAttributes(this._style.stroke, this._style.fill, {
+      "font-size": this._style.fontSize,
+      "font-family": "Times New Roman",
+    });
+    this._svg.append(this._sg);
+    return this._sg;
   }
 
-  clear() {
+  _do_draw(element: XML, stroke: boolean, fill: boolean) {
+    element.applyAttributes(
+      stroke ? {} : { stroke: "none" },
+      fill ? {} : { fill: "none" }
+    );
+    this._get_sg().append(element);
+  }
+
+  _attrsc(stroke: boolean, fill: boolean) {
+    return {
+      ...(stroke ? this._style.stroke : {}),
+      ...(fill ? this._style.fill : { fill: "none" }),
+    };
+  }
+
+  _draw_path(pathData: string, stroke: boolean, fill: boolean) {
+    this._do_draw(<path d={pathData} />, stroke, fill);
+  }
+
+  clear(color?: [number, number, number, number?]) {
     this._svg.children = [];
+    if (color) {
+      let c = colorToHex(color);
+      this._svg.append(
+        <rect width="100%" height="100%" fill={c[0]} fill-opacity={c[1]} />
+      );
+    }
     return this;
   }
 
@@ -236,6 +333,9 @@ export class SVGBackend implements Backend<"path" | "text"> {
     let style = this._style_stack.pop();
     if (!style) throw new Error("Stack is empty!");
     this._style = style;
+
+    // Reset style group
+    this._sg = undefined;
     return this;
   }
   style(options: Backend.Style<"path" | "text">) {
@@ -273,6 +373,7 @@ export class SVGBackend implements Backend<"path" | "text"> {
           );
       }
     }
+    this._sg = undefined;
     return this;
   }
   path(): Backend.Path {
@@ -280,5 +381,8 @@ export class SVGBackend implements Backend<"path" | "text"> {
   }
   text(): Backend.Text {
     return new SVGTextBackend(this);
+  }
+  primitive(): Backend.Primitive {
+    return new SVGPrimitiveBackend(this);
   }
 }

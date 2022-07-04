@@ -19,11 +19,213 @@ import popupLayer from "./layers/Popup";
 import { Renderer, CanvasBackend, Align, Backend } from "@lib/renderer/";
 import { ExportButton } from "./layers/tmpExport";
 import { HTMLBackend } from "@lib/renderer/BackendHTML";
+import { initialize } from "esbuild";
+
+function* drawFundametalDomains(
+  r: Renderer<"path">,
+  options: {
+    cosets: math.Moebius[];
+    domain: (math.Complex | math.oo)[];
+    projection: { origin: [number, number]; scale: number };
+    style?: {
+      stroke?: Renderer.Color;
+      fill?: Renderer.Color;
+      lineWidth?: number;
+    };
+  }
+) {
+  let {
+    style: {
+      stroke = [50, 50, 50] as Renderer.Color,
+      fill = [50, 50, 50, 0.5] as Renderer.Color,
+      lineWidth = 1,
+    } = {},
+    domain,
+    projection,
+  } = options;
+
+  r.style({
+    lineWidth,
+    fill,
+    stroke,
+  });
+
+  for (let coset of options.cosets) {
+    yield;
+    let p = r.path();
+
+    for (let i = 0; i < domain.length; i++) {
+      hyperbolicLine(
+        p,
+        projection,
+        coset.transform(domain[i]),
+        coset.transform(domain[(i + 1) % domain.length])
+      );
+    }
+    //ctx.close();
+    p.draw();
+  }
+}
+
+function drawAxisOverlay(
+  r: Renderer<"path" | "text">,
+  options: {
+    position: { width: number; height: number };
+    projection: { origin: [number, number]; scale: number };
+    annotate?: [number, number][];
+    style?: {
+      fontSize?: number;
+    };
+  }
+) {
+  let { position, projection, style: { fontSize = 10 } = {} } = options;
+
+  let annotations: { sprite: any; at: number }[] = [];
+
+  let measure = sprites.fakeMeasure();
+  r.style({ fontSize });
+  measure.fontSize = fontSize;
+  for (let [p, q] of options.annotate || []) {
+    let d = math.gcd(p, q);
+    (p /= d), (q /= d);
+    if (q < 0) (p = -p), (q = -q);
+
+    annotations.push({
+      sprite: sprites.FracSprite(
+        sprites.TextSprite(measure, "" + p),
+        sprites.TextSprite(measure, "" + q)
+      ),
+      at: p / q,
+    });
+  }
+
+  r.style({ fill: [0, 0, 0], stroke: [0, 0, 0], lineWidth: 1.5 });
+
+  drawCarthesian2DAxis(r, { position, projection, fontSize });
+  annotateCarthesian2DAxis(r, "x", projection, annotations);
+}
 
 window.customElements.define(
   "subgroups-wc",
   layers.LayeredComponent({
     connected(config) {
+      let state = {
+        group_type: math.congruenceSubgroups.Gamma_1,
+        level: 7,
+        domain: math.congruenceSubgroups.Domain1,
+      };
+
+      let visual = {
+        level: state.level,
+        group_type: state.group_type,
+        group: [] as math.Moebius[],
+        domain: state.domain.corners,
+        projection: new ComplexScTr([200, 300], 200),
+        mouse: null as [number, number] | null,
+        style: {
+          color: [20, 20, 20] as [number, number, number],
+          fillAlpha: 0.5,
+        },
+      };
+
+      let popup = config.addLayer("popup", popupLayer());
+
+      let asyncManager = new asyncLib.AsyncManager<
+        "findGroup" | "drawBackground"
+      >();
+
+      function start() {
+        changeGroup(state.group_type, state.level);
+      }
+
+      // background canvas
+      config.addLayer(
+        "background",
+        layers.Canvas({
+          update: (config, ctx) => {
+            asyncManager.abortAll("drawBackground");
+
+            let r = Renderer.from(new CanvasBackend(ctx));
+            r.clear();
+
+            asyncLib
+              .callAsync(
+                null,
+                drawFundametalDomains,
+                [
+                  Renderer.from(new CanvasBackend(ctx)),
+                  {
+                    cosets: visual.group,
+                    domain: visual.domain,
+                    projection: visual.projection,
+                    style: {
+                      stroke: visual.style.color,
+                      fill: [...visual.style.color, visual.style.fillAlpha],
+                    },
+                  },
+                ],
+                asyncManager.getNew("drawBackground")
+              )
+              .catch(() => {});
+          },
+        })
+      );
+
+      // foreground canvas
+      let foreground = config.addLayer(
+        "foreground",
+        layers.Canvas({
+          update: (config, ctx) => {
+            let r = Renderer.from(new CanvasBackend(ctx));
+            r.clear();
+
+            let annotations: [number, number][] = [
+              [-1, 2],
+              [1, 2],
+            ];
+
+            let { mouse, projection, domain } = visual;
+
+            if (mouse === null) popup.show(false);
+
+            if (mouse != null) {
+              let m = math.congruenceSubgroups.Domain1.findCosetOf(
+                projection.invert(mouse)
+              );
+
+              if (m === undefined) popup.show(false);
+              else {
+                popup.show();
+                popup.move(mouse[0], mouse[1]);
+                if (m.m[2] < 0)
+                  m = new math.Moebius(-m.m[0], -m.m[1], -m.m[2], -m.m[3]);
+                katex.render(m.toTeX(), popup.container);
+
+                asyncLib.callSync(null, drawFundametalDomains, [
+                  r,
+                  {
+                    domain: visual.domain,
+                    cosets: [m],
+                    projection: visual.projection,
+                    style: {
+                      stroke: [0, 0, 0],
+                      fill: "#cccceeaa",
+                    },
+                  },
+                ]);
+              }
+            }
+
+            drawAxisOverlay(r, {
+              position: config,
+              projection: visual.projection,
+              annotate: annotations,
+            });
+          },
+        })
+      );
+
+      // Add KaTeX styles
       config.attachToShaddow(
         dom.Element("link", [], {
           rel: "stylesheet",
@@ -32,63 +234,37 @@ window.customElements.define(
         })
       );
 
-      // TEST
-      // config.addLayer("options", new OptionsLayer({}));
-
-      let state = {
-        group_type: math.congruenceSubgroups.Gamma_1,
-        level: 17,
-        domain: math.congruenceSubgroups.Domain1,
-      };
-
-      let visual = {
-        level: state.level,
-        group_type: state.group_type,
-        group: state.group_type.cosetRepresentatives(state.level),
-        domain: state.domain.corners,
-        projection: new ComplexScTr([200, 300], 200),
-        mouse: null as [number, number] | null,
-      };
-      let info = dom.Element(
-        "div",
-        {
-          __html: katex.renderToString(
-            visual.group_type.tex + `(${visual.level})`
-          ),
-        },
-        {
-          style: "position: absolute;bottom:0;left:0;z-index: 2;padding: 10px;",
-        }
-      );
+      // Current group in bottom left
+      let info = dom.Element("div", [], {
+        style: "position: absolute;bottom:0;left:0;z-index: 2;padding: 10px;",
+      });
       config.attachToShaddow(info);
 
-      let asyncManager = new asyncLib.AsyncManager<"group" | "bgDraw">();
-
-      let changeGroup = (
+      async function changeGroup(
         newGroup: math.congruenceSubgroups.CongruenceSubgroup,
         newLevel: number
-      ) => {
-        asyncManager.abortAll("group");
-        let p = newGroup.cosetRepresentativesAsync(
-          newLevel,
-          asyncManager.getNew("group")
-        );
+      ) {
+        // compute representatives async
+        asyncManager.abortAll("findGroup");
 
-        p.then((g) => {
+        try {
+          let group = await newGroup.cosetRepresentativesAsync(
+            newLevel,
+            asyncManager.getNew("findGroup")
+          );
+
           visual.group_type = newGroup;
           visual.level = newLevel;
-          visual.group = g;
+          visual.group = group;
 
+          // Update the info block
           katex.render(newGroup.tex + `(${newLevel})`, info);
 
           config.update();
-        }).catch((e) => {
-          console.log(e);
-          if (e !== "aborted") console.log(e);
-        });
-      };
-
-      let popup = config.addLayer("popup", popupLayer());
+        } catch (e) {
+          if (e !== "aborted") console.error(e);
+        }
+      }
 
       /**
        * Events for the canvas
@@ -105,12 +281,12 @@ window.customElements.define(
         (pos: [number, number] | null) => {
           if (pos) popup.move(pos[0], pos[1]);
           visual.mouse = pos;
-          config.update("fg"); // only fg update
+          foreground.update(); // only fg update
         }
       ).registerListeners(config.containerElement);
 
       const appOptions = {
-        fill: "#a40000",
+        fill: "#555555",
       };
 
       let options = config.addLayer("options", layers.Options());
@@ -158,7 +334,7 @@ window.customElements.define(
       options.add("color", {
         label: "Color",
         onChange(s) {
-          appOptions.fill = s;
+          visual.style.color = Renderer.Color(s) as any;
           config.update();
         },
         default: appOptions.fill,
@@ -171,151 +347,33 @@ window.customElements.define(
           setup() {
             return { width: config.width, height: config.height };
           },
-          render: (r) => asyncLib.callAsync(null, bgDraw, [r]),
-        })
-      );
-
-      function* bgDraw(ctx: Renderer<"path">) {
-        ctx.style({
-          lineWidth: 1,
-          fill: appOptions.fill + "55",
-          stroke: appOptions.fill,
-        });
-
-        let i = 0;
-        for (let m of visual.group) {
-          yield;
-          let p = ctx.path();
-          for (let i = 0; i < visual.domain.length; i++) {
-            hyperbolicLine(
-              p,
-              visual.projection,
-              m.transform(visual.domain[i]),
-              m.transform(visual.domain[(i + 1) % visual.domain.length])
-            );
-          }
-          //ctx.close();
-          p.draw(true, true);
-        }
-      }
-
-      // background canvas
-      config.addLayer(
-        "bg",
-        layers.Canvas({
-          update: (config, ctx) => {
-            ctx?.clearRect(0, 0, config.width, config.height);
-            asyncManager.abortAll("bgDraw");
-
-            asyncLib
-              .callAsync(
-                null,
-                bgDraw,
-                [Renderer.from(new CanvasBackend(ctx))],
-                asyncManager.getNew("bgDraw")
-              )
-              .catch(() => {});
+          render: async (r) => {
+            let { projection } = visual;
+            await asyncLib.callAsync(null, drawFundametalDomains, [
+              r,
+              {
+                projection,
+                domain: visual.domain,
+                cosets: visual.group,
+                style: {
+                  stroke: visual.style.color,
+                  fill: [...visual.style.color, visual.style.fillAlpha],
+                },
+              },
+            ]);
+            drawAxisOverlay(r, {
+              position: config,
+              projection,
+              annotate: [
+                [-1, 2],
+                [1, 2],
+              ],
+            });
           },
         })
       );
 
-      // foreground canvas
-      config.addLayer(
-        "fg",
-        layers.Canvas({
-          update: (config, ctx) => {
-            let r = new render.Canvas(ctx, config.width, config.height);
-            ctx.clearRect(0, 0, config.width, config.height);
-
-            let annotationFS = 9;
-            r.fontSize = annotationFS;
-            let annotations = [
-              {
-                sprite: sprites.FracSprite(
-                  sprites.TextSprite(r, "-1"),
-                  sprites.TextSprite(r, "2")
-                ),
-                at: -0.5,
-              },
-              {
-                sprite: sprites.FracSprite(
-                  sprites.TextSprite(r, "1"),
-                  sprites.TextSprite(r, "2")
-                ),
-                at: 0.5,
-              },
-            ];
-
-            let { mouse, projection, domain } = visual;
-
-            if (mouse === null) popup.show(false);
-
-            if (mouse != null) {
-              const m = math.congruenceSubgroups.Domain1.findCosetOf(
-                projection.invert(mouse)
-              );
-
-              if (m === undefined) popup.show(false);
-              else {
-                popup.show();
-                popup.move(mouse[0], mouse[1]);
-                katex.render(m.toTeX(), popup.container);
-
-                r.fillStyle = "#CCCCEEAA";
-                let pa = Renderer.from(new CanvasBackend(ctx)).path();
-                for (let i = 0; i < domain.length; i++) {
-                  hyperbolicLine(
-                    pa,
-                    projection,
-                    m.transform(domain[i]),
-                    m.transform(domain[(i + 1) % domain.length])
-                  );
-                }
-                pa.close();
-                pa.draw(true, true);
-                r.fillStyle = "#000000";
-
-                let [a, b, c, d] = m.m;
-                /*console.log(
-                  (2 * (c * c + d * d) * (a * c + b * d) +
-                    c * d * (b * c + a * d)) /
-                    (c * c * c * c + d * d * d * d + c * c * d * d) /
-                    2
-                );*/
-
-                let p = m.m[0],
-                  q = m.m[2];
-                if (q < 0) {
-                  q = -q;
-                  p = -p;
-                }
-                if (p !== 0)
-                  annotations.push({
-                    sprite: sprites.FracSprite(
-                      sprites.TextSprite(r, "" + p),
-                      sprites.TextSprite(r, "" + q)
-                    ),
-                    at: p / q,
-                  });
-              }
-            }
-
-            drawCarthesian2DAxis(r, projection);
-
-            r.fontSize = annotationFS;
-            annotateCarthesian2DAxis(r, "x", projection, annotations);
-          },
-        })
-      );
-
-      let e = document.createElement("div");
-      e.style.width = "100%";
-      e.style.height = "100%";
-      e.style.fontFamily = "Times New Roman";
-      config.addLayer("test", e);
-
-      let txt = new HTMLBackend(e);
-      txt.text().draw(10, 10, "HALLO", Align.TL);
+      start();
     },
   })
 );

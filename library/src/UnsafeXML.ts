@@ -11,6 +11,14 @@ export class XML {
     this.attributes = attributes || {};
   }
 
+  applyAttributes(...args: { [key: string]: string | number }[]) {
+    for (let attributes of args) Object.assign(this.attributes, attributes);
+  }
+
+  removeAttributes(...names: string[]) {
+    for (let k of names) delete this.attributes[k];
+  }
+
   private attrString() {
     return Object.entries(this.attributes)
       .map(([k, v]) => `${k}="${v}"`)
@@ -21,8 +29,8 @@ export class XML {
     return this.children.map((v) => v.toString()).join("");
   }
 
-  append(child: XML | string) {
-    this.children.push(child);
+  append(...childred: (XML | string)[]) {
+    this.children.push(...childred);
   }
 
   toString(): string {

@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% include "_page_header.njk" %}
+    {% include "_fonts.njk" %}
     <style>
       {% inline 'essentials.pcss' %}
     </style>
@@ -20,6 +21,7 @@
 
       body {
         display: grid;
+        font-family: 'LinuxLibertine', 'Times New Roman', Serif;
         grid-template-columns: 350px 1fr;
         grid-template-rows: var(--sidebar-top-height) 1fr;
         box-sizing: border-box;
