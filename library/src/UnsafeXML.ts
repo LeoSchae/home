@@ -45,7 +45,7 @@ jsx.Fragment = "";
 export declare namespace jsx.JSX {
   type Element = XML;
   type IntrinsicElements = {
-    [key: Lowercase<string>]: {
+    [key: string]: {
       [key: string]: string | number;
     };
   };

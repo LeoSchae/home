@@ -5,6 +5,8 @@ import { ComplexScTr } from "../../library/src/canvas/axis";
 import SVG from "@lib/renderer/SVG";
 import { congruenceSubgroups } from "@lib/modules/math";
 import { hyperbolicLine } from "@lib/modules/math/draw";
+import { Complete } from "@lib/renderer/new";
+import { SVGBackend } from "@lib/renderer/newSVG";
 
 let nojs = (
   <div style="display:grid;justify-items:center;align-items:center;width:100%;height:100%;">
@@ -51,26 +53,28 @@ function perviewIcon(this: any, data: any) {
   let grp = group.cosetRepresentatives(level);
   let dom = congruenceSubgroups.Domain1.corners;
 
-  let ctx = new SVG(200, 200);
+  let svg;
+  let ctx = Complete((svg = new SVGBackend(200, 200)));
   let projection = new ComplexScTr([100, 200], 100);
 
-  ctx.fillStyle = "#AA000055";
-  ctx.strokeStyle = "#AA0000";
-  ctx.lineWidth = 1.0;
+  ctx.style({
+    fill: "#AA000055",
+    stroke: "#AA0000",
+  });
 
   let i = 0;
   for (let m of grp) {
-    ctx.begin();
+    let p = ctx.path();
     for (let i = 0; i < dom.length; i++) {
       hyperbolicLine(
-        ctx,
+        p,
         projection,
         m.transform(dom[i]),
         m.transform(dom[(i + 1) % dom.length])
       );
     }
     //ctx.closePath();
-    ctx.fillAndStroke();
+    p.draw(true, true);
   }
-  return ctx.svg.toString();
+  return svg._svg.toString();
 }

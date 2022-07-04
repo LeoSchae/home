@@ -16,6 +16,9 @@ import katex from "katex";
 import { manualSizing } from "./layers/Options";
 
 import popupLayer from "./layers/Popup";
+import { Complete, FullBackend } from "@lib/renderer/new";
+import { CanvasBackend } from "@lib/renderer/newCanvas";
+import { ExportButton } from "./layers/tmpExport";
 
 function download(
   content: string,
@@ -186,7 +189,16 @@ window.customElements.define(
 
       options.add(manualSizing, config);
 
-      options.add("multiButton", {
+      options.add(
+        ExportButton({
+          setup() {
+            return { width: config.width, height: config.height };
+          },
+          render: (r) => asyncLib.callAsync(null, bgDraw, [r]),
+        })
+      );
+
+      /*options.add("multiButton", {
         label: "Export as",
         values: [
           { name: "SVG", label: "SVG" },
@@ -210,10 +222,10 @@ window.customElements.define(
           while (!d.next().done) continue;
           download(r.toFileString(), fileName, dataType);
         },
-      });
+      });*/
 
-      function* bgDraw(ctx: render.Renderer2D) {
-        ctx.set({
+      function* bgDraw(ctx: FullBackend) {
+        ctx.style({
           lineWidth: 1,
           fill: appOptions.fill + "55",
           stroke: appOptions.fill,
@@ -222,17 +234,17 @@ window.customElements.define(
         let i = 0;
         for (let m of visual.group) {
           yield;
-          ctx.begin();
+          let p = ctx.path();
           for (let i = 0; i < visual.domain.length; i++) {
             hyperbolicLine(
-              ctx,
+              p,
               visual.projection,
               m.transform(visual.domain[i]),
               m.transform(visual.domain[(i + 1) % visual.domain.length])
             );
           }
           //ctx.close();
-          ctx.fillAndStroke();
+          p.draw(true, true);
         }
       }
 
@@ -248,7 +260,7 @@ window.customElements.define(
               .callAsync(
                 null,
                 bgDraw,
-                [new render.Canvas(ctx)],
+                [Complete(new CanvasBackend(ctx))],
                 asyncManager.getNew("bgDraw")
               )
               .catch(() => {});
@@ -299,18 +311,17 @@ window.customElements.define(
                 katex.render(m.toTeX(), popup.container);
 
                 r.fillStyle = "#CCCCEEAA";
-                r.begin();
+                let pa = Complete(new CanvasBackend(ctx)).path();
                 for (let i = 0; i < domain.length; i++) {
                   hyperbolicLine(
-                    r,
+                    pa,
                     projection,
                     m.transform(domain[i]),
                     m.transform(domain[(i + 1) % domain.length])
                   );
                 }
-                r.close();
-                r.fill();
-                r.stroke();
+                pa.close();
+                pa.draw(true, true);
                 r.fillStyle = "#000000";
 
                 let [a, b, c, d] = m.m;

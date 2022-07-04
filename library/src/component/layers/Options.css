@@ -1,4 +1,8 @@
 .button {
+  --_fg: #def;
+  --_bg: hsl(207, 100%, 40%);
+  --_fgHov: white;
+  --_bgHov: hsl(207, 100%, 20%);
   position: absolute;
   bottom: 1em;
   right: 1em;
@@ -6,20 +10,19 @@
   height: 50px;
   padding: 10px;
   border-radius: 50%;
-  border: 2px solid #012;
-  background-color: #012;
-  color: #def;
+  border: none;
+  background-color: var(--_bg);
+  color: var(--_fg);
   z-index: 99;
 }
 
 .button:hover {
-  background-color: #bbddee;
-  color: #001122;
+  background-color: var(--_bgHov);
+  color: var(--_fgHov);
 }
+
 .button:active {
   transform: translateY(1px);
-  background-color: #bbddee;
-  color: #001122;
 }
 
 .icon {

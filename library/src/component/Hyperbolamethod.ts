@@ -3,6 +3,13 @@ import * as render from "@lib/renderer";
 import * as math from "@lib/modules/math";
 import ScaledRender from "@lib/renderer/AutoScale";
 import { manualSizing } from "./layers/Options";
+import { Backend, Complete, FullBackend, Renderer } from "@lib/renderer/new";
+import { MeasuredRenderer } from "@lib/renderer/newScaled";
+import { stringify } from "querystring";
+import { SVGBackend } from "@lib/renderer/newSVG";
+import { TikZBackend } from "@lib/renderer/newTikZ";
+import { ExportButton } from "./layers/tmpExport";
+import { CanvasBackend } from "@lib/renderer/newCanvas";
 
 function download(
   content: string,
@@ -17,7 +24,7 @@ function download(
 }
 
 function renderHyperbolamethod3d(
-  r: render.Renderer2D,
+  r: FullBackend,
   opts: {
     N: number;
     W: number;
@@ -47,27 +54,27 @@ function renderHyperbolamethod3d(
     // z face
     let alphaHex = "ff";
 
-    r.set({ fill: shadeFront + alphaHex });
-    r.begin();
-    r.move(...proj(cuts[i], cuts[j], cuts[k]))
+    r.style({ fill: shadeFront + alphaHex });
+    r.path()
+      .move(...proj(cuts[i], cuts[j], cuts[k]))
       .line(...proj(cuts[i - 1], cuts[j], cuts[k]))
       .line(...proj(cuts[i - 1], cuts[j - 1], cuts[k]))
       .line(...proj(cuts[i], cuts[j - 1], cuts[k]))
       .close()
       .fill()
       .stroke();
-    r.set({ fill: shadeTop + alphaHex });
-    r.begin();
-    r.move(...proj(cuts[i], cuts[j], cuts[k]))
+    r.style({ fill: shadeTop + alphaHex });
+    r.path()
+      .move(...proj(cuts[i], cuts[j], cuts[k]))
       .line(...proj(cuts[i - 1], cuts[j], cuts[k]))
       .line(...proj(cuts[i - 1], cuts[j], cuts[k - 1]))
       .line(...proj(cuts[i], cuts[j], cuts[k - 1]))
       .close()
       .fill()
       .stroke();
-    r.set({ fill: shadeSide + alphaHex });
-    r.begin();
-    r.move(...proj(cuts[i], cuts[j], cuts[k]))
+    r.style({ fill: shadeSide + alphaHex });
+    r.path()
+      .move(...proj(cuts[i], cuts[j], cuts[k]))
       .line(...proj(cuts[i], cuts[j], cuts[k - 1]))
       .line(...proj(cuts[i], cuts[j - 1], cuts[k - 1]))
       .line(...proj(cuts[i], cuts[j - 1], cuts[k]))
@@ -76,26 +83,26 @@ function renderHyperbolamethod3d(
       .stroke();
   }
 
-  r.set({ lineWidth: 1.5, stroke: "#000000" });
-  r.begin();
-  r.move(...proj(W, W, W)).line(...proj(N + (N - W) * 0.1, W, W));
-  r.move(...proj(W, W, W)).line(...proj(W, N + (N - W) * 0.1, W));
-  r.move(...proj(W, W, W)).line(...proj(W, W, N + (N - W) * 0.1));
-  r.stroke();
+  r.style({ lineWidth: 1.5, stroke: "#000000" });
+  let p = r.path();
+  p.move(...proj(W, W, W)).line(...proj(N + (N - W) * 0.1, W, W));
+  p.move(...proj(W, W, W)).line(...proj(W, N + (N - W) * 0.1, W));
+  p.move(...proj(W, W, W)).line(...proj(W, W, N + (N - W) * 0.1));
+  p.stroke();
 
   /*r.begin().move(...proj(cuts[0], W, W));
   for (let i = 1; i < cuts.length; i++)
     r.line(...proj(cuts[i], cuts[cuts.length - i], W));
   r.stroke();*/
 
-  r.set({ lineWidth: 0.75 });
+  r.style({ lineWidth: 0.75 });
   for (let ix = 1; ix < cuts.length; ix++)
     for (let iy = 1; iy < cuts.length - ix + 1; iy++)
       drawBoxSpike(cuts, [ix, iy, cuts.length + 1 - ix - iy]);
 }
 
 function renderHyperbolamethod(
-  r: render.Renderer2D,
+  r: FullBackend<"primitive">,
   opts: {
     N: number;
     W: number;
@@ -120,39 +127,43 @@ function renderHyperbolamethod(
   let cuts = [...new math.Range(0, J + 1)].map((i) => W * Math.exp(i * lNJ));
 
   // fill below
-  r.set({ fill, stroke: gridFill, lineWidth: 1.5 });
+  r.style({ fill, stroke: gridFill, lineWidth: 1.5 });
 
-  r.begin();
-  r.move(cuts[0], N - cuts[0]).line(cuts[0], N - cuts[J]);
+  let path = r.path();
+  path.move(cuts[0], N - cuts[0]).line(cuts[0], N - cuts[J]);
   for (var i = 1; i < cuts.length; i++)
-    r.line(cuts[i - 1], N - cuts[J - i]).line(cuts[i], N - cuts[J - i]);
-  r.line(cuts[J], N - cuts[0]).close();
+    path.line(cuts[i - 1], N - cuts[J - i]).line(cuts[i], N - cuts[J - i]);
+  path.line(cuts[J], N - cuts[0]).close();
   //r.stroke();
-  r.fill();
+  path.fill();
 
   // fill error;
-  r.begin();
-  r.set({ lineWidth: 1.5, fill: errorFill });
-  r.move(cuts[0], N - cuts[J]);
+  path = r.path();
+  r.style({ lineWidth: 1.5, fill: errorFill });
+  path.move(cuts[0], N - cuts[J]);
   for (var i = 1; i < cuts.length; i++)
-    r.line(cuts[i - 1], N - cuts[J - i + 1]).line(cuts[i], N - cuts[J - i + 1]);
+    path
+      .line(cuts[i - 1], N - cuts[J - i + 1])
+      .line(cuts[i], N - cuts[J - i + 1]);
   for (var i = J; i > 0; i--)
-    r.line(cuts[i], N - cuts[J - i]).line(cuts[i - 1], N - cuts[J - i]);
-  r.line(cuts[0], N - cuts[J]);
-  r.fill();
+    path.line(cuts[i], N - cuts[J - i]).line(cuts[i - 1], N - cuts[J - i]);
+  path.line(cuts[0], N - cuts[J]);
+  path.fill();
 
   /* Lines (every line only single stroked and with corners) */
   let p: [number, number];
-  r.set({ lineWidth: 1 });
+  r.style({ lineWidth: 1 });
   // longest boxes (|_| shaped)
-  r.begin();
+  path = r.path();
   p = [cuts[1], N - cuts[J]];
-  r.move(W, N - W)
+  path
+    .move(W, N - W)
     .line(W, p[1])
     .line(p[0], p[1])
     .line(p[0], N - W);
   p = [cuts[J], N - cuts[1]];
-  r.move(W, N - W)
+  path
+    .move(W, N - W)
     .line(p[0], N - W)
     .line(p[0], p[1])
     .line(W, p[1]);
@@ -161,24 +172,25 @@ function renderHyperbolamethod(
     minLine = 2;
   for (var i = minLine; i <= maxLine - minLine; i++) {
     p = [cuts[i], N - cuts[maxLine - i]];
-    r.move(W, p[1])
+    path
+      .move(W, p[1])
       .line(p[0], p[1])
       .line(p[0], N - W);
   }
-  r.stroke();
+  path.stroke();
 
   // Hyperbola
-  r.begin();
+  path = r.path();
   let steps = 100;
 
-  r.set({ lineWidth: 2, stroke: hypFill });
-  r.move(W, N - W);
+  r.style({ lineWidth: 2, stroke: hypFill });
+  path.move(W, N - W);
   for (let i of [...new math.Range(0, steps + 1)]) {
     let v = Math.pow(N / W, i / steps);
-    r.line(W * v, N - N / v);
+    path.line(W * v, N - N / v);
   }
-  r.close();
-  r.stroke();
+  path.close();
+  path.stroke();
 }
 
 function draw(r: render.Renderer2D) {
@@ -225,16 +237,14 @@ window.customElements.define(
         layers.Canvas({
           update(config, ctx) {
             ctx.clearRect(0, 0, config.width, config.height);
-            let scale = new ScaledRender();
-            if (state.dim == "2D") renderHyperbolamethod(scale, state);
-            else renderHyperbolamethod3d(scale, state);
+            let scale = new MeasuredRenderer();
+            let r = Complete<undefined>(scale);
+            if (state.dim == "2D") renderHyperbolamethod(r, state);
+            else renderHyperbolamethod3d(r, state);
 
-            scale.applyScaled(
-              new render.Canvas(ctx),
-              config.width,
-              config.height,
-              { buffer: 10 }
-            );
+            scale.replay(Complete(new CanvasBackend(ctx)), {
+              fit: { width: config.width, height: config.height },
+            });
           },
         })
       );
@@ -305,34 +315,27 @@ window.customElements.define(
       });
 
       options.add(manualSizing, config);
-      options.add("multiButton", {
-        label: "Export as",
-        values: [
-          { name: "SVG", label: "SVG" },
-          { name: "TikZ", label: "TikZ" },
-        ],
-        onClick(name) {
-          let r: render.SVG | render.TikZ;
-          let fileName: string = "Hyperbola";
-          let dataType: string;
-          if (name == "SVG") {
-            r = new render.SVG(config.width, config.height);
-            fileName += ".svg";
-            dataType = "image/svg+xml";
-          } else if (name == "TikZ") {
-            r = new render.TikZ(config.width, config.height);
-            fileName += ".tikz";
-            dataType = "text/plain";
-          } else throw new Error("Unknown format");
+      options.add(
+        ExportButton({
+          setup() {
+            return {
+              fileName: "Hyperbola",
+              width: config.width,
+              height: config.height,
+            };
+          },
+          render(r) {
+            let scale = new MeasuredRenderer();
+            let renderer = Complete<undefined>(scale);
+            if (state.dim == "2D") renderHyperbolamethod(renderer, state);
+            else renderHyperbolamethod3d(renderer, state);
 
-          let scale = new ScaledRender();
-          if (state.dim == "2D") renderHyperbolamethod(scale, state);
-          else renderHyperbolamethod3d(scale, state);
-          scale.applyScaled(r, config.width, config.height, { buffer: 10 });
-
-          download(r.toFileString(), fileName, dataType);
-        },
-      });
+            scale.replay(r, {
+              fit: { width: config.width, height: config.height },
+            });
+          },
+        })
+      );
     },
   })
 );

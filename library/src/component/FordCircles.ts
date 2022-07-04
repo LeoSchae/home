@@ -1,8 +1,4 @@
-import {
-  ComplexScTr,
-  drawCarthesian2DAxis,
-  annotateCarthesian2DAxis,
-} from "../canvas/axis";
+import { ComplexScTr } from "../canvas/axis";
 import * as render from "../renderer";
 import { BBSprite, FracSprite, TextSprite } from "../canvas/sprites";
 import { DragZoomHover } from "../modules/Interact";
@@ -11,6 +7,9 @@ import * as layers from "./layers";
 import { runInContext } from "vm";
 import * as asyncLib from "@lib/modules/Async";
 import { manualSizing } from "./layers/Options";
+import { Complete, FullBackend, FullPathBackend } from "@lib/renderer/new";
+import { CanvasBackend } from "@lib/renderer/newCanvas";
+import { ExportButton } from "./layers/tmpExport";
 
 function download(
   content: string,
@@ -25,7 +24,7 @@ function download(
 }
 
 const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
-  r: render.Renderer2D,
+  r: FullBackend<"text">,
   Q: number,
   options: { projection: { origin: [number, number]; scale: number } }
 ) {
@@ -37,23 +36,24 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
   let { projection } = options;
   let { origin, scale } = projection;
 
-  r.set({ fill: "#AAAAAA" });
-  r.begin();
-  r.arc(...origin, scale, 0, 2 * Math.PI - 0.01);
-  r.fillAndStroke();
+  r.style({ fill: "#AAAAAA", stroke: [0, 0, 0] });
+  r.path()
+    .arc(...origin, scale, 0, 2 * Math.PI - 0.01)
+    .draw(true, true);
   //domainCircle(r, [0, 0.5], 0.5, pr);
   //r.stroke();
 
   let fr = FareyFractions(Q);
 
   let fs = 12;
-  r.set({ fontSize: fs });
+  r.style({ fontSize: fs });
+
   let textUpTo = Q; //bestQ(pr.scale, fs) + 5;
   let annotations: [number, number, number][][] = Array(textUpTo)
     .fill(null)
     .map(() => []);
 
-  r.set({ fill: "#FFFFFF" });
+  r.style({ fill: [255, 255, 255], stroke: [0, 0, 0] });
   for (let [a, b] of fr) {
     yield;
 
@@ -62,22 +62,23 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
     if (b === 1) segments = 40;
     let xPosition = a / b;
     let radius = 0.5 / b / b;
+    let path = r.path();
     let midP = domainCircle(
-      r,
+      path,
       [xPosition, radius],
       radius,
       projection,
       segments
     );
-    r.fillAndStroke();
+    path.draw(true, true);
     if (b <= textUpTo) annotations[b - 1].push([a, midP[0], midP[1]]);
   }
 
-  r.set({ fill: "#555555" });
+  r.style({ fill: "#555555" });
   for (let q0 = 0; q0 < annotations.length; q0++) {
     let q = q0 + 1;
 
-    r.set({ fontSize: q == 1 ? scale / 2 : scale / q / q });
+    r.style({ fontSize: q == 1 ? scale / 2 : scale / q / q });
     measure.fontSize = q == 1 ? scale / 2 : scale / q / q;
     let qSprite;
     for (let [p, m0, m1] of annotations[q0]) {
@@ -92,7 +93,7 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
 });
 
 const fordCirclesInPlane = asyncLib.wrap.async(function* (
-  r: render.Renderer2D,
+  r: FullBackend<"text">,
   Q: number,
   options: {
     projection: { origin: [number, number]; scale: number };
@@ -104,31 +105,32 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
       .getContext("2d") as CanvasRenderingContext2D
   );
 
-  r.set({ fill: "#AAAAAA" });
+  r.style({ fill: "#AAAAAA" });
   let { width, height } = r as any;
-  r.move(0, 0)
+  r.path()
+    .move(0, 0)
     .line(0, height)
     .line(width, height)
     .line(width, 0)
     .close()
     .fill();
-  r.set({ fill: "#000000" });
+  r.style({ fill: "#000000" });
   let { projection } = options;
   let { origin, scale } = projection;
 
   let fs = 12;
-  r.set({ fontSize: fs });
+  r.style({ fontSize: fs });
   let textUpTo = Q; //bestQ(pr.scale, fs) + 5;
   let annotations: number[][] = Array(textUpTo)
     .fill(null)
     .map(() => []);
 
-  r.set({ lineWidth: 1.25, fontSize: 10 });
-  drawCarthesian2DAxis(r as any, projection, { noY: true, labelX: "" });
-  annotateCarthesian2DAxis(r as any, "x", projection, [
+  r.style({ lineWidth: 1.25, fontSize: 10 });
+  //drawCarthesian2DAxis(r as any, projection, { noY: true, labelX: "" });
+  /*annotateCarthesian2DAxis(r as any, "x", projection, [
     { sprite: TextSprite(measure, "0"), at: 0 },
     { sprite: TextSprite(measure, "1"), at: 1 },
-  ]);
+  ]);*/
 
   let fractions = FareyFractions(Q);
 
@@ -138,27 +140,27 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
 
   // Find all fracions on screen
 
-  r.set({ fill: "#FFFFFF" });
+  r.style({ fill: "#FFFFFF" });
   for (let [a, b] of fractions) {
     yield;
 
     let xPosition = a / b;
     let radius = 0.5 / b / b;
 
-    r.begin();
-    r.arc(...map(xPosition, radius), radius * scale, 0, 2 * Math.PI - 0.01);
-    r.close();
-    r.stroke();
-    r.fill();
+    r.path()
+      .arc(...map(xPosition, radius), radius * scale, 0, 2 * Math.PI - 0.01)
+      .close()
+      .stroke()
+      .fill();
 
     if (b < textUpTo) annotations[b - 1].push(a);
   }
   let d = 0;
-  r.set({ fill: "#000000" });
+  r.style({ fill: "#000000" });
   for (let q0 = 0; q0 < annotations.length; q0++) {
     let q = q0 + 1;
 
-    r.set({ fontSize: (scale * 0.3) / q / q });
+    r.style({ fontSize: (scale * 0.3) / q / q });
     measure.fontSize = (scale * 0.3) / q / q;
     let qSprite;
     for (let p of annotations[q0]) {
@@ -176,7 +178,7 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
 });
 
 function domainCircle(
-  r: render.Renderer2D,
+  r: render.Renderer2D | FullPathBackend,
   center: [number, number],
   radius: number,
   projection: { origin: [number, number]; scale: number },
@@ -196,7 +198,7 @@ function domainCircle(
   let len = 0;
   let middleP = [0, 0];
 
-  r.begin();
+  if ("begin" in r) r.begin();
   let oldP = map(center[0] + radius, center[1]);
   r.move(...oldP);
   for (let s = 1; s < segments + 1; s++) {
@@ -278,44 +280,28 @@ window.customElements.define(
       });
 
       options.add(manualSizing, config);
-      options.add("multiButton", {
-        label: "Export as",
-        values: [
-          { name: "SVG", label: "SVG" },
-          { name: "TikZ", label: "TikZ" },
-        ],
-        async onClick(name) {
-          let r: render.SVG | render.TikZ;
-          let fileName: string = "Hyperbola";
-          let dataType: string;
-          if (name == "SVG") {
-            r = new render.SVG(config.width, config.height);
-            fileName += ".svg";
-            dataType = "image/svg+xml";
-          } else if (name == "TikZ") {
-            r = new render.TikZ(config.width, config.height);
-            fileName += ".tikz";
-            dataType = "text/plain";
-          } else throw new Error("Unknown format");
-
-          let promise;
-          if (mode == "Halfplane")
-            promise = fordCirclesInPlane(r, Q, { projection: pr });
-          else promise = fordCirclesInUnitSphere(r, Q, { projection: pr });
-
-          promise.catch((e) => console.log(e));
-
-          await promise;
-
-          download(r.toFileString(), fileName, dataType);
-        },
-      });
+      options.add(
+        ExportButton({
+          setup() {
+            return {
+              fileName: "FordCircles",
+              width: config.width,
+              height: config.height,
+            };
+          },
+          render(r) {
+            if (mode == "Halfplane")
+              return fordCirclesInPlane(r, Q, { projection: pr });
+            else return fordCirclesInUnitSphere(r, Q, { projection: pr });
+          },
+        })
+      );
 
       config.addLayer(
         "draw",
         layers.Canvas({
           update(config, ctx) {
-            let r = new render.Canvas(ctx);
+            let r = Complete(new CanvasBackend(ctx));
 
             ctx.clearRect(0, 0, config.width, config.height);
 

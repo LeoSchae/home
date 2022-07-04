@@ -1,7 +1,12 @@
+import { FullBackend, Renderer } from "@lib/renderer/new";
 import type * as render from "../renderer";
 
 export type Sprite = {
-  draw(ctx: render.Renderer2D, x: number, y: number): unknown;
+  draw(
+    ctx: render.Renderer2D | FullBackend<"text">,
+    x: number,
+    y: number
+  ): unknown;
 };
 
 export type BBSprite = Sprite & {
@@ -54,8 +59,16 @@ export function TextSprite(
     bot,
     left,
     right,
-    draw: function (ctx: render.Renderer2D, x: number, y: number) {
-      ctx.drawText(this.text, x - this.dx, y, 0 as render.TextAlign);
+    draw: function (
+      ctx: render.Renderer2D | FullBackend<"text">,
+      x: number,
+      y: number
+    ) {
+      if ("drawText" in ctx) {
+        ctx.drawText(this.text, x - this.dx, y, 0 as render.TextAlign);
+      } else {
+        ctx.text().draw(x - this.dx, y, this.text);
+      }
     },
   };
   return sprite;
@@ -97,17 +110,29 @@ export function FracSprite(top: BBSprite, bot: BBSprite): BBSprite {
     left: halfLineLength,
     right: halfLineLength,
 
-    draw: function (ctx: render.Renderer2D, x: number, y: number) {
+    draw: function (
+      ctx: render.Renderer2D | FullBackend<"text">,
+      x: number,
+      y: number
+    ) {
       let [topOffsetX, topOffsetY, botOffsetX, botOffsetY, halfLineLength] =
         this.data;
 
       top.draw(ctx, x + topOffsetX, y + topOffsetY);
       bot.draw(ctx, x + botOffsetX, y + botOffsetY);
 
-      ctx.begin();
-      ctx.move(x - halfLineLength, y);
-      ctx.line(x + halfLineLength, y);
-      ctx.stroke();
+      if ("begin" in ctx) {
+        ctx.begin();
+        ctx.move(x - halfLineLength, y);
+        ctx.line(x + halfLineLength, y);
+        ctx.stroke();
+      } else {
+        ctx
+          .path()
+          .move(x - halfLineLength, y)
+          .line(x + halfLineLength, y)
+          .stroke();
+      }
     },
   };
   return sprite;

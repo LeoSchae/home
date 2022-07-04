@@ -10,6 +10,21 @@ import * as layers from "./layers";
 import * as asyncLib from "@lib/modules/Async";
 import { manualSizing } from "./layers/Options";
 import { renderToString } from "katex";
+import {
+  Complete,
+  ellipsePoint,
+  FullBackend,
+  Renderer,
+} from "@lib/renderer/new";
+import { SVGBackend } from "@lib/renderer/newSVG";
+import { TikZBackend } from "@lib/renderer/newTikZ";
+import { ProxyBackend } from "@lib/renderer/newProxy";
+import { MeasuredRenderer } from "@lib/renderer/newScaled";
+import { Matrix22 } from "@lib/modules/math/matrix";
+import { InterceptedBackend, Transform } from "@lib/renderer/newIntercept";
+import { config } from "process";
+import { ExportButton } from "./layers/tmpExport";
+import { CanvasBackend } from "@lib/renderer/newCanvas";
 
 function download(
   content: string,
@@ -35,8 +50,83 @@ function height(...args: [number, number][]) {
   return max;
 }
 
+/**
+ * [[a,c],[c,b]]
+ * @param a
+ * @param b
+ * @param c
+ * @returns
+ */
+function diagonalizeSymmetric(
+  a: number,
+  b: number,
+  c: number
+): [number, number, number] {
+  let eig1, eig2; // Eigenvalues of resulting matrix
+  let tmp1; // sqrt((a-b)^2 + 4c^2)
+  {
+    tmp1 = a - b;
+    tmp1 = tmp1 * tmp1 + 4 * c * c;
+    tmp1 = Math.sqrt(tmp1);
+    let tmp2 = a + b;
+    eig1 = 0.5 * (tmp2 + tmp1);
+    eig2 = 0.5 * (tmp2 - tmp1);
+  }
+  let theta;
+  if (c === 0) theta = a >= b ? 0 : 0.25;
+  else if (a === b) theta = c > 0 ? 0.125 : 0.375;
+  else {
+    theta = (0.25 * Math.atan((2 * c) / (a - b))) / Math.PI;
+    if (theta < 0) theta += 0.125;
+
+    // theta is in range [0,0.125) now determine the quadrant
+    let s1 = Math.sign(c),
+      s2 = Math.sign(a - b);
+
+    if (s1 === 1 && s2 === 1) {
+    } else if (s1 === 1 && s2 === -1) theta += 0.125;
+    else if (s1 === -1 && s2 === 1) theta += 0.375;
+    else if (s1 === -1 && s2 === -1) theta += 0.25;
+    else theta = 0;
+  }
+
+  return [eig1, eig2, theta];
+}
+
+function ellipseTrafo(
+  r: FullBackend,
+  trafo: Matrix22,
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  axisRotation: number,
+  start: number,
+  amount: number
+): [number, number, number, number, number] {
+  let m = new Matrix22(rx * rx, 0, 0, ry * ry);
+  m = trafo.mul(m.mul(trafo.T));
+  let radii = diagonalizeSymmetric(m.m[0], m.m[3], m.m[1]);
+
+  let theta = -radii[2];
+  let xrad = Math.sqrt(radii[0]),
+    yrad = Math.sqrt(radii[1]);
+
+  // find start and end angle
+
+  let p0 = trafo.of(ellipsePoint(0, 0, rx, ry, axisRotation, start));
+
+  p0 = Matrix22.rotation(theta).of(p0);
+
+  p0 = [(50 * p0[0]) / xrad, (50 * p0[1]) / yrad];
+
+  let arg = (0.5 * new math.Complex(...p0).arg()) / Math.PI;
+
+  return [xrad, yrad, theta, -arg, amount];
+}
+
 let renderPoints = asyncLib.wrap.async(function* (
-  r: render.Renderer2D,
+  r: FullBackend<"primitive">,
   options: {
     height: number;
     projection: ComplexScTr;
@@ -60,9 +150,9 @@ let renderPoints = asyncLib.wrap.async(function* (
         [-1, -1],
       ]) {
         let p = pr.project([(s0 * x[0]) / x[1], (s1 * y[0]) / y[1]]);
-        r.begin()
-          .arc(...p, 0.5, 0, 1.9999 * Math.PI, false)
-          .close()
+
+        r.primitive()
+          .square(...p, 1.2)
           .fill();
       }
     }
@@ -117,49 +207,28 @@ window.customElements.define(
       });
 
       options.add(manualSizing, config);
-      options.add("multiButton", {
-        label: "Export as",
-        values: [
-          { name: "SVG", label: "SVG" },
-          { name: "TikZ", label: "TikZ" },
-        ],
-        async onClick(name) {
-          let r: render.SVG | render.TikZ;
-          let fileName: string = "Hyperbola";
-          let dataType: string;
-          if (name == "SVG") {
-            r = new render.SVG(config.width, config.height);
-            (r as render.SVG).round = (x) => x;
-            fileName += ".svg";
-            dataType = "image/svg+xml";
-          } else if (name == "TikZ") {
-            r = new render.TikZ(config.width, config.height);
-            (r as render.TikZ).round = (x) => x;
-            fileName += ".tikz";
-            dataType = "text/plain";
-          } else throw new Error("Unknown format");
-
-          let promise = renderPoints(r, parameters);
-
-          promise.catch((e) => console.log(e));
-
-          await promise;
-
-          download(r.toFileString(), fileName, dataType);
-        },
-      });
+      options.add(
+        ExportButton({
+          setup: () => ({
+            fileName: "P2Points",
+            width: config.width,
+            height: config.height,
+          }),
+          render: (r) => renderPoints(r, parameters),
+        })
+      );
 
       config.addLayer(
         "draw",
         layers.Canvas({
           update(config, ctx) {
-            let r = new render.Canvas(ctx);
+            let re = Complete(new CanvasBackend(ctx));
 
             ctx.clearRect(0, 0, config.width, config.height);
 
             asyncManager.abortAll("draw");
 
-            renderPoints(r, parameters, asyncManager.getNew("draw", 20)).catch(
+            renderPoints(re, parameters, asyncManager.getNew("draw", 20)).catch(
               (e) => {
                 if (e !== "aborted") console.log(e);
               }
