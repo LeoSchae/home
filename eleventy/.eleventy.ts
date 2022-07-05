@@ -59,8 +59,8 @@ module.exports = function (eleventyConfig: types.Config): types.ConfigReturn {
     "pcss",
     "ts",
     "tsx",
-    "ttf",
     "woff",
+    "woff2",
   ]);
 
   eleventyConfig.addPlugin(Essentials, {

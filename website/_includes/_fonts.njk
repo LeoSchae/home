@@ -1,8 +1,10 @@
 <style>
 @font-face {
-    font-family: 'LinuxLibertine'; /* normal */
-    src: url('{{ "/fonts/LinLibertine_R.woff" | link }}') format('woff'),
-       url('{{ "/fonts/LinLibertine_R.ttf" | link }}') format('truetype');
-}     
+    font-family: 'LinuxLibertine';
+    src: url('{{ "/fonts/linlibertine_r.woff2" | link }}') format('woff2'),
+         url('{{ "/fonts/linlibertine_r.woff" | link }}') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}  
 </style>
-<link rel="preload" href="{{ '/fonts/LinLibertine_R.woff' | link }}" as="font" type="font/woff"/>

@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {% include "_page_header.njk" %}
+    <link rel="stylesheet" href="{{ "/katex/katex.min.css" | link }}" />
     {% include "_fonts.njk" %}
+    {% include "_page_header.njk" %}
     <style>
       {% inline 'essentials.pcss' %}
     </style>
-    <link rel="stylesheet" href="{{ "/katex/katex.min.css" | link }}" />
   </head>
   <body>
     <style>
@@ -17,11 +17,12 @@
         --sidebar-bg: black;
         --sidebar-fg: white;
         --sidebar-top-height: 50px;
+        --main-font: LinuxLibertine, Cambria, "Hoefler Text", Utopia, "Liberation Serif", "Nimbus Roman No9 L Regular", Times, "Times New Roman", serif;
       }
 
       body {
         display: grid;
-        font-family: 'LinuxLibertine', 'Times New Roman', Serif;
+        font-family: var(--main-font);
         grid-template-columns: 350px 1fr;
         grid-template-rows: var(--sidebar-top-height) 1fr;
         box-sizing: border-box;
