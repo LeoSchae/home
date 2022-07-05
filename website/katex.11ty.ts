@@ -2,7 +2,6 @@
  * Move the relevant katex files from node to _build.
  * (katex.min.css + fonts folder)
  */
-
 import * as fs from "fs";
 
 const katex_folder = "./node_modules/katex/dist/";

@@ -3,7 +3,6 @@ import {
   drawCarthesian2DAxis,
   annotateCarthesian2DAxis,
 } from "../canvas/axis";
-import * as render from "../renderer/old";
 import {
   BBSprite,
   fakeMeasure,
@@ -211,7 +210,15 @@ function bestFracsFor(Q: number, v: number) {
  * @param max The maximum fraction value.
  */
 function fareyIter(
-  ctx: render.MeasureText,
+  ctx: {
+    fontSize: number;
+    measureText(text: string): {
+      top: number;
+      left: number;
+      right: number;
+      bot: number;
+    };
+  },
   start: [number, number, number, number],
   Q: number,
   max: number

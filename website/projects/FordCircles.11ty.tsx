@@ -1,6 +1,6 @@
 /** @jsx jsx */
 /** @jsxFrag jsx.Fragment */
-import { SVG } from "@lib/renderer/old";
+import { Renderer, SVGBackend } from "@lib/renderer";
 import { jsx } from "@lib/UnsafeXML";
 
 let nojs = (
@@ -32,32 +32,33 @@ export function data() {
 }
 
 function previewIcon() {
-  let r = new SVG(200, 200);
-  r.strokeStyle = "#FF0000";
-  r.fillStyle = "#FF000022";
+  let svg;
+  let r = Renderer.from((svg = new SVGBackend(200, 200)));
+
+  r.style({ stroke: [255, 0, 0], fill: [255, 0, 0, 0.3] });
 
   let shift = 150;
 
-  r.begin();
-  r.arc(0, shift - 100, 100, Math.PI / 2, 0, false);
-  r.arc(200, shift - 100, 100, Math.PI, Math.PI / 2, false);
-  r.close();
-  r.stroke();
+  r.path()
+    .arc(0, shift - 100, 100, 0.25, -0.25)
+    .arc(200, shift - 100, 100, 0.5, -0.25)
+    .close()
+    .stroke();
 
-  r.begin();
-  r.arc(100, shift - 25, 25, 0, 2 * Math.PI - 0.01, true);
-  r.close();
-  r.fillAndStroke();
+  r.path()
+    .arc(100, shift - 25, 25, 0, 0.99)
+    .close()
+    .draw();
 
-  r.begin();
-  r.arc(200 / 3, shift - 100 / 9, 100 / 9, 0, 2 * Math.PI - 0.01, true);
-  r.close();
-  r.fillAndStroke();
+  r.path()
+    .arc(200 / 3, shift - 100 / 9, 100 / 9, 0, 0.99)
+    .close()
+    .draw();
 
-  r.begin();
-  r.arc(400 / 3, shift - 100 / 9, 100 / 9, 0, 2 * Math.PI - 0.01, true);
-  r.close();
-  r.fillAndStroke();
+  r.path()
+    .arc(400 / 3, shift - 100 / 9, 100 / 9, 0, 0.99)
+    .close()
+    .draw();
 
-  return r.toXML();
+  return svg._svg.toString();
 }

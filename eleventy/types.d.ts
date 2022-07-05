@@ -22,6 +22,32 @@ export type AnyCTX = LiquidCTX | NunjucksCTX | HandlebarsCTX | JsCTX;
 /** Filter type */
 export type Filter<CTX> = (this: CTX, ...args: any[]) => any;
 
+export namespace Extension {
+  export type Compile = (
+    content: string,
+    inputPath: string
+  ) => Render | Promise<Render> | void | Promise<void>;
+  export type Render = (data: unknown) => string | Promise<String>;
+}
+export type Extension = {
+  outputFileExtension?: string;
+  read?: boolean;
+  init?: (this: Config) => void | Promise<void>;
+  compile: Extension.Compile;
+
+  //data
+  getData?:
+    | boolean
+    | string[]
+    | (() => { [key: string]: any } | Promise<{ [key: string]: any }>);
+  getInstanceFromInputPath?(inputPath: string): {
+    [key: string]: any;
+  };
+  compileOptions?: {
+    permalink?(contents: string, inputPath: string): string | false;
+  };
+};
+
 export type Config = {
   addPlugin<F extends (config: Config, ...args: any[]) => any>(
     plugin: F,
@@ -109,6 +135,8 @@ export type Config = {
       content: string
     ) => string | Promise<string>
   ): unknown;
+
+  addExtension(ext: string, handler: Extension): unknown;
 };
 export type ConfigReturn = {
   templateFormats?: string[];

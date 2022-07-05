@@ -3,7 +3,6 @@ import {
   ComplexScTr,
   drawCarthesian2DAxis,
 } from "../canvas/axis";
-import * as render from "../renderer/old";
 import * as sprites from "../canvas/sprites";
 import * as asyncLib from "../modules/Async";
 import { DragZoomHover } from "../modules/Interact";

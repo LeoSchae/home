@@ -138,6 +138,23 @@
       #nav-sidebar-checkbox:checked ~ .nav-sidebar {
         transform: translateX(0);
       }
+
+      #nav-backdrop {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 998;
+        transform: translateX(-100%);
+        background-color: #000000;
+        opacity: 0.75;
+        transition: transform 0.3s;
+      }
+
+      #nav-sidebar-checkbox:checked ~ #nav-backdrop {
+        transform: translateX(0);
+      }
+
       #nav-sidebar-checkbox-label {
         position: absolute;
         display: block;
@@ -157,7 +174,13 @@
         transform: translateX(0);
       }
 
+
+
       @media (min-width: 1200px) {
+        #nav-backdrop {
+          display: none;
+        }
+        
         .nav-home-top {
           display: none;
         }
@@ -174,11 +197,23 @@
         }
       }
     </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', (event) => {
+        var backdrop = document.getElementById("nav-backdrop");
+        var checkbox = document.getElementById("nav-sidebar-checkbox");
+        if (checkbox) {
+          backdrop?.addEventListener("click", () => {
+            checkbox.checked = false;
+          });
+        }
+      })
+    </script>
     <input
       id="nav-sidebar-checkbox"
       type="checkbox"
       aria-label="Toggle sidebar"
     />
+    <div id="nav-backdrop" style="position: absolute;"></div>
     <aside
       class="nav-sidebar"
       style="
@@ -207,9 +242,7 @@
         "nav-list-2"], item_classes: ["nav-item-1", "nav-item-2"] } %}
       </nav>
     </aside>
-    <div class="nav-home-top">
-      <a href="{{ '/' | link }}">Leo Schäfer</a>
-    </div>
+    
 
     <main id="content-root">{% include "_page_content.njk"%}</main>
   </body>

@@ -44,7 +44,7 @@ class SVGPathBackend implements Backend.Path {
   ): this {
     let absAngle = Math.abs(angle);
     let fullTruns = Math.floor(absAngle);
-    //TODO FULL CIRCLES
+
     angle = Math.sign(angle) * (absAngle - fullTruns);
     if (angle >= 0.499 && angle <= 0.511) {
       let angle_2 = 0.5 * angle;
@@ -87,13 +87,35 @@ class SVGPathBackend implements Backend.Path {
     );
     let ccw = angle >= 0;
 
+    this.line(x0, y0);
+
     let rounded = this.round;
 
-    this.d += `L${rounded(x0)} ${rounded(y0)}A${radiusX} ${radiusY} ${
-      -axisRotation * 360
-    } ${Math.abs(angle) > 0.5 ? 1 : 0} ${ccw ? 0 : 1} ${rounded(x1)} ${rounded(
-      y1
-    )}`;
+    let dataTurns = "";
+
+    if (fullTruns !== 0) {
+      // Split full turns into multiple 1/4 + 3/4 turns
+      let pre = `A${radiusX} ${radiusY} ${-axisRotation * 360}`;
+
+      let [xm, ym] = ellipsePoint(
+        cx,
+        cy,
+        radiusX,
+        radiusY,
+        axisRotation,
+        angleOffset + (ccw ? 0.25 : -0.25)
+      );
+      /* First is shor, second long */
+      let full = `${pre} ${0} ${ccw ? 0 : 1} ${rounded(xm)} ${rounded(
+        ym
+      )}${pre} ${1} ${ccw ? 0 : 1} ${rounded(x0)} ${rounded(y0)}`;
+      dataTurns = full.repeat(fullTruns);
+    }
+    this.d += dataTurns;
+    if (angle === 0) return this;
+    this.d += `A${radiusX} ${radiusY} ${-axisRotation * 360} ${
+      Math.abs(angle) > 0.5 ? 1 : 0
+    } ${ccw ? 0 : 1} ${rounded(x1)} ${rounded(y1)}`;
     return this;
   }
   close(): this {

@@ -1,6 +1,5 @@
 import { ComplexScTr, drawCarthesian2DAxis } from "../canvas/axis";
-import * as render from "../renderer/old";
-import { FracSprite, TextSprite } from "../canvas/sprites";
+import { fakeMeasure, FracSprite, TextSprite } from "../canvas/sprites";
 import { DragZoomHover } from "../modules/Interact";
 import { Complex } from "../modules/math";
 import * as layers from "./layers";
@@ -16,11 +15,7 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
   props: { width: number; height: number },
   options: { projection: { origin: [number, number]; scale: number } }
 ) {
-  let measure = new render.Canvas(
-    document
-      .createElement("canvas")
-      .getContext("2d") as CanvasRenderingContext2D
-  );
+  let measure = fakeMeasure();
   let { projection } = options;
   let { origin, scale } = projection;
 
@@ -89,11 +84,7 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
   }
 ) {
   let width: number = undefined as any;
-  let measure = new render.Canvas(
-    document
-      .createElement("canvas")
-      .getContext("2d") as CanvasRenderingContext2D
-  );
+  let measure = fakeMeasure();
 
   r.clear("#AAAAAA");
   r.style({ fill: "#000000" });
@@ -165,7 +156,7 @@ const fordCirclesInPlane = asyncLib.wrap.async(function* (
 });
 
 function domainCircle(
-  r: render.Renderer2D | Renderer.Path,
+  r: Renderer.Path,
   center: [number, number],
   radius: number,
   projection: { origin: [number, number]; scale: number },
@@ -185,7 +176,6 @@ function domainCircle(
   let len = 0;
   let middleP = [0, 0];
 
-  if ("begin" in r) r.begin();
   let oldP = map(center[0] + radius, center[1]);
   r.move(...oldP);
   for (let s = 1; s < segments + 1; s++) {

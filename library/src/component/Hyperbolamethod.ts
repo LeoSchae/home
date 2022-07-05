@@ -1,5 +1,4 @@
 import * as layers from "./layers";
-import * as render from "@lib/renderer/old";
 import * as math from "@lib/modules/math";
 import { manualSizing } from "./layers/Options";
 import { Renderer, CanvasBackend } from "@lib/renderer/";
@@ -174,25 +173,6 @@ function renderHyperbolamethod(
   }
   path.close();
   path.stroke();
-}
-
-function draw(r: render.Renderer2D) {
-  r.set({ fill: "#FF000055" });
-  r.move(50, 50);
-  r.arc(50, 50, 20, 0, Math.PI, false);
-
-  r.move(150, 50);
-  r.arc(150, 50, 20, 0, (3 * Math.PI) / 2, false);
-
-  r.move(250, 50);
-  r.arc(250, 50, 20, -Math.PI, (3 * Math.PI) / 2, false);
-
-  r.move(350, 50);
-  r.arc(350, 50, 20, -Math.PI, (3 * Math.PI) / 2, true);
-
-  r.move(50, 150);
-  r.arc(50, 150, 20, Math.PI, 3 * Math.PI, true);
-  r.fillAndStroke();
 }
 
 window.customElements.define(

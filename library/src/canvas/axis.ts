@@ -1,6 +1,5 @@
 import { Complex } from "../modules/math";
 import { Align, Renderer } from "@lib/renderer";
-import * as render from "../renderer/old";
 import * as sprites from "./sprites";
 import { Options } from "@lib/component/layers";
 

@@ -6,7 +6,6 @@ import Essentials from "./plugins/essentials";
 import * as html_min from "html-minifier";
 import Navigation from "./plugins/navigation";
 import Inline from "./plugins/inline";
-import { AcceptedPlugin } from "postcss";
 
 module.exports = function (eleventyConfig: types.Config): types.ConfigReturn {
   const environment =
@@ -46,11 +45,23 @@ module.exports = function (eleventyConfig: types.Config): types.ConfigReturn {
   eleventyConfig.addWatchTarget("./inline/");
 
   // Passthrough katex
-  eleventyConfig.addPassthroughCopy("website/katex/");
-  eleventyConfig.addPassthroughCopy("website/fonts/");
+  // eleventyConfig.addPassthroughCopy("website/fonts/");
+  // eleventyConfig.addPassthroughCopy("website/fonts/");
+  eleventyConfig.addTransform("test", function (content) {
+    console.log(this.inputPath);
+    return content;
+  });
 
   // Template formats
-  eleventyConfig.setTemplateFormats(["njk", "md", "pcss", "ts", "tsx"]);
+  eleventyConfig.setTemplateFormats([
+    "njk",
+    "md",
+    "pcss",
+    "ts",
+    "tsx",
+    "ttf",
+    "woff",
+  ]);
 
   eleventyConfig.addPlugin(Essentials, {
     links: {

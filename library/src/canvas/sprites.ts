@@ -1,12 +1,7 @@
 import { Renderer } from "@lib/renderer/";
-import type * as render from "../renderer/old";
 
 export type Sprite = {
-  draw(
-    ctx: render.Renderer2D | Renderer<"text">,
-    x: number,
-    y: number
-  ): unknown;
+  draw(ctx: Renderer<"text">, x: number, y: number): unknown;
 };
 
 export type BBSprite = Sprite & {
@@ -17,7 +12,7 @@ export type BBSprite = Sprite & {
 };
 
 export function strokeBounds(
-  ctx: render.Renderer2D,
+  ctx: Renderer<"path">,
   sprite: BBSprite,
   x: number,
   y: number
@@ -26,12 +21,18 @@ export function strokeBounds(
     t = y - sprite.top,
     r = x + sprite.right,
     b = y + sprite.bot;
-  ctx.begin().line(l, t).line(r, t).line(r, b).line(l, b);
-  ctx.close();
-  ctx.stroke();
+  ctx.path().move(l, t).line(r, t).line(r, b).line(l, b).close().stroke();
 }
 
-export function fakeMeasure() {
+export function fakeMeasure(): {
+  fontSize: number;
+  measureText(text: string): {
+    top: number;
+    bot: number;
+    left: number;
+    right: number;
+  };
+} {
   const canvas = document
     .createElement("canvas")
     .getContext("2d") as CanvasRenderingContext2D;
@@ -69,7 +70,7 @@ export function fakeMeasure() {
  * @returns Sprite of thext
  */
 export function TextSprite(
-  measure: render.MeasureText,
+  measure: ReturnType<typeof fakeMeasure>,
   text: string,
   options?: { center?: boolean }
 ): BBSprite {
@@ -89,16 +90,8 @@ export function TextSprite(
     bot,
     left,
     right,
-    draw: function (
-      ctx: render.Renderer2D | Renderer<any>,
-      x: number,
-      y: number
-    ) {
-      if ("drawText" in ctx) {
-        ctx.drawText(this.text, x - this.dx, y, 0 as render.TextAlign);
-      } else {
-        ctx.text().draw(x - this.dx, y, this.text);
-      }
+    draw: function (ctx: Renderer<any>, x: number, y: number) {
+      ctx.text().draw(x - this.dx, y, this.text);
     },
   };
   return sprite;
@@ -140,29 +133,18 @@ export function FracSprite(top: BBSprite, bot: BBSprite): BBSprite {
     left: halfLineLength,
     right: halfLineLength,
 
-    draw: function (
-      ctx: render.Renderer2D | Renderer<any>,
-      x: number,
-      y: number
-    ) {
+    draw: function (ctx: Renderer<any>, x: number, y: number) {
       let [topOffsetX, topOffsetY, botOffsetX, botOffsetY, halfLineLength] =
         this.data;
 
       top.draw(ctx, x + topOffsetX, y + topOffsetY);
       bot.draw(ctx, x + botOffsetX, y + botOffsetY);
 
-      if ("begin" in ctx) {
-        ctx.begin();
-        ctx.move(x - halfLineLength, y);
-        ctx.line(x + halfLineLength, y);
-        ctx.stroke();
-      } else {
-        ctx
-          .path()
-          .move(x - halfLineLength, y)
-          .line(x + halfLineLength, y)
-          .stroke();
-      }
+      ctx
+        .path()
+        .move(x - halfLineLength, y)
+        .line(x + halfLineLength, y)
+        .stroke();
     },
   };
   return sprite;
