@@ -4,7 +4,7 @@ import {
   drawCarthesian2DAxis,
 } from "../canvas/axis";
 import * as sprites from "../canvas/sprites";
-import * as asyncLib from "../modules/Async";
+import { Async, Sync } from "../modules/Async";
 import { DragZoomHover } from "../modules/Interact";
 import * as math from "../modules/math";
 import { hyperbolicLine } from "../modules/math/draw";
@@ -129,43 +129,38 @@ window.customElements.define(
 
       let popup = config.addLayer("popup", popupLayer());
 
-      let asyncManager = new asyncLib.AsyncManager<
-        "findGroup" | "drawBackground"
-      >();
-
       function start() {
         changeGroup(state.group_type, state.level);
       }
 
       // background canvas
+      // TODO time budget
+      let backgroundDrawTask = new Async.Group();
       config.addLayer(
         "background",
         layers.Canvas({
           update: (config, ctx) => {
-            asyncManager.abortAll("drawBackground");
+            backgroundDrawTask.abort();
 
             let r = Renderer.from(new CanvasBackend(ctx));
             r.clear();
 
-            asyncLib
-              .callAsync(
-                null,
-                drawFundametalDomains,
-                [
-                  Renderer.from(new CanvasBackend(ctx)),
-                  {
-                    cosets: visual.group,
-                    domain: visual.domain,
-                    projection: visual.projection,
-                    style: {
-                      stroke: visual.style.color,
-                      fill: [...visual.style.color, visual.style.fillAlpha],
-                    },
+            backgroundDrawTask
+              .apply(null, drawFundametalDomains, [
+                Renderer.from(new CanvasBackend(ctx)),
+                {
+                  cosets: visual.group,
+                  domain: visual.domain,
+                  projection: visual.projection,
+                  style: {
+                    stroke: visual.style.color,
+                    fill: [...visual.style.color, visual.style.fillAlpha],
                   },
-                ],
-                asyncManager.getNew("drawBackground")
-              )
-              .catch(() => {});
+                },
+              ])
+              .catch((e) => {
+                if (!e.isAbort) console.log(e);
+              });
           },
         })
       );
@@ -200,7 +195,7 @@ window.customElements.define(
                   m = new math.Moebius(-m.m[0], -m.m[1], -m.m[2], -m.m[3]);
                 katex.render(m.toTeX(), popup.container);
 
-                asyncLib.callSync(null, drawFundametalDomains, [
+                Sync.apply(drawFundametalDomains, [
                   r,
                   {
                     domain: visual.domain,
@@ -239,18 +234,18 @@ window.customElements.define(
       });
       config.attachToShaddow(info);
 
+      const computeGroupTask = new Async.Group();
       async function changeGroup(
         newGroup: math.congruenceSubgroups.CongruenceSubgroup,
         newLevel: number
       ) {
         // compute representatives async
-        asyncManager.abortAll("findGroup");
+        computeGroupTask.abort();
 
         try {
-          let group = await newGroup.cosetRepresentativesAsync(
-            newLevel,
-            asyncManager.getNew("findGroup")
-          );
+          let group = await newGroup.cosetRepresentativesAsync.with(
+            computeGroupTask
+          )(newLevel);
 
           visual.group_type = newGroup;
           visual.level = newLevel;
@@ -260,8 +255,8 @@ window.customElements.define(
           katex.render(newGroup.tex + `(${newLevel})`, info);
 
           config.update();
-        } catch (e) {
-          if (e !== "aborted") console.error(e);
+        } catch (e: any) {
+          if (!e.isAbort) console.error(e);
         }
       }
 
@@ -348,7 +343,7 @@ window.customElements.define(
           },
           render: async (r) => {
             let { projection } = visual;
-            await asyncLib.callAsync(null, drawFundametalDomains, [
+            await Async.apply(drawFundametalDomains, [
               r,
               {
                 projection,

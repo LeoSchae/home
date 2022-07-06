@@ -2,22 +2,11 @@ import { ComplexScTr } from "../canvas/axis";
 import { DragZoomHover } from "../modules/Interact";
 import * as math from "../modules/math";
 import * as layers from "./layers";
-import * as asyncLib from "@lib/modules/Async";
+import { Async, Sync } from "@lib/modules/Async";
 import { manualSizing } from "./layers/Options";
 import { Renderer, CanvasBackend } from "@lib/renderer/";
 import { ExportButton } from "./layers/tmpExport";
-
-function download(
-  content: string,
-  name: string,
-  dataType: string = "text/plain"
-) {
-  let data = `data:${dataType};base64,${window.btoa(content)}`;
-  let link = document.createElement("a");
-  link.setAttribute("download", name);
-  link.href = data;
-  link.click();
-}
+import { render } from "katex";
 
 function height(...args: [number, number][]) {
   let fac = 1;
@@ -31,50 +20,7 @@ function height(...args: [number, number][]) {
   return max;
 }
 
-/**
- * [[a,c],[c,b]]
- * @param a
- * @param b
- * @param c
- * @returns
- */
-function diagonalizeSymmetric(
-  a: number,
-  b: number,
-  c: number
-): [number, number, number] {
-  let eig1, eig2; // Eigenvalues of resulting matrix
-  let tmp1; // sqrt((a-b)^2 + 4c^2)
-  {
-    tmp1 = a - b;
-    tmp1 = tmp1 * tmp1 + 4 * c * c;
-    tmp1 = Math.sqrt(tmp1);
-    let tmp2 = a + b;
-    eig1 = 0.5 * (tmp2 + tmp1);
-    eig2 = 0.5 * (tmp2 - tmp1);
-  }
-  let theta;
-  if (c === 0) theta = a >= b ? 0 : 0.25;
-  else if (a === b) theta = c > 0 ? 0.125 : 0.375;
-  else {
-    theta = (0.25 * Math.atan((2 * c) / (a - b))) / Math.PI;
-    if (theta < 0) theta += 0.125;
-
-    // theta is in range [0,0.125) now determine the quadrant
-    let s1 = Math.sign(c),
-      s2 = Math.sign(a - b);
-
-    if (s1 === 1 && s2 === 1) {
-    } else if (s1 === 1 && s2 === -1) theta += 0.125;
-    else if (s1 === -1 && s2 === 1) theta += 0.375;
-    else if (s1 === -1 && s2 === -1) theta += 0.25;
-    else theta = 0;
-  }
-
-  return [eig1, eig2, theta];
-}
-
-let renderPoints = asyncLib.wrap.async(function* (
+let renderPoints = Async.wrap(function* (
   r: Renderer<"primitive">,
   options: {
     height: number;
@@ -116,8 +62,6 @@ window.customElements.define(
   "projective-points",
   layers.LayeredComponent({
     connected(config) {
-      let asyncManager = new asyncLib.AsyncManager<"draw">();
-
       const pr = new ComplexScTr([config.width / 2, config.height / 2], 100);
 
       let parameters = {
@@ -167,6 +111,7 @@ window.customElements.define(
         })
       );
 
+      let drawTask = new Async.Group("drawTask");
       config.addLayer(
         "draw",
         layers.Canvas({
@@ -175,13 +120,13 @@ window.customElements.define(
 
             ctx.clearRect(0, 0, config.width, config.height);
 
-            asyncManager.abortAll("draw");
+            drawTask.abort();
 
-            renderPoints(re, parameters, asyncManager.getNew("draw", 20)).catch(
-              (e) => {
-                if (e !== "aborted") console.log(e);
-              }
-            );
+            renderPoints
+              .with(drawTask)(re, parameters)
+              .catch((e) => {
+                if (!e.isAbort) console.log(e);
+              });
           },
         })
       );

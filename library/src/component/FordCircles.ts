@@ -3,13 +3,12 @@ import { fakeMeasure, FracSprite, TextSprite } from "../canvas/sprites";
 import { DragZoomHover } from "../modules/Interact";
 import { Complex } from "../modules/math";
 import * as layers from "./layers";
-import * as asyncLib from "@lib/modules/Async";
+import { Async } from "@lib/modules/Async";
 import { manualSizing } from "./layers/Options";
 import { Renderer, CanvasBackend } from "@lib/renderer/";
 import { ExportButton } from "./layers/tmpExport";
-import { config } from "process";
 
-const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
+const fordCirclesInUnitSphere = Async.wrap(function* (
   r: Renderer<"path" | "primitive" | "text">,
   Q: number,
   props: { width: number; height: number },
@@ -75,7 +74,7 @@ const fordCirclesInUnitSphere = asyncLib.wrap.async(function* (
   }
 });
 
-const fordCirclesInPlane = asyncLib.wrap.async(function* (
+const fordCirclesInPlane = Async.wrap(function* (
   r: Renderer<"path" | "primitive" | "text">,
   Q: number,
   props: { width: number; height: number },
@@ -209,8 +208,6 @@ window.customElements.define(
   "ford-circles",
   layers.LayeredComponent({
     connected(config) {
-      let asyncManager = new asyncLib.AsyncManager<"draw">();
-
       const pr = new ComplexScTr([config.width / 2, config.height / 2], 100);
 
       const dzh = new DragZoomHover(
@@ -275,6 +272,7 @@ window.customElements.define(
         })
       );
 
+      let drawTask = new Async.Group("Draw");
       config.addLayer(
         "draw",
         layers.Canvas({
@@ -283,28 +281,20 @@ window.customElements.define(
 
             ctx.clearRect(0, 0, config.width, config.height);
 
-            asyncManager.abortAll("draw");
+            drawTask.abort();
 
             if (mode === "Halfplane")
-              fordCirclesInPlane(
-                r,
-                Q,
-                config,
-                { projection: pr },
-                asyncManager.getNew("draw", 100)
-              ).catch((e) => {
-                if (e !== "aborted") console.log(e);
-              });
+              fordCirclesInPlane
+                .with(drawTask)(r, Q, config, { projection: pr })
+                .catch((e: any) => {
+                  if (!e.isAbort) console.log(e);
+                });
             else
-              fordCirclesInUnitSphere(
-                r,
-                Q,
-                config,
-                { projection: pr },
-                asyncManager.getNew("draw", 100)
-              ).catch((e) => {
-                if (e !== "aborted") console.log(e);
-              });
+              fordCirclesInUnitSphere
+                .with(drawTask)(r, Q, config, { projection: pr })
+                .catch((e: any) => {
+                  if (!e.isAbort) console.log(e);
+                });
           },
         })
       );

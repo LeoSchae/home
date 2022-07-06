@@ -2,35 +2,179 @@
  * Tools to turn Generator functions into sync or async functions.
  */
 
-export class AsyncManager<K> {
-  private map = new Map<K, AsyncOptions[]>();
+type Wrappable<T> = (this: T, ...args: any[]) => Generator<any, any, any>;
 
-  constructor() {}
+class AbortError extends Error {
+  isAbort = true as const;
+}
 
-  getNew(context: K, timeBudget?: number): OptionsFactory {
-    return {
-      create: () => {
-        let m = this.map;
-        let active: AsyncOptions[];
+export namespace Async {
+  type GroupOptions = {};
+  export class Group implements OptionsFactory {
+    private running: AsyncOptions[] = [];
 
-        if (m.has(context)) {
-          active = m.get(context) as AsyncOptions[];
-        } else {
-          active = [];
-          m.set(context, active);
-        }
-        let o = new AsyncOptions(timeBudget);
-        active.push(o);
-        return o;
-      },
+    constructor(options?: GroupOptions);
+    constructor(name: string, options?: GroupOptions);
+    constructor(name?: string | GroupOptions, options?: GroupOptions) {
+      if (typeof name !== "string") {
+        options = name;
+        name = "[unknown]";
+      }
+    }
+
+    create(): Options {
+      let ao = new AsyncOptions(20);
+      this.running.push(ao);
+      return ao;
+    }
+
+    abort() {
+      for (let task of this.running) task.aborted = true;
+      this.running = [];
+    }
+
+    async apply<F extends Wrappable<undefined>>(
+      func: F,
+      params: Parameters<F>
+    ): Promise<F extends () => Generator<any, infer R, any> ? R : unknown>;
+    async apply<T, F extends Wrappable<T>>(
+      thisParam: T,
+      func: F,
+      params: Parameters<F>
+    ): Promise<F extends () => Generator<any, infer R, any> ? R : unknown>;
+
+    async apply<F extends Wrappable<any>>(
+      thisParam: any,
+      func: any,
+      params?: any
+    ): Promise<any> {
+      let th: any;
+      let f: F;
+      let args: any[];
+      if (Array.isArray(params)) {
+        th = thisParam;
+        f = func;
+        args = params;
+      } else {
+        th = undefined;
+        f = thisParam;
+        args = func;
+      }
+
+      let asyncInstance = this.create();
+
+      asyncInstance.begin?.();
+
+      // The types should be safe
+      let gen = f.apply(th, args);
+      let n = gen.next();
+      while (!n.done) {
+        if (asyncInstance.shouldYield()) await asyncInstance.yield();
+        n = gen.next();
+      }
+
+      asyncInstance.done?.();
+      return n.value;
+    }
+  }
+
+  const defaultGroup = new Group();
+
+  export const apply = defaultGroup.apply.bind(defaultGroup);
+
+  type Wrapped<F extends Wrappable<any>> = {
+    with(
+      group: Group
+    ): (
+      this: F extends (this: infer T, ...args: any[]) => any ? T : unknown,
+      ...args: Parameters<F>
+    ) => F extends (...args: any[]) => Generator<any, infer R, any>
+      ? Promise<R>
+      : Promise<unknown>;
+  } & ((
+    this: F extends (this: infer T, ...args: any[]) => any ? T : unknown,
+    ...args: Parameters<F>
+  ) => F extends (...args: any[]) => Generator<any, infer R, any>
+    ? Promise<R>
+    : Promise<unknown>);
+
+  export function wrap<F extends Wrappable<any>>(f: F): Wrapped<F> {
+    let result = function (this: any, ...args: Parameters<F>): any {
+      return apply(this, f, args as any);
+    };
+    (result as any).with = (group: Group) =>
+      function (this: any, ...args: Parameters<F>): any {
+        return group.apply(this, f, args as any);
+      };
+    return result as any;
+  }
+
+  export function forward<C, K extends keyof C>(
+    object: C,
+    key: K
+  ): C[K] extends Wrappable<C> ? Wrapped<C[K]> : unknown {
+    let result = function (...args: any): any {
+      return apply(object, object[key] as any, args as any);
+    };
+    (result as any).with = (group: Group) =>
+      function (...args: any): any {
+        return group.apply(object, object[key] as any, args as any);
+      };
+    return result as any;
+  }
+}
+
+export namespace Sync {
+  export function apply<F extends Wrappable<undefined>>(
+    func: F,
+    params: Parameters<F>
+  ): F extends () => Generator<any, infer R, any> ? R : unknown;
+  export function apply<T, F extends Wrappable<T>>(
+    thisParam: T,
+    func: F,
+    params: Parameters<F>
+  ): F extends () => Generator<any, infer R, any> ? R : unknown;
+  export function apply<F extends Wrappable<any>>(
+    thisParam: any,
+    func: any,
+    params?: any
+  ): any {
+    let th: any, f: F, args: any[];
+    if (Array.isArray(params)) {
+      th = thisParam;
+      f = func;
+      args = params;
+    } else {
+      th = undefined;
+      f = thisParam;
+      args = func;
+    }
+    // The types should be safe
+    let gen = f.apply(th, args);
+    let n = gen.next();
+    while (!n.done) n = gen.next();
+    return n.value;
+  }
+
+  type Wrapped<F extends Wrappable<any>> = (
+    this: F extends (this: infer T, ...args: any[]) => any ? T : unknown,
+    ...args: Parameters<F>
+  ) => F extends (...args: any[]) => Generator<any, infer R, any> ? R : unknown;
+
+  export function wrap<F extends Wrappable<any>>(f: F): Wrapped<F> {
+    return function (this: any, ...args: Parameters<F>): any {
+      return apply(this, f, args);
     };
   }
 
-  abortAll(context: K) {
-    if (!this.map.has(context)) return;
-    let v = this.map.get(context) as AsyncOptions[];
-    for (let o of v) o.aborted = true;
-    this.map.delete(context);
+  export function forward<C, K extends keyof C>(
+    object: C,
+    key: K
+  ): C[K] extends Wrappable<C> ? Wrapped<C[K]> : unknown {
+    let result = function (this: any, ...args: any): any {
+      return apply(object, object[key] as any, args as any);
+    };
+    return result as any;
   }
 }
 
@@ -43,7 +187,7 @@ type Options = {
   yield(): Promise<void | number>;
 };
 
-export class AsyncOptions implements Options {
+class AsyncOptions implements Options {
   private I: number = -1;
   private i: number = 0;
   private t: number = performance.now();
@@ -87,7 +231,8 @@ export class AsyncOptions implements Options {
     await wait(0);
     if (this.aborted) {
       console.debug("A task was aborted!");
-      throw "aborted";
+      // TODO
+      throw new AbortError("Aborted");
     }
 
     this.i = 0;
@@ -96,130 +241,6 @@ export class AsyncOptions implements Options {
   }
 }
 
-export async function callAsync<
-  T,
-  R,
-  F extends (this: T, ...args: any[]) => Generator<any, R, any>
->(th: T, f: F, args: Parameters<F>, asyncOptions?: OptionsFactory): Promise<R> {
-  asyncOptions ??= DefaultAsyncOptions;
-  let asyncInstance: Options = asyncOptions.create();
-
-  asyncInstance.begin?.();
-
-  // The types should be safe
-  let gen = f.apply(th, args);
-  let n = gen.next();
-  while (!n.done) {
-    if (asyncInstance.shouldYield()) await asyncInstance.yield();
-    n = gen.next();
-  }
-
-  asyncInstance.done?.();
-  return n.value;
-}
-
-export function callSync<
-  T,
-  R,
-  F extends (this: T, ...args: any[]) => Generator<any, R, any>
->(th: T, f: F, args: Parameters<F>): R {
-  // The types should be safe
-  let gen = f.apply(th, args);
-  let n = gen.next();
-  while (!n.done) n = gen.next();
-  return n.value;
-}
-
-export const DefaultAsyncOptions: OptionsFactory = {
-  create: () => {
-    return {
-      shouldYield() {
-        return false;
-      },
-      async yield() {},
-    };
-  },
-};
-
 export function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-type AsyncWrap<
-  F extends (this: any, ...args: any[]) => Generator<any, any, any>
-> = F extends (this: infer T, ...args: any[]) => Generator<any, infer R, any> // Infer both this and return
-  ? (this: T, ...args: [...Parameters<F>, OptionsFactory?]) => Promise<R>
-  : F extends (this: any, ...args: any[]) => Generator<any, infer R, any> // Infer only return
-  ? (...args: [...Parameters<F>, OptionsFactory?]) => Promise<R>
-  : F extends (this: infer T, ...args: any[]) => Generator<any, any, any> // Infer only this
-  ? (this: T, ...args: [...Parameters<F>, OptionsFactory?]) => Promise<unknown>
-  : (...args: [...Parameters<F>, OptionsFactory?]) => Promise<unknown>;
-type SyncWrap<
-  F extends (this: any, ...args: any[]) => Generator<any, any, any>
-> = F extends (this: infer T, ...args: any[]) => Generator<any, infer R, any> // Infer both this and return
-  ? (this: T, ...args: Parameters<F>) => R
-  : F extends (this: any, ...args: any[]) => Generator<any, infer R, any> // Infer only return
-  ? (...args: Parameters<F>) => R
-  : F extends (this: infer T, ...args: any[]) => Generator<any, any, any> // Infer only this
-  ? (this: T, ...args: Parameters<F>) => unknown
-  : (...args: Parameters<F>) => unknown;
-
-function extractOptions(args: any[]): [OptionsFactory | undefined, any[]] {
-  let last = args[args.length - 1];
-  let ao: OptionsFactory | undefined;
-
-  // Simple (not perfect) check if last arguent is options
-  if ("create" in last) {
-    args = Array.prototype.slice.call(args, 0, args.length - 1);
-    ao = last;
-  }
-  return [ao, args];
-}
-
-/**
- * Tooling to wrap a function.
- */
-export namespace wrap {
-  export function async<F extends (...args: any[]) => Generator<any, any, any>>(
-    f: F
-  ): AsyncWrap<F> {
-    let res = function (this: any, ...args: any[]) {
-      let [options, fnArgs] = extractOptions(args);
-      return callAsync(this, f, fnArgs as any, options);
-    };
-    return res as any;
-  }
-
-  export function sync<F extends (...args: any[]) => Generator<any, any, any>>(
-    f: F
-  ): SyncWrap<F> {
-    let res = function (this: any, ...args: any[]) {
-      return callSync(this, f, args as any);
-    };
-    return res as any;
-  }
-}
-
-/**
- * Tooling to forward a function to another function defined on the this object.
- */
-export namespace forward {
-  export function async<
-    F extends (...args: any[]) => Generator<any, any, any> = never
-  >(key: string): AsyncWrap<F> {
-    let res = function (this: any, ...args: any[]) {
-      let [options, fnArgs] = extractOptions(args);
-      return callAsync(this, this[key], fnArgs as any, options);
-    };
-    return res as any;
-  }
-
-  export function sync<F extends (...args: any[]) => Generator<any, any, any>>(
-    key: string
-  ): SyncWrap<F> {
-    let res = function (this: any, ...args: any[]) {
-      return callSync(this, this[key], args as any);
-    };
-    return res as any;
-  }
 }

@@ -1,4 +1,4 @@
-import { AsyncOptions, DefaultAsyncOptions, forward, wrap } from "../Async";
+import { Async, Sync } from "../Async";
 
 export enum MathType {
   Infinity = "infinity",
@@ -363,9 +363,7 @@ export namespace congruenceSubgroups {
      * @param level The level of the group.
      * @returns The list of cosetRepresentatives.
      */
-    cosetRepresentatives = forward.sync<
-      CongruenceSubgroup["_cosetRepresentatives"]
-    >("_cosetRepresentatives");
+    cosetRepresentatives = Sync.forward(this, "_cosetRepresentatives");
 
     /**
      * Get a list of cosetRepresentatives.
@@ -375,9 +373,7 @@ export namespace congruenceSubgroups {
      * @param ao The AsyncOptions to use.
      * @returns A Promise for the list of coset representatives.
      */
-    cosetRepresentativesAsync = forward.async<
-      CongruenceSubgroup["_cosetRepresentatives"]
-    >("_cosetRepresentatives");
+    cosetRepresentativesAsync = Async.forward(this, "_cosetRepresentatives");
 
     /**
      * @returns TeX representation of this Group.
