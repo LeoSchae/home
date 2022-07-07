@@ -119,7 +119,7 @@ export function EleventyPlugin(
         case "ts":
           // Compile file as .ts content
           return async function (this: any, data: any) {
-            eleventyBundledImport.call(
+            return eleventyBundledImport.call(
               thisBindings(eleventyConfig.javascriptFunctions, data),
               path
             );
